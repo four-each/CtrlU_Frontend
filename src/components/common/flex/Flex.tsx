@@ -4,20 +4,24 @@ import { css } from "@emotion/react";
 
 interface FlexProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;
-  justifyContent?: React.CSSProperties["justifyContent"];
-  alignItems?: React.CSSProperties["alignItems"];
+  justify?: React.CSSProperties["justifyContent"];
+  align?: React.CSSProperties["alignItems"];
   gap?: React.CSSProperties["gap"];
   padding?: React.CSSProperties["padding"];
   margin?: React.CSSProperties["margin"];
-  borderRadius?: React.CSSProperties["borderRadius"];
+  radius?: React.CSSProperties["borderRadius"];
+  bgColor?: React.CSSProperties["backgroundColor"];
+  width?: React.CSSProperties["width"];
+  height?: React.CSSProperties["height"];
   children: React.ReactNode;
 }
 
 export const Row = (props: FlexProps) => {
   const {
-    justifyContent: justify,
-    alignItems: align,
-    borderRadius: radius,
+    justify: justify,
+    align: align,
+    radius: radius,
+    bgColor: bgColor,
     children,
     ...others
   } = props;
@@ -28,6 +32,7 @@ export const Row = (props: FlexProps) => {
       justify={justify}
       align={align}
       radius={radius}
+      bgColor={bgColor}
       direction={"row"}
     >
       {children}
@@ -37,9 +42,10 @@ export const Row = (props: FlexProps) => {
 
 export const Col = (props: FlexProps) => {
   const {
-    justifyContent: justify,
-    alignItems: align,
-    borderRadius: radius,
+    justify: justify,
+    align: align,
+    radius: radius,
+    bgColor: bgColor,
     children,
     ...others
   } = props;
@@ -50,6 +56,7 @@ export const Col = (props: FlexProps) => {
       justify={justify}
       align={align}
       radius={radius}
+      bgColor={bgColor}
       direction={"column"}
     >
       {children}
@@ -65,6 +72,9 @@ interface StyledFlexProps {
   padding?: React.CSSProperties["padding"];
   margin?: React.CSSProperties["margin"];
   gap?: React.CSSProperties["gap"];
+  bgColor?: React.CSSProperties["backgroundColor"];
+  width?: React.CSSProperties["width"];
+  height?: React.CSSProperties["height"];
 }
 
 const Flex = styled.div<StyledFlexProps>`
@@ -100,5 +110,20 @@ const Flex = styled.div<StyledFlexProps>`
     radius &&
     css`
       border-radius: ${radius};
+    `}
+    ${({ bgColor }) =>
+    bgColor &&
+    css`
+      background-color: ${bgColor};
+    `}
+  ${({ width }) =>
+    width &&
+    css`
+      width: ${width};
+    `}
+  ${({ height }) =>
+    height &&
+    css`
+      height: ${height};
     `}
 `;
