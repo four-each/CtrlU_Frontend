@@ -53,7 +53,7 @@ const Header = (props: HeaderProps) => {
             fontWeight={500}
             textAlign={"center"}
           >
-            상세
+            {title}
           </Txt>
         )}
       </div>

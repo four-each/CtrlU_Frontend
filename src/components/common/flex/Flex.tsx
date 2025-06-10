@@ -78,6 +78,7 @@ interface StyledFlexProps {
 }
 
 const Flex = styled.div<StyledFlexProps>`
+  position: relative;
   display: flex;
   flex-direction: ${(props) => props.direction};
   ${({ align }) =>

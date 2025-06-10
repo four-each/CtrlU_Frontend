@@ -3,7 +3,8 @@ import { css } from "@emotion/react";
 export const globalStyles = css`
   @font-face {
     font-family: "NotoSansKR";
-    src: url("/fonts/NotoSansKR-VariableFont_wght.ttf") format("ttf");
+    src: url("/src/assets/fonts/NotoSansKR-VariableFont_wght.ttf")
+      format("truetype");
     font-weight: 100 900;
     font-display: swap;
     font-style: normal;
