@@ -1,25 +1,18 @@
-import {
-  createBrowserRouter,
-  createRoutesFromElements,
-  Route,
-  RouterProvider,
-} from "react-router-dom";
+import { HashRouter, Routes, Route } from "react-router-dom";
 import Home from "./Home";
 import Detail from "./Detail";
 import OnBoarding from "./OnBoarding";
 
 const Router = () => {
-  const router = createBrowserRouter(
-    createRoutesFromElements(
-      <>
+  return (
+    <HashRouter>
+      <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/onboarding" element={<OnBoarding />} />
         <Route path="/detail" element={<Detail />} />
-      </>
-    )
+      </Routes>
+    </HashRouter>
   );
-
-  return <RouterProvider router={router} />;
 };
 
 export default Router;
