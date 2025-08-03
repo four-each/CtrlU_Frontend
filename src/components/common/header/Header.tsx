@@ -13,6 +13,7 @@ type HeaderProps = {
   onBack?: () => void;
   onRight?: () => void;
   rightIcon?: React.ReactNode;
+  userName?: string;
 };
 
 const Header = (props: HeaderProps) => {
@@ -24,6 +25,7 @@ const Header = (props: HeaderProps) => {
     onRight,
     onBack = () => navigate(-1),
     rightIcon,
+    userName,
   } = props;
 
   return (
@@ -46,14 +48,14 @@ const Header = (props: HeaderProps) => {
           align-items: center;
         `}
       >
-        {title && (
+        {(title || userName) && (
           <Txt
             color={colors.textBlack}
             fontSize={"18px"}
             fontWeight={500}
             textAlign={"center"}
           >
-            {title}
+            {userName || title}
           </Txt>
         )}
       </div>

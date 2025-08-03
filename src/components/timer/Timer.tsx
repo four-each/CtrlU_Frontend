@@ -66,7 +66,12 @@ export default function Timer({ durationTime, endTime, timerRef }: TimerProps) {
             src="/src/assets/icons/default.png"
             alt="mainImage"
           />
-          <Percent isOver={isOver}>{isOver ? `🚨` : `${percentage}%`}</Percent>
+          <Percent 
+            isOver={isOver} 
+            percentage={percentage}
+          >
+            {isOver ? `🚨` : `${percentage}%`}
+          </Percent>
         </CircularProgressbarWithChildren>
         {/* 그라데이션 정의 */}
         <svg width="0" height="0">
@@ -109,24 +114,33 @@ export default function Timer({ durationTime, endTime, timerRef }: TimerProps) {
   );
 }
 
-const Percent = styled.div<{ isOver: boolean }>`
+const Percent = styled.div<{ isOver: boolean; percentage: number }>`
   display: flex;
   justify-content: center;
   align-items: center;
   position: absolute;
-  top: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: ${({ isOver }) => (isOver ? "1.6rem" : "0.9rem")};
-  font-weight: 700;
-  color: ${colors.textBlack};
-  text-align: center;
   width: 30px;
   height: 30px;
+  font-size: ${({ isOver }) => (isOver ? "1.6rem" : "0.9rem")};
+  font-weight: 700;
   color: white;
   background-color: ${({ isOver }) => (isOver ? colors.red : colors.purple3)};
   border-radius: 50%;
   z-index: 1;
+  
+  /* 원형 진행바를 따라 움직이도록 위치 계산 */
+  ${({ percentage }) => {
+    const angle = (percentage / 100) * 360 - 90; // -90도로 시작점을 12시 방향으로
+    const radius = 136; // 원형 진행바의 반지름 (272px / 2)
+    const x = Math.cos((angle * Math.PI) / 180) * radius;
+    const y = Math.sin((angle * Math.PI) / 180) * radius;
+    
+    return `
+      left: calc(50% + ${x}px);
+      top: calc(50% + ${y}px);
+      transform: translate(-50%, -50%);
+    `;
+  }}
 `;
 
 const ChallengeTimeBox = styled.div`

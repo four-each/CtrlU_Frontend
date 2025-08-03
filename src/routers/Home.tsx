@@ -137,19 +137,30 @@ const Home = () => {
 
   return (
     <Container>
-      <Header title="메인" isBack={false} isRight={false} />
       <Content>
         {/* 스토리 섹션 */}
         <Section>
-          <SectionTitle>스토리</SectionTitle>
+          <ProfileHeader>
+            <ProfileTextBox>
+              <ProfileText>내 프로필</ProfileText>
+              <ProfileText>활성화 프로필</ProfileText>
+            </ProfileTextBox>
+            <SettingsIcon src="/src/assets/icons/settings.png" alt="설정" />
+          </ProfileHeader>
           <StoryContainer>
             {storyItems.map(renderStoryItem)}
           </StoryContainer>
         </Section>
 
+        {/* 구분선 */}
+        <Divider />
+
         {/* 내 할 일 섹션 */}
         <Section>
-          <SectionTitle>내 할 일</SectionTitle>
+          <ProgressHeader>
+            <SectionTitle>진행 목록</SectionTitle>
+            <RefreshIcon src="/src/assets/icons/refresh.png" alt="새로고침" />
+          </ProgressHeader>
           <TaskList>
             {mockMyTasks.map(renderTaskItem)}
           </TaskList>
@@ -157,7 +168,7 @@ const Home = () => {
 
         {/* 친구 할 일 섹션 */}
         <Section>
-          <SectionTitle>친구 할 일</SectionTitle>
+          <SectionTitle>친구</SectionTitle>
           <TaskList>
             {mockFriendTasks.map(renderTaskItem)}
           </TaskList>
@@ -192,11 +203,59 @@ const SectionTitle = styled.h2`
   margin-bottom: 15px;
 `;
 
+const ProfileHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+`;
+
+const ProfileTextBox = styled.div`
+  display: flex;
+  gap: 20px;
+  margin-bottom: -30px;
+`;
+
+const ProfileText = styled.span`
+  font-size: 14px;
+  font-weight: 700;
+  color: ${colors.textBlack};
+  font-family: 'Noto Sans KR', sans-serif;
+`;
+
+const SettingsIcon = styled.img`
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+  margin-bottom: 10px;
+`;
+
+const Divider = styled.div`
+  height: 1px;
+  background-color: rgb(205, 156, 209);
+  width: 100%;
+  width: calc(100% + 40px);
+  margin: 0 -20px 40px -20px;
+`;
+
+const ProgressHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+`;
+
+const RefreshIcon = styled.img`
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+`;
+
 const StoryContainer = styled.div`
   display: flex;
   gap: 15px;
   overflow-x: auto;
-  padding-bottom: 10px;
+  margin-bottom: -10px;
 `;
 
 const StoryItemContainer = styled.div`

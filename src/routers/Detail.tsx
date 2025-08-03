@@ -5,11 +5,15 @@ import Txt from "@components/common/Txt";
 import Timer, { FinishHandler } from "@components/timer/Timer";
 import styled from "@emotion/styled";
 import { colors } from "@styles/theme";
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Detail = () => {
   const isMe = true;
   const finishHandler = useRef<FinishHandler>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [modalType, setModalType] = useState<'complete' | 'quit'>('complete');
+  const navigate = useNavigate();
   return (
     <Col align="center">
       <Header
@@ -17,6 +21,7 @@ const Detail = () => {
         isRight={true}
         rightIcon={isMe ? <TrashIcon /> : null}
         title={isMe ? "" : "친구이름"}
+        userName={isMe ? "나" : "친구이름"}
       />
       <Col
         justify="flex-start"
@@ -37,7 +42,7 @@ const Detail = () => {
         </Txt>
       </Col>
       <Timer
-        durationTime={1200000}
+        durationTime={600000}
         endTime="00:20:05"
         timerRef={finishHandler}
       />
@@ -49,17 +54,60 @@ const Detail = () => {
           width="100%"
           padding={"20px 0 44px"}
         >
-          <MissionButton buttonType="quit">미션 포기</MissionButton>
+          <MissionButton 
+            buttonType="quit"
+            onClick={() => {
+              setModalType('quit');
+              setShowModal(true);
+            }}
+          >
+            미션 포기
+          </MissionButton>
           <MissionButton
             buttonType="complete"
             onClick={() => {
-              finishHandler.current?.setFinished();
-              console.log("미션 완료");
+              setModalType('complete');
+              setShowModal(true);
             }}
           >
             미션 완료
           </MissionButton>
         </Row>
+      )}
+
+      {/* 확인 모달 */}
+      {showModal && (
+        <ModalOverlay onClick={() => setShowModal(false)}>
+          <ModalContent onClick={(e) => e.stopPropagation()}>
+            <ModalTitle>
+              {modalType === 'complete' ? '미션을 완료할까요?' : '미션을 포기할까요?'}
+            </ModalTitle>
+            <ModalButtons>
+              <ModalButton 
+                buttonType="cancel"
+                onClick={() => setShowModal(false)}
+              >
+                아니오
+              </ModalButton>
+              <ModalButton 
+                buttonType="confirm"
+                onClick={() => {
+                  if (modalType === 'complete') {
+                    finishHandler.current?.setFinished();
+                    console.log("미션 완료");
+                    navigate('/camera');
+                  } else {
+                    console.log("미션 포기");
+                    navigate('/');
+                  }
+                  setShowModal(false);
+                }}
+              >
+                네
+              </ModalButton>
+            </ModalButtons>
+          </ModalContent>
+        </ModalOverlay>
       )}
     </Col>
   );
@@ -89,4 +137,55 @@ const MissionButton = styled.button<{ buttonType: "quit" | "complete" }>`
     buttonType === "quit" ? colors.textBlack : colors.white};
   background-color: ${({ buttonType }) =>
     buttonType === "quit" ? colors.purple1 : colors.purple3};
+`;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.div`
+  background-color: white;
+  border-radius: 14px;
+  padding: 40px 20px 20px;
+  width: 297px;
+  height: 148px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+`;
+
+const ModalTitle = styled.div`
+  font-size: 16px;
+  font-weight: 400;
+  color: ${colors.textBlack};
+  text-align: center;
+  margin-bottom: 20px;
+`;
+
+const ModalButtons = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+`;
+
+const ModalButton = styled.button<{ buttonType: "cancel" | "confirm" }>`
+  width: 90px;
+  height: 36px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  font-weight: 400;
+  color: white;
+  background-color: ${({ buttonType }) =>
+    buttonType === "cancel" ? "#bababa" : "#ad8aca"};
+  cursor: pointer;
 `;
