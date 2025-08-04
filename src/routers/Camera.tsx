@@ -4,6 +4,7 @@ import Header from '@components/common/header/Header';
 import Txt from '@components/common/Txt';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
+import { useNavigate, useParams } from 'react-router-dom';
 
 interface CameraScreenProps {
   mode?: 'start' | 'complete';
@@ -11,9 +12,14 @@ interface CameraScreenProps {
 }
 
 const CameraScreen: React.FC<CameraScreenProps> = ({ 
-  mode = 'start', 
+  mode: propMode, 
   taskId = '1' 
 }) => {
+  const navigate = useNavigate();
+  const params = useParams();
+  
+  // URL 파라미터에서 mode를 가져오고, 없으면 prop을 사용하고, 그것도 없으면 'start'를 기본값으로 사용
+  const mode = params.mode as 'start' | 'complete' || propMode || 'start';
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [isCameraActive, setIsCameraActive] = useState(false);
@@ -23,8 +29,11 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
-  // 컴포넌트 언마운트 시 카메라 정리
+  // 컴포넌트 마운트 시 카메라 자동 시작
   useEffect(() => {
+    startCamera();
+    
+    // 컴포넌트 언마운트 시 카메라 정리
     return () => {
       stopCamera();
     };
@@ -46,6 +55,7 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
       });
       
       console.log('카메라 스트림 획득 성공:', stream);
+      console.log('videoRef.current:', videoRef.current);
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -57,12 +67,17 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
         // 비디오 로드 완료 이벤트 추가
         videoRef.current.onloadedmetadata = () => {
           console.log('비디오 메타데이터 로드 완료');
+          console.log('비디오 크기:', videoRef.current?.videoWidth, 'x', videoRef.current?.videoHeight);
           setIsCameraActive(true);
         };
         
         videoRef.current.oncanplay = () => {
           console.log('비디오 재생 가능');
           setIsCameraActive(true);
+        };
+        
+        videoRef.current.onplay = () => {
+          console.log('비디오 재생 시작');
         };
         
         videoRef.current.onerror = (e) => {
@@ -72,6 +87,7 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
         };
         
         console.log('비디오 요소에 스트림 설정 완료');
+        console.log('비디오 요소:', videoRef.current);
       }
     } catch (error) {
       console.error('카메라 접근 오류:', error);
@@ -155,107 +171,107 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
     console.log('이미지 제출:', capturedImage);
     console.log('모드:', mode);
     console.log('태스크 ID:', taskId);
+    
+    if (mode === 'start') {
+      // 시작 모드일 때는 CreateTask.tsx로 이동
+      navigate('/create-task', { 
+        state: { 
+          startImage: capturedImage 
+        } 
+      });
+    } else {
+      // 완료 모드일 때는 Success.tsx로 이동
+      navigate('/success');
+    }
   };
 
   return (
     <Container>
-      <Header
-        isBack={true}
-        isRight={false}
-        title={mode === 'start' ? '시작 사진' : '완료 사진'}
-      />
-      <Content>
+      {/* 상단 헤더 */}
+      <HeaderSection>
+        <HeaderContent>
+          <BackButton onClick={() => window.history.back()}>
+            <BackIcon src="/assets/back.png" alt="뒤로가기" />
+          </BackButton>
+          <Title>{mode === 'start' ? '시작' : '완료'}</Title>
+        </HeaderContent>
+      </HeaderSection>
+
+      {/* 카메라 영역 */}
+      <CameraSection>
         {!capturedImage ? (
           <CameraPreview>
-            {isCameraActive ? (
-              <VideoContainer>
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  style={{ 
-                    width: '100%', 
-                    height: '100%', 
-                    objectFit: 'cover',
-                    borderRadius: '12px',
-                    backgroundColor: '#000'
-                  }}
-                />
-                <CameraOverlay>
-                  <Txt fontSize="16px" color="white" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.7)' }}>
-                    카메라 준비 완료
+            <VideoContainer>
+                          <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              style={{ 
+                width: '100%', 
+                height: '100%', 
+                objectFit: 'cover',
+                backgroundColor: '#000',
+                display: isCameraActive ? 'block' : 'none'
+              }}
+            />
+              {!isCameraActive && cameraError && (
+                <CameraPlaceholder>
+                  <CameraIcon>⚠️</CameraIcon>
+                  <Txt fontSize="14px" color={colors.red}>
+                    {cameraError}
                   </Txt>
-                </CameraOverlay>
-              </VideoContainer>
-            ) : cameraError ? (
-              <CameraPlaceholder>
-                <CameraIcon>⚠️</CameraIcon>
-                <Txt fontSize="14px" color={colors.red}>
-                  {cameraError}
-                </Txt>
-                <Txt fontSize="16px" color={colors.textGray}>
-                  {mode === 'start' ? '시작 사진을 촬영해주세요' : '완료 사진을 촬영해주세요'}
-                </Txt>
-              </CameraPlaceholder>
-            ) : (
-              <CameraPlaceholder>
-                <CameraIcon>📷</CameraIcon>
-                <Txt fontSize="16px" color={colors.textGray}>
-                  {mode === 'start' ? '시작 사진을 촬영해주세요' : '완료 사진을 촬영해주세요'}
-                </Txt>
-              </CameraPlaceholder>
-            )}
+                  <Txt fontSize="16px" color={colors.textGray}>
+                    {mode === 'start' ? '시작 사진을 촬영해주세요' : '완료 사진을 촬영해주세요'}
+                  </Txt>
+                </CameraPlaceholder>
+              )}
+              {!isCameraActive && !cameraError && (
+                <CameraPlaceholder>
+                  <CameraIcon>📷</CameraIcon>
+                  <Txt fontSize="16px" color={colors.textGray}>
+                    {mode === 'start' ? '시작 사진을 촬영해주세요' : '완료 사진을 촬영해주세요'}
+                  </Txt>
+                </CameraPlaceholder>
+              )}
+            </VideoContainer>
           </CameraPreview>
         ) : (
           <CapturedImageContainer>
             <CapturedImage src={capturedImage} alt="captured" />
           </CapturedImageContainer>
         )}
+      </CameraSection>
 
-        <ButtonContainer>
-          {!capturedImage ? (
-            <>
-              {!isCameraActive && !cameraError && (
-                <CaptureButton onClick={() => {
-                  console.log('카메라 시작 버튼 클릭됨');
-                  startCamera();
-                }}>
-                  카메라 시작
-                </CaptureButton>
-              )}
-              {isCameraActive && (
-                <CaptureButton onClick={handleCapture} disabled={isCapturing}>
-                  {isCapturing ? '촬영 중...' : '사진 촬영'}
-                </CaptureButton>
-              )}
-              {cameraError && (
-                <Row gap={15}>
-                  <CaptureButton onClick={startCamera}>
-                    카메라 재시도
-                  </CaptureButton>
-                  <CaptureButton onClick={() => fileInputRef.current?.click()}>
-                    파일 선택
-                  </CaptureButton>
-                </Row>
-              )}
-              {/* 디버깅 정보 */}
-              <div style={{ marginTop: '10px', fontSize: '12px', color: '#666' }}>
-                카메라 상태: {isCameraActive ? '활성' : '비활성'} | 
-                에러: {cameraError ? '있음' : '없음'}
-              </div>
-            </>
-          ) : (
-            <Row gap={15}>
-              <RetakeButton onClick={handleRetake}>
-                다시 촬영
-              </RetakeButton>
-              <SubmitButton onClick={handleSubmit}>
-                제출하기
-              </SubmitButton>
-            </Row>
-          )}
-        </ButtonContainer>
+      {/* 하단 버튼 영역 */}
+      <BottomSection>
+        {!capturedImage ? (
+          <CaptureButtonContainer>
+            <CaptureButton onClick={handleCapture} disabled={isCapturing || !isCameraActive}>
+              <ShootIcon src="/assets/shoot.png" alt="촬영" />
+            </CaptureButton>
+            {cameraError && (
+              <ErrorButtons>
+                <RetakeButton onClick={startCamera}>
+                  카메라 재시도
+                </RetakeButton>
+                <RetakeButton onClick={() => fileInputRef.current?.click()}>
+                  파일 선택
+                </RetakeButton>
+              </ErrorButtons>
+            )}
+          </CaptureButtonContainer>
+        ) : (
+          <ActionButtons>
+            <RetakeButton onClick={handleRetake}>
+              다시 촬영
+            </RetakeButton>
+            <SubmitButton onClick={handleSubmit}>
+              제출하기
+            </SubmitButton>
+          </ActionButtons>
+        )}
+      </BottomSection>
 
         <input
           ref={fileInputRef}
@@ -270,8 +286,7 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
           ref={canvasRef}
           style={{ display: 'none' }}
         />
-      </Content>
-    </Container>
+      </Container>
   );
 };
 
@@ -279,25 +294,79 @@ export default CameraScreen;
 
 const Container = styled.div`
   width: 100%;
+  max-width: 480px;
   height: 100vh;
   background-color: ${colors.white};
-`;
-
-const Content = styled.div`
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 60px);
-  padding: 20px;
+  margin: 0 auto;
+`;
+
+// 상단 헤더 스타일
+const HeaderSection = styled.div`
+  background-color: #ad8aca;
+  height: 60px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  position: relative;
+`;
+
+const HeaderContent = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 60px;
+  padding: 0 20px;
+  margin-top: 0;
+  position: relative;
+`;
+
+const Title = styled.h1`
+  color: white;
+  font-size: 18px;
+  font-weight: 500;
+  font-family: 'Noto Sans KR', sans-serif;
+  margin: 0;
+`;
+
+const BackButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+`;
+
+const BackIcon = styled.img`
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+`;
+
+
+
+// 카메라 영역 스타일
+const CameraSection = styled.div`
+  flex: 1;
+  background-color: black;
+  display: flex;
+  flex-direction: column;
 `;
 
 const CameraPreview = styled.div`
   flex: 1;
-  background-color: #f5f5f5;
-  border-radius: 12px;
+  background-color: black;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 20px;
 `;
 
 const CameraPlaceholder = styled.div`
@@ -310,20 +379,8 @@ const CameraPlaceholder = styled.div`
 const VideoContainer = styled.div`
   width: 100%;
   height: 100%;
-  border-radius: 12px;
   overflow: hidden;
   position: relative;
-`;
-
-const CameraOverlay = styled.div`
-  position: absolute;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: rgba(0, 0, 0, 0.5);
-  padding: 8px 16px;
-  border-radius: 20px;
-  z-index: 10;
 `;
 
 const CameraIcon = styled.div`
@@ -332,9 +389,8 @@ const CameraIcon = styled.div`
 
 const CapturedImageContainer = styled.div`
   flex: 1;
-  border-radius: 12px;
   overflow: hidden;
-  margin-bottom: 20px;
+  background-color: white;
 `;
 
 const CapturedImage = styled.img`
@@ -343,36 +399,48 @@ const CapturedImage = styled.img`
   object-fit: cover;
 `;
 
-const ButtonContainer = styled.div`
+// 하단 버튼 영역 스타일
+const BottomSection = styled.div`
+  background-color: #ad8aca;
+  height: 140px;
   display: flex;
+  align-items: center;
   justify-content: center;
+  padding: 20px;
+`;
+
+const CaptureButtonContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 15px;
 `;
 
 const CaptureButton = styled.button`
-  padding: 15px 30px;
-  background-color: ${colors.purple3};
-  color: white;
-  border: none;
-  border-radius: 25px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  
-  &:hover {
-    opacity: 0.9;
-  }
-  
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
+  width: 80px;
+  height: 80px;
+`;
+
+const ShootIcon = styled.img`
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+`;
+
+const ErrorButtons = styled.div`
+  display: flex;
+  gap: 15px;
+`;
+
+const ActionButtons = styled.div`
+  display: flex;
+  gap: 15px;
 `;
 
 const RetakeButton = styled.button`
   padding: 12px 24px;
-  background-color: ${colors.purple1};
-  color: ${colors.textBlack};
+  background-color: white;
+  color: #ad8aca;
   border: none;
   border-radius: 25px;
   font-size: 14px;
@@ -386,8 +454,8 @@ const RetakeButton = styled.button`
 
 const SubmitButton = styled.button`
   padding: 12px 24px;
-  background-color: ${colors.purple3};
-  color: white;
+  background-color: white;
+  color: #ad8aca;
   border: none;
   border-radius: 25px;
   font-size: 14px;

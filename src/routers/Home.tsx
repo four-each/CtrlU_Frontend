@@ -98,6 +98,10 @@ const Home = () => {
     navigate('/detail');
   };
 
+  const handleCameraClick = () => {
+    navigate('/camera/start');
+  };
+
   const renderStoryItem = (item: StoryItem) => (
     <StoryItemContainer key={item.id} onClick={() => handleItemClick(item.task)}>
       <StoryImage 
@@ -145,7 +149,7 @@ const Home = () => {
               <ProfileText>내 프로필</ProfileText>
               <ProfileText>활성화 프로필</ProfileText>
             </ProfileTextBox>
-            <SettingsIcon src="/src/assets/icons/settings.png" alt="설정" />
+            <SettingsIcon src="/assets/settings.png" alt="설정" />
           </ProfileHeader>
           <StoryContainer>
             {storyItems.map(renderStoryItem)}
@@ -159,7 +163,7 @@ const Home = () => {
         <Section>
           <ProgressHeader>
             <SectionTitle>진행 목록</SectionTitle>
-            <RefreshIcon src="/src/assets/icons/refresh.png" alt="새로고침" />
+            <RefreshIcon src="/assets/refresh.png" alt="새로고침" />
           </ProgressHeader>
           <TaskList>
             {mockMyTasks.map(renderTaskItem)}
@@ -174,6 +178,11 @@ const Home = () => {
           </TaskList>
         </Section>
       </Content>
+
+      {/* 우측 하단 고정 카메라 버튼 */}
+      <CameraButton onClick={handleCameraClick}>
+        <CameraIcon src="/assets/camera.png" alt="카메라" />
+      </CameraButton>
     </Container>
   );
 };
@@ -182,8 +191,11 @@ export default Home;
 
 const Container = styled.div`
   width: 100%;
+  max-width: 480px;
   height: 100vh;
   background-color: ${colors.white};
+  margin: 0 auto;
+  position: relative;
 `;
 
 const Content = styled.div`
@@ -337,4 +349,34 @@ const TaskTime = styled.span`
   font-weight: 400;
   color: #7c3aed;
   font-family: 'Noto Sans KR', sans-serif;
+`;
+
+const CameraButton = styled.button`
+  position: absolute;
+  bottom: 30px;
+  right: 30px;
+  width: 71px;
+  height: 71px;
+  border: none;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 1000;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+`;
+
+const CameraIcon = styled.img`
+  width: 71px;
+  height: 71px;
+  object-fit: contain;
 `;

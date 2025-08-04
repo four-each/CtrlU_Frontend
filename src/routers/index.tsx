@@ -9,6 +9,7 @@ import Detail from "./Detail";
 import OnBoarding from "./OnBoarding";
 import Camera from "./Camera";
 import CreateTask from "./CreateTask";
+import Success from "./Success";
 
 const Router = () => {
   const router = createBrowserRouter(
@@ -17,8 +18,9 @@ const Router = () => {
         <Route path="/" element={<Home />} />
         <Route path="/onboarding" element={<OnBoarding />} />
         <Route path="/detail" element={<Detail />} />
-        <Route path="/camera" element={<Camera />} />
+        <Route path="/camera/:mode?" element={<Camera />} />
         <Route path="/create-task" element={<CreateTask />} />
+        <Route path="/success" element={<Success />} />
       </>
     )
   );

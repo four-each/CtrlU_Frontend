@@ -15,7 +15,8 @@ const Detail = () => {
   const [modalType, setModalType] = useState<'complete' | 'quit'>('complete');
   const navigate = useNavigate();
   return (
-    <Col align="center">
+    <Container>
+      <Col align="center">
       <Header
         isBack={true}
         isRight={true}
@@ -95,7 +96,7 @@ const Detail = () => {
                   if (modalType === 'complete') {
                     finishHandler.current?.setFinished();
                     console.log("미션 완료");
-                    navigate('/camera');
+                    navigate('/camera/complete');
                   } else {
                     console.log("미션 포기");
                     navigate('/');
@@ -109,11 +110,20 @@ const Detail = () => {
           </ModalContent>
         </ModalOverlay>
       )}
-    </Col>
+      </Col>
+    </Container>
   );
 };
 
 export default Detail;
+
+const Container = styled.div`
+  width: 100%;
+  max-width: 480px;
+  height: 100vh;
+  background-color: ${colors.white};
+  margin: 0 auto;
+`;
 
 const SmallImage = styled.img`
   width: 35px;

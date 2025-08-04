@@ -3,49 +3,51 @@ import { Col, Row } from '@components/common/flex/Flex';
 import Header from '@components/common/header/Header';
 import Txt from '@components/common/Txt';
 import styled from '@emotion/styled';
+import { css } from '@emotion/react';
 import { colors } from '@styles/theme';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { CircularProgressbarWithChildren } from 'react-circular-progressbar';
 
 interface CreateTaskScreenProps {
   startImage?: string;
 }
 
 const CreateTaskScreen: React.FC<CreateTaskScreenProps> = ({ 
-  startImage = '/src/assets/icons/default.png' 
+  startImage: propStartImage = '/src/assets/icons/default.png' 
 }) => {
-  const [title, setTitle] = useState('');
+  const location = useLocation();
+  const navigate = useNavigate();
   const [description, setDescription] = useState('');
-  const [targetTime, setTargetTime] = useState(30);
-  const [selectedTime, setSelectedTime] = useState('30');
+  const [selectedHours, setSelectedHours] = useState(0);
+  const [selectedMinutes, setSelectedMinutes] = useState(30);
 
-  const timeOptions = [
-    { value: '15', label: '15분' },
-    { value: '30', label: '30분' },
-    { value: '45', label: '45분' },
-    { value: '60', label: '1시간' },
-    { value: '90', label: '1시간 30분' },
-    { value: '120', label: '2시간' },
-  ];
+  // location.state에서 전달받은 이미지 사용, 없으면 prop 사용
+  const startImage = location.state?.startImage || propStartImage;
 
-  const handleTimeChange = (value: string) => {
-    setSelectedTime(value);
-    setTargetTime(parseInt(value));
+  const hours = Array.from({ length: 5 }, (_, i) => i); // 0-4시간
+  const minutes = [0, 15, 30, 45];
+
+  const handleTimeChange = (hours: number, minutes: number) => {
+    setSelectedHours(hours);
+    setSelectedMinutes(minutes);
   };
 
   const handleSubmit = () => {
-    if (!title.trim()) {
-      alert('제목을 입력해주세요.');
+    if (!description.trim()) {
+      alert('내용을 입력해주세요.');
       return;
     }
 
-    if (!description.trim()) {
-      alert('설명을 입력해주세요.');
+    const targetTime = selectedHours * 60 + selectedMinutes;
+    if (targetTime === 0) {
+      alert('시간을 설정해주세요.');
       return;
     }
 
     const newTask = {
       id: Date.now().toString(),
       userId: 'user1',
-      title: title.trim(),
+      title: description.trim(),
       description: description.trim(),
       targetTime,
       startTime: new Date(),
@@ -57,75 +59,117 @@ const CreateTaskScreen: React.FC<CreateTaskScreenProps> = ({
     };
 
     console.log('새 할 일 생성:', newTask);
-    // 여기서 API 호출 또는 상태 업데이트
+    navigate('/');
+  };
+
+  const formatGoalTime = () => {
+    const totalMinutes = selectedHours * 60 + selectedMinutes;
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
   };
 
   return (
     <Container>
-      <Header
-        isBack={true}
-        isRight={false}
-        title="할 일 만들기"
-      />
-      <Content>
-        {/* 시작 사진 */}
-        <ImageSection>
-          <StartImage src={startImage} alt="start" />
-          <Txt fontSize="14px" color={colors.textGray}>
-            시작 사진
-          </Txt>
-        </ImageSection>
 
-        {/* 제목 입력 */}
-        <InputSection>
-          <Label>제목</Label>
-          <Input
-            type="text"
-            placeholder="할 일의 제목을 입력하세요"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            maxLength={50}
-          />
-          <CharacterCount>{title.length}/50</CharacterCount>
-        </InputSection>
+      {/* Header */}
+      <HeaderSection>
+        <BackButton onClick={() => window.history.back()}>
+          <BackIcon src="/assets/back.png" alt="뒤로가기" />
+        </BackButton>
+        <HeaderTitle>시작</HeaderTitle>
+      </HeaderSection>
 
-        {/* 설명 입력 */}
-        <InputSection>
-          <Label>설명</Label>
-          <TextArea
-            placeholder="할 일에 대한 설명을 입력하세요"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            maxLength={200}
-            rows={4}
-          />
-          <CharacterCount>{description.length}/200</CharacterCount>
-        </InputSection>
+      {/* Activity Card */}
+      <ActivityCard>
+        <ActivityIcon src="/src/assets/icons/default.png" alt="Activity" />
+        <ActivityNameInput
+          value={description}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDescription(e.target.value)}
+          placeholder="활동명을 입력하세요"
+        />
+      </ActivityCard>
 
-        {/* 목표 시간 선택 */}
-        <InputSection>
-          <Label>목표 시간</Label>
-          <TimeOptionsContainer>
-            {timeOptions.map((option) => (
-              <TimeOption
-                key={option.value}
-                isSelected={selectedTime === option.value}
-                onClick={() => handleTimeChange(option.value)}
-              >
-                {option.label}
-              </TimeOption>
-            ))}
-          </TimeOptionsContainer>
-        </InputSection>
-
-        {/* 제출 버튼 */}
-        <SubmitButton 
-          onClick={handleSubmit}
-          disabled={!title.trim() || !description.trim()}
+      {/* Circular Progress with Image */}
+      <CircularProgressSection>
+        <Col
+          css={css`
+            max-width: 300px;
+          `}
         >
-          할 일 시작하기
-        </SubmitButton>
-      </Content>
+          <CircularProgressbarWithChildren
+            value={0}
+            strokeWidth={7}
+            styles={{
+              path: {
+                stroke: "url(#gradient)",
+                strokeLinecap: "round",
+              },
+              trail: {
+                stroke: "#d4d4d8",
+              },
+            }}
+            css={css`
+              box-shadow: 0px 0px 10px 2px rgba(131, 44, 197, 0.6);
+              border-radius: 50%;
+            `}
+          >
+            <img
+              css={css`
+                width: 84%;
+                height: 84%;
+                margin-top: -9px;
+                border-radius: 50%;
+                object-fit: cover;
+              `}
+              src={startImage}
+              alt="촬영된 사진"
+            />
+            <Percent>0%</Percent>
+          </CircularProgressbarWithChildren>
+          {/* 그라데이션 정의 */}
+          <svg width="0" height="0">
+            <defs>
+              <linearGradient id="gradient" x1="0%" y1="0%" x2="10%" y2="100%">
+                <stop offset="0%" stopColor="white" />
+                <stop offset="100%" stopColor="#7c3aed" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </Col>
+      </CircularProgressSection>
+
+      {/* Goal Time Display with Time Picker */}
+      <GoalTimeSection>
+        <GoalTimeLabel>목표 시간</GoalTimeLabel>
+        <TimePickerRow>
+          <TimeSelect 
+            value={selectedHours} 
+            onChange={(e) => handleTimeChange(parseInt(e.target.value), selectedMinutes)}
+          >
+            {Array.from({ length: 5 }, (_, i) => (
+              <option key={i} value={i}>{i}시간</option>
+            ))}
+          </TimeSelect>
+          <TimeSelect 
+            value={selectedMinutes} 
+            onChange={(e) => handleTimeChange(selectedHours, parseInt(e.target.value))}
+          >
+            <option value={0}>0분</option>
+            <option value={15}>15분</option>
+            <option value={30}>30분</option>
+            <option value={45}>45분</option>
+          </TimeSelect>
+        </TimePickerRow>
+        <GoalTime>{formatGoalTime()}</GoalTime>
+      </GoalTimeSection>
+
+      {/* Start Button */}
+      <StartButtonSection>
+        <StartButton onClick={handleSubmit}>
+          시작
+        </StartButton>
+      </StartButtonSection>
     </Container>
   );
 };
@@ -133,131 +177,232 @@ const CreateTaskScreen: React.FC<CreateTaskScreenProps> = ({
 export default CreateTaskScreen;
 
 const Container = styled.div`
-  width: 100%;
-  height: 100vh;
-  background-color: ${colors.white};
-`;
-
-const Content = styled.div`
-  padding: 20px;
-  height: calc(100vh - 60px);
-  overflow-y: auto;
-`;
-
-const ImageSection = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 30px;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  background-color: white;
+  min-height: 100vh;
 `;
 
-const StartImage = styled.img`
-  width: 120px;
-  height: 120px;
-  border-radius: 12px;
-  object-fit: cover;
-  border: 2px solid ${colors.purple1};
+const StatusBar = styled.header`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 12px 16px 12px 32px;
+  background-color: #94a3b8;
+  backdrop-filter: blur(20px);
 `;
 
-const InputSection = styled.div`
-  margin-bottom: 25px;
-`;
-
-const Label = styled.label`
-  display: block;
+const StatusTime = styled.time`
   font-size: 16px;
   font-weight: 600;
-  color: ${colors.textBlack};
-  margin-bottom: 8px;
+  color: black;
 `;
 
-const Input = styled.input`
+const StatusIcons = styled.div`
+  display: flex;
+  gap: 1px;
+  align-items: center;
+`;
+
+const StatusIcon = styled.img`
+  width: 17px;
+  height: auto;
+  object-fit: contain;
+`;
+
+const HeaderSection = styled.header`
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 100%;
-  padding: 12px 16px;
-  border: 2px solid ${colors.purple1};
-  border-radius: 8px;
-  font-size: 16px;
-  background-color: white;
-  
-  &:focus {
-    outline: none;
-    border-color: ${colors.purple3};
-  }
-  
-  &::placeholder {
-    color: ${colors.textGray};
-  }
-`;
-
-const TextArea = styled.textarea`
-  width: 100%;
-  padding: 12px 16px;
-  border: 2px solid ${colors.purple1};
-  border-radius: 8px;
-  font-size: 16px;
-  background-color: white;
-  resize: vertical;
-  min-height: 100px;
-  
-  &:focus {
-    outline: none;
-    border-color: ${colors.purple3};
-  }
-  
-  &::placeholder {
-    color: ${colors.textGray};
-  }
-`;
-
-const CharacterCount = styled.div`
-  text-align: right;
-  font-size: 12px;
-  color: ${colors.textGray};
-  margin-top: 4px;
-`;
-
-const TimeOptionsContainer = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-`;
-
-const TimeOption = styled.button<{ isSelected: boolean }>`
-  padding: 12px 16px;
-  border: 2px solid ${({ isSelected }) => 
-    isSelected ? colors.purple3 : colors.purple1};
-  border-radius: 8px;
-  background-color: ${({ isSelected }) => 
-    isSelected ? colors.purple3 : 'white'};
-  color: ${({ isSelected }) => 
-    isSelected ? colors.white : colors.textBlack};
-  font-size: 14px;
+  padding: 20px;
+  background-color: #ad8aca;
+  font-size: 18px;
   font-weight: 500;
+  color: white;
+  position: relative;
+`;
+
+const BackButton = styled.button`
+  position: absolute;
+  left: 20px;
+  background: none;
+  border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  padding: 4px;
+  border-radius: 4px;
   
-  &:hover {
-    border-color: ${colors.purple3};
-    background-color: ${({ isSelected }) => 
-      isSelected ? colors.purple3 : colors.purple1};
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
   }
 `;
 
-const SubmitButton = styled.button<{ disabled: boolean }>`
+const BackIcon = styled.img`
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+`;
+
+const HeaderTitle = styled.h1`
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+`;
+
+const ActivityCard = styled.section`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 56px;
+`;
+
+const ActivityIcon = styled.img`
+  width: 35px;
+  height: 35px;
+  object-fit: contain;
+  margin-bottom: 14px;
+`;
+
+const ActivityNameInput = styled.input`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 64px;
+  max-width: 233px;
+  background-color: #f5f5f5;
+  border-radius: 50px;
+  box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
+  color: #57534e;
+  font-size: 16px;
+  text-align: center;
+  border: none;
+  outline: none;
+  
+  &::placeholder {
+    color: #a8a29e;
+  }
+  
+  &:focus {
+    box-shadow: 0px 0px 4px rgba(124, 58, 237, 0.3);
+  }
+`;
+
+const CircularProgressSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 24px;
   width: 100%;
-  padding: 16px;
-  background-color: ${({ disabled }) => 
-    disabled ? colors.textGray : colors.purple3};
+`;
+
+
+
+const Percent = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: white;
+  background-color: #7c3aed;
+  border-radius: 50%;
+  z-index: 1;
+  
+  /* 원형 진행바의 시작점(12시 방향)에 위치 */
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
+`;
+
+const GoalTimeSection = styled.section`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 40px;
+`;
+
+const GoalTimeLabel = styled.p`
+  font-size: 16px;
+  font-weight: 500;
+  color: #94a3b8;
+  margin: 0;
+`;
+
+const TimePickerRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+`;
+
+const TimeSelect = styled.select`
+  padding: 8px 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  background-color: white;
+  font-size: 16px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  
+  &:focus {
+    outline: none;
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  }
+`;
+
+const GoalTime = styled.time`
+  margin-top: 4px;
+  font-size: 60px;
+  font-weight: 500;
+  color: #292524;
+`;
+
+
+
+const StartButtonSection = styled.div`
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 0 20px;
+  margin-top: 48px;
+  margin-bottom: 64px;
+`;
+
+const StartButton = styled.button`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 16px 64px;
+  width: 100%;
+  max-width: 335px;
+  background-color: #7c3aed;
   color: white;
   border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: ${({ disabled }) => disabled ? 'not-allowed' : 'pointer'};
-  margin-top: 20px;
+  border-radius: 50px;
+  font-size: 20px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
+  transition: background-color 0.2s ease;
   
   &:hover {
-    opacity: ${({ disabled }) => disabled ? 1 : 0.9};
+    background-color: #6d28d9;
+  }
+  
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.3);
   }
 `; 

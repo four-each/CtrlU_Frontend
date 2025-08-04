@@ -4,10 +4,12 @@ import { Col, Row } from "@components/common/flex/Flex";
 import Txt from "@components/common/Txt";
 import { css } from "@emotion/react";
 import { colors } from "@styles/theme";
+import styled from "@emotion/styled";
 
 export default function OnBoarding() {
   return (
-    <Col>
+    <Container>
+      <Col>
       <div
         css={css`
           width: 100%;
@@ -70,6 +72,15 @@ export default function OnBoarding() {
           />
         </Col>
       </Col>
-    </Col>
+      </Col>
+    </Container>
   );
 }
+
+const Container = styled.div`
+  width: 100%;
+  max-width: 480px;
+  height: 100vh;
+  background-color: ${colors.white};
+  margin: 0 auto;
+`;
