@@ -10,6 +10,7 @@ import OnBoarding from "./OnBoarding";
 import Camera from "./Camera";
 import CreateTask from "./CreateTask";
 import Success from "./Success";
+import { Login, Signup, EmailVerification, VerificationComplete } from "./auth";
 
 const Router = () => {
   const router = createBrowserRouter(
@@ -21,6 +22,12 @@ const Router = () => {
         <Route path="/camera/:mode?" element={<Camera />} />
         <Route path="/create-task" element={<CreateTask />} />
         <Route path="/success" element={<Success />} />
+        
+        {/* Auth Routes */}
+        <Route path="/auth/login" element={<Login />} />
+        <Route path="/auth/signup" element={<Signup />} />
+        <Route path="/auth/email-verification" element={<EmailVerification />} />
+        <Route path="/auth/verifination-complete" element={<VerificationComplete />} />
       </>
     )
   );

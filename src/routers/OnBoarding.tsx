@@ -5,8 +5,19 @@ import Txt from "@components/common/Txt";
 import { css } from "@emotion/react";
 import { colors } from "@styles/theme";
 import styled from "@emotion/styled";
+import { useNavigate } from "react-router-dom";
 
 export default function OnBoarding() {
+  const navigate = useNavigate();
+
+  const handleLoginClick = () => {
+    navigate('/auth/login');
+  };
+
+  const handleSignupClick = () => {
+    navigate('/auth/signup');
+  };
+
   return (
     <Container>
       <Col>
@@ -63,12 +74,14 @@ export default function OnBoarding() {
             title="로그인"
             textColor={colors.white}
             bgColor={colors.purple3}
+            onClick={handleLoginClick}
           />
           <Button
             title="회원가입"
             textColor={colors.textBlack}
             bgColor={colors.white}
             shadow={true}
+            onClick={handleSignupClick}
           />
         </Col>
       </Col>
