@@ -25,7 +25,7 @@ const ProfileSection = styled.div`
   margin-top: 60px;
 `;
 
-const ProfileImage = styled.div`
+const ProfileImage = styled.img`
   width: 102px;
   height: 102px;
   border-radius: 50%;
@@ -38,18 +38,22 @@ const ProfileImage = styled.div`
   cursor: pointer;
 `;
 
-const CameraIcon = styled.div`
+const Upload = styled.div`
   position: absolute;
-  bottom: 0;
+  bottom: 4px;
   right: 0;
   width: 26px;
   height: 26px;
   background: #ad8aca;
   border: 2px solid #ffffff;
   border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  cursor: pointer;
+  padding: 4px;
+`;
+
+const UploadIcon = styled.img`
+  width: 14px;
+  height: 14px;
 `;
 
 const FormContainer = styled.div`
@@ -235,11 +239,12 @@ const Signup = () => {
   return (
     <SignupContainer>
       <ProfileSection>
-        <ProfileImage onClick={handleCameraClick}>
-          <CameraIcon>
-            <span style={{ fontSize: '12px', color: '#ffffff' }}>📷</span>
-          </CameraIcon>
-        </ProfileImage>
+        <div style={{ position: 'relative' }}>
+          <ProfileImage src='/assets/default-profile.jpg' alt="프로필 이미지" onClick={handleCameraClick} />
+          <Upload onClick={handleCameraClick}>
+            <UploadIcon src='/assets/image-upload.png' alt="프로필 이미지" />
+          </Upload>
+        </div>
       </ProfileSection>
 
       <FormContainer>

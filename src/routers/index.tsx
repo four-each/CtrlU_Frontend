@@ -10,6 +10,8 @@ import OnBoarding from "./OnBoarding";
 import Camera from "./Camera";
 import CreateTask from "./CreateTask";
 import Success from "./Success";
+import MyPage from "./user/MyPage";
+import MyPageEdit from "./user/MyPageEdit";
 import { Login, Signup, EmailVerification, VerificationComplete } from "./auth";
 
 const Router = () => {
@@ -22,12 +24,16 @@ const Router = () => {
         <Route path="/camera/:mode?" element={<Camera />} />
         <Route path="/create-task" element={<CreateTask />} />
         <Route path="/success" element={<Success />} />
+
+        {/* User Routes */}
+        <Route path="/mypage" element={<MyPage />} />
+        <Route path="/mypage/edit" element={<MyPageEdit />} />
         
         {/* Auth Routes */}
         <Route path="/auth/login" element={<Login />} />
         <Route path="/auth/signup" element={<Signup />} />
         <Route path="/auth/email-verification" element={<EmailVerification />} />
-        <Route path="/auth/verifination-complete" element={<VerificationComplete />} />
+        <Route path="/auth/verification-complete" element={<VerificationComplete />} />
       </>
     )
   );
