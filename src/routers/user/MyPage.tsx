@@ -2,6 +2,8 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
+import { BackLightIcon, ArchiveIcon, FriendListIcon, FriendRequestIcon, SettingIcon } from '@assets/icons';
+import { css } from "@emotion/react";
 
 const MyPageContainer = styled.div`
   width: 100%;
@@ -21,19 +23,6 @@ const Header = styled.div`
   justify-content: space-between;
   padding: 0 20px;
   position: relative;
-`;
-
-const BackButton = styled.img`
-  width: 24px;
-  height: 21px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  margin-top: 2px;
 `;
 
 const HeaderTitle = styled.h1`
@@ -102,14 +91,6 @@ const ProfileStatus = styled.p`
   margin: 0;
 `;
 
-const SettingsButton = styled.img`
-  width: 21px;
-  height: 21px;
-  cursor: pointer;
-  margin-right: 16px;
-  margin-top: 16px;
-`;
-
 const FriendsSection = styled.div`
   display: flex;
   gap: 10px;
@@ -132,16 +113,6 @@ const FriendTab = styled.div`
   &:hover {
     background: #e8e8e8;
   }
-`;
-
-const Icon = styled.img`
-  width: 27px;
-  height: 27px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  color: #ad8aca;
 `;
 
 const FriendText = styled.span`
@@ -252,7 +223,14 @@ const MyPage = () => {
   return (
     <MyPageContainer>
       <Header>
-        <BackButton src='./assets/back-purple.png' onClick={handleBack} />
+        <BackLightIcon 
+          css={css`
+            width: 24px;
+            height: 21px;
+            cursor: pointer;
+            margin-top: 2px;
+          `}
+          onClick={handleBack} />
         <HeaderTitle>마이페이지</HeaderTitle>
       </Header>
 
@@ -263,20 +241,28 @@ const MyPage = () => {
             <ProfileName>ㅇㅇ 님</ProfileName>
             <ProfileStatus>오늘의 목표는? 🔥</ProfileStatus>
           </ProfileInfo>
-          <SettingsButton src='./assets/setting.png' onClick={handleEdit} />
+          <SettingIcon 
+            css={css`
+              width: 24px;
+              height: 24px;
+              cursor: pointer;
+              margin-right: 16px;
+              margin-top: 16px;
+            `}
+            onClick={handleEdit} />
         </ProfileSection>
 
         <FriendsSection>
           <FriendTab onClick={handleFriendList}>
-            <Icon src='./assets/friends-list.png' />
+            <FriendListIcon />
             <FriendText>친구 목록</FriendText>
           </FriendTab>
           <FriendTab onClick={handleFriendRequest}>
-            <Icon src='./assets/friend-request.png' />
+            <FriendRequestIcon />
             <FriendText>친구 요청</FriendText>
           </FriendTab>
           <FriendTab onClick={handleArchive}>
-            <Icon src='./assets/archive.png' />
+            <ArchiveIcon />
             <FriendText>보관함</FriendText>
           </FriendTab>
         </FriendsSection>

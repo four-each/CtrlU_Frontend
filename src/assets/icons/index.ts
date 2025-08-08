@@ -11,6 +11,10 @@ import SearchIcon from "./friendship/search.svg?react";
 import AlarmLightIcon from "./friendship/alarm_light.svg?react";
 import AcceptIcon from "./friendship/accept.svg?react";
 import RemoveIcon from "./friendship/remove.svg?react";
+import ArchiveIcon from "./mypage/archive.svg?react";
+import FriendListIcon from "./mypage/friend_list.svg?react";
+import FriendRequestIcon from "./mypage/friend_request.svg?react";
+import SettingIcon from "./mypage/setting.svg?react";
 
 export {
   BackIcon,
@@ -26,4 +30,8 @@ export {
   BackLightIcon,
   AcceptIcon,
   RemoveIcon,
+  ArchiveIcon,
+  FriendListIcon,
+  FriendRequestIcon,
+  SettingIcon,
 };
