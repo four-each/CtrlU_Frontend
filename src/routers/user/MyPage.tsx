@@ -33,6 +33,7 @@ const BackButton = styled.img`
   align-items: center;
   justify-content: center;
   font-size: 18px;
+  margin-top: 2px;
 `;
 
 const HeaderTitle = styled.h1`
@@ -224,9 +225,10 @@ const MyPage = () => {
     console.log('보관함');
   };
 
-  const handleReport = () => {
-    // TODO: 문제 신고 페이지로 이동
-    console.log('문제 신고');
+  const handlePasswordChange = () => {
+    // TODO: 비밀번호 변경 페이지로 이동
+    console.log('비밀번호 변경');
+    navigate('/mypage/password-reset');
   };
 
   const handlePrivacy = () => {
@@ -280,11 +282,11 @@ const MyPage = () => {
         <SettingsSection>
           <SettingsTitle>이용 안내</SettingsTitle>
           <SettingsDivider />
-          <SettingsItem onClick={handleReport}>
-            <SettingsText>문제 신고하기</SettingsText>
-          </SettingsItem>
           <SettingsItem onClick={handlePrivacy}>
             <SettingsText>개인정보 처리방침</SettingsText>
+          </SettingsItem>
+          <SettingsItem onClick={handlePasswordChange}>
+            <SettingsText>비밀번호 변경</SettingsText>
           </SettingsItem>
           <SettingsItem onClick={handleLogout}>
             <SettingsText>로그아웃</SettingsText>

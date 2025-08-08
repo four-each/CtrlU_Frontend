@@ -12,6 +12,7 @@ import CreateTask from "./CreateTask";
 import Success from "./Success";
 import MyPage from "./user/MyPage";
 import MyPageEdit from "./user/MyPageEdit";
+import PasswordReset from "./user/PasswordReset";
 import { Login, Signup, EmailVerification, VerificationComplete } from "./auth";
 
 const Router = () => {
@@ -28,6 +29,7 @@ const Router = () => {
         {/* User Routes */}
         <Route path="/mypage" element={<MyPage />} />
         <Route path="/mypage/edit" element={<MyPageEdit />} />
+        <Route path="/mypage/password-reset" element={<PasswordReset />} />
         
         {/* Auth Routes */}
         <Route path="/auth/login" element={<Login />} />

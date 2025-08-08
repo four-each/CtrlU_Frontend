@@ -59,7 +59,6 @@ const UploadIcon = styled.img`
 const FormContainer = styled.div`
   width: 100%;
   max-width: 335px;
-  height: 480px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -136,11 +135,7 @@ const SignupButton = styled.button`
   color: #ffffff;
   cursor: pointer;
   transition: background-color 0.2s;
-  position: fixed;
-  bottom: 25px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
+  margin-top: 20px;
   
   &:hover {
     background: #6a1fa0;
@@ -201,8 +196,8 @@ const Signup = () => {
       newErrors.password = '비밀번호를 입력해주세요';
     } else if (formData.password.length < 8 || formData.password.length > 12) {
       newErrors.password = '비밀번호는 8~12자로 입력해주세요';
-    } else if (!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,12}$/.test(formData.password)) {
-      newErrors.password = '영문과 숫자를 포함하여 입력해주세요';
+    } else if (!/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&^])[A-Za-z\d@$!%*#?&^]{8,}$/.test(formData.password)) {
+      newErrors.password = '영문, 숫자, 특수문자를 포함하여 입력해주세요';
     }
 
     if (!formData.confirmPassword) {
@@ -298,10 +293,10 @@ const Signup = () => {
             <HelperText>한글, 영어, 숫자만 가능</HelperText>
           )}
         </InputGroup>
+        <SignupButton onClick={handleSignup}>
+          완료
+        </SignupButton>
       </FormContainer>
-      <SignupButton onClick={handleSignup}>
-        완료
-      </SignupButton>
     </SignupContainer>
   );
 };

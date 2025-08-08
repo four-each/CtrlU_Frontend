@@ -33,6 +33,7 @@ const BackButton = styled.img`
   align-items: center;
   justify-content: center;
   font-size: 18px;
+  margin-top: 2px;
 `;
 
 const HeaderTitle = styled.h1`
