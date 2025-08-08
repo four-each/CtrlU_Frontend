@@ -4,6 +4,8 @@ import { Col } from '@components/common/flex/Flex';
 import Txt from '@components/common/Txt';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
+import { CTRULogo, Owl } from '@assets/icons';
+import { css } from "@emotion/react";
 
 const LoginContainer = styled.div`
   width: 100%;
@@ -24,34 +26,6 @@ const LogoSection = styled.div`
   position: relative;
 `;
 
-const LogoText = styled.h1`
-  font-family: 'Noto Sans KR', sans-serif;
-  font-weight: 700;
-  font-size: 60px;
-  color: #000000;
-  margin: 0;
-  letter-spacing: 0.06px;
-`;
-
-const OwlLogo = styled.img`
-  width: 100px;
-  height: 108px;
-  position: relative;
-  z-index: 2;
-`;
-
-const IdeaIcon = styled.img`
-  width: 85.39px;
-  height: 73.82px;
-  position: absolute;
-  top: 20%;
-  left: 72%;
-  transform: translate(-50%, -50%);
-  z-index: 1;
-  margin-left: -60px;
-  margin-top: -40px;
-`;
-
 const FormContainer = styled.div`
   width: 100%;
   max-width: 335px;
@@ -59,6 +33,7 @@ const FormContainer = styled.div`
   flex-direction: column;
   gap: 20px;
   bottom: 175px;
+  margin-top: 30px;
 `;
 
 const InputGroup = styled.div`
@@ -212,9 +187,12 @@ const Login = () => {
   return (
     <LoginContainer>
       <LogoSection>
-        <IdeaIcon src="/assets/idea-icon.png" alt="아이디어 아이콘" />
-        <OwlLogo src="/assets/owl-logo.png" alt="부엉이 로고" />
-        <LogoText>Ctrl U</LogoText>
+        <Owl 
+          css={css`
+            width: 100px;
+            height: 108px;
+          `} />
+        <CTRULogo />
       </LogoSection>
       
       <FormContainer>

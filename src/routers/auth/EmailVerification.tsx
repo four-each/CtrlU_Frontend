@@ -4,6 +4,7 @@ import { Col } from '@components/common/flex/Flex';
 import Txt from '@components/common/Txt';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
+import { CTRULogo } from '@assets/icons';
 
 const VerificationContainer = styled.div`
   width: 100%;
@@ -114,7 +115,7 @@ const EmailVerification = () => {
   return (
     <VerificationContainer>
       <LogoSection>
-        <LogoText>Ctrl U</LogoText>
+        <CTRULogo />
       </LogoSection>
 
       <Divider />

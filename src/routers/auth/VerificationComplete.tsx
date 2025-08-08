@@ -4,6 +4,7 @@ import { Col } from '@components/common/flex/Flex';
 import Txt from '@components/common/Txt';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
+import { CTRULogo } from '@assets/icons';
 
 const VerificationContainer = styled.div`
   width: 100%;
@@ -22,16 +23,6 @@ const LogoSection = styled.div`
   flex-direction: column;
   align-items: center;
   gap: 20px;
-`;
-
-const LogoText = styled.h1`
-  height: 50px;
-  font-family: 'Noto Sans KR', sans-serif;
-  font-weight: 700;
-  font-size: 60px;
-  color: #000000;
-  margin: 0;
-  letter-spacing: 0.06px;
 `;
 
 const Divider = styled.div`
@@ -105,7 +96,7 @@ const VerificationComplete = () => {
   return (
     <VerificationContainer>
       <LogoSection>
-        <LogoText>Ctrl U</LogoText>
+        <CTRULogo />
       </LogoSection>
 
       <Divider />
