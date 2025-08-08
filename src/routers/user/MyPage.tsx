@@ -213,11 +213,13 @@ const MyPage = () => {
   const handleFriendList = () => {
     // TODO: 친구 목록 페이지로 이동
     console.log('친구 목록');
+    navigate('/friendship/list');
   };
 
   const handleFriendRequest = () => {
     // TODO: 친구 요청 페이지로 이동
     console.log('친구 요청');
+    navigate('/friendship/request');
   };
 
   const handleArchive = () => {
