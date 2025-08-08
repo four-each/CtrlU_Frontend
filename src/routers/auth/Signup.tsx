@@ -1,9 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Col } from '@components/common/flex/Flex';
-import Txt from '@components/common/Txt';
 import styled from '@emotion/styled';
-import { colors } from '@styles/theme';
 import { ImageUploadIcon } from '@assets/icons';
 import { css } from "@emotion/react";
 
@@ -59,8 +56,7 @@ const FormContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 20px;
-  overflow-y: auto;
-  padding-bottom: 20px;
+  padding-bottom: 40px;
 `;
 
 const InputGroup = styled.div`
