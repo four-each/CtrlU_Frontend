@@ -4,6 +4,8 @@ import { Col } from '@components/common/flex/Flex';
 import Txt from '@components/common/Txt';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
+import { ImageUploadIcon } from '@assets/icons';
+import { css } from "@emotion/react";
 
 const SignupContainer = styled.div`
   width: 100%;
@@ -49,11 +51,6 @@ const Upload = styled.div`
   border-radius: 50%;
   cursor: pointer;
   padding: 4px;
-`;
-
-const UploadIcon = styled.img`
-  width: 14px;
-  height: 14px;
 `;
 
 const FormContainer = styled.div`
@@ -237,7 +234,12 @@ const Signup = () => {
         <div style={{ position: 'relative' }}>
           <ProfileImage src='/assets/default-profile.jpg' alt="프로필 이미지" onClick={handleCameraClick} />
           <Upload onClick={handleCameraClick}>
-            <UploadIcon src='/assets/image-upload.png' alt="프로필 이미지" />
+            <ImageUploadIcon 
+              css={css`
+                width: 14px;
+                height: 14px;
+              `}
+            />
           </Upload>
         </div>
       </ProfileSection>

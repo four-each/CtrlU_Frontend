@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
+import { BackLightIcon, ImageUploadIcon } from '@assets/icons';
+import { css } from "@emotion/react";
 
 const EditContainer = styled.div`
   width: 100%;
@@ -21,19 +23,6 @@ const Header = styled.div`
   justify-content: space-between;
   padding: 0 20px;
   position: relative;
-`;
-
-const BackButton = styled.img`
-  width: 24px;
-  height: 21px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  margin-top: 2px;
 `;
 
 const HeaderTitle = styled.h1`
@@ -85,11 +74,6 @@ const Edit = styled.div`
   border-radius: 50%;
   cursor: pointer;
   padding: 4px;
-`;
-
-const EditIcon = styled.img`
-  width: 14px;
-  height: 14px;
 `;
 
 const FormSection = styled.div`
@@ -207,7 +191,14 @@ const MyPageEdit = () => {
   return (
     <EditContainer>
       <Header>
-        <BackButton src='/assets/back-purple.png' onClick={handleBack} />
+        <BackLightIcon 
+          css={css`
+            width: 24px;
+            height: 21px;
+            cursor: pointer;
+            margin-top: 2px;
+          `}
+          onClick={handleBack} />
         <HeaderTitle>마이페이지 수정</HeaderTitle>
       </Header>
 
@@ -216,7 +207,12 @@ const MyPageEdit = () => {
           <div style={{ position: 'relative' }}>
             <ProfileImage src='/assets/default-profile.jpg' alt="프로필 이미지" onClick={handleCameraClick} />
             <Edit onClick={handleCameraClick}>
-              <EditIcon src='/assets/image-upload.png' alt="프로필 이미지" />
+              <ImageUploadIcon 
+                css={css`
+                  width: 14px;
+                  height: 14px;
+                `}
+              />
             </Edit>
           </div>
         </ProfileSection>

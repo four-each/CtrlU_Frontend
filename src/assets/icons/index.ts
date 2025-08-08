@@ -6,6 +6,7 @@ import ClockIcon from "./clock.svg?react";
 import CTRULogo from "./ctru_logo.svg?react";
 import Owl from "./owl.svg?react";
 import BackLightIcon from "./backArrow_light.svg?react";
+import ImageUploadIcon from "./image_upload.svg?react";
 import AddFriendIcon from "./friendship/add_friend.svg?react";
 import SearchIcon from "./friendship/search.svg?react";
 import AlarmLightIcon from "./friendship/alarm_light.svg?react";
@@ -24,6 +25,7 @@ export {
   ClockIcon,
   CTRULogo,
   Owl,
+  ImageUploadIcon,
   AddFriendIcon,
   SearchIcon,
   AlarmLightIcon,
