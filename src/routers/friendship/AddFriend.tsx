@@ -179,6 +179,10 @@ const AddFriend = () => {
     navigate(-1);
   };
 
+  const handleAlarm = () => {
+    navigate('/friendship/request');
+  };
+
   const handleAddFriend = (friendId: number) => {
     // TODO: 친구 추가 API 호출
     console.log('친구 추가:', friendId);
@@ -210,6 +214,7 @@ const AddFriend = () => {
             height: 24px;
             cursor: pointer;
           `}
+          onClick={handleAlarm}
         />
       </Header>
 

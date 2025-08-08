@@ -189,6 +189,10 @@ const FriendListPage = () => {
     navigate(-1);
   };
 
+  const handleAlarm = () => {
+    navigate('/friendship/request');
+  };
+
   const handleRemoveFriend = (friendId: number) => {
     // TODO: 친구 삭제 API 호출
     console.log('친구 삭제:', friendId);
@@ -220,7 +224,8 @@ const FriendListPage = () => {
             width: 24px;
             height: 24px;
             cursor: pointer;
-          `}
+          `}  
+          onClick={handleAlarm}
         />
       </Header>
 
