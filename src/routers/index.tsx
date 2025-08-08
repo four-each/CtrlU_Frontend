@@ -13,6 +13,9 @@ import Success from "./Success";
 import MyPage from "./user/MyPage";
 import MyPageEdit from "./user/MyPageEdit";
 import PasswordReset from "./user/PasswordReset";
+import AddFriend from "./friendship/AddFriend";
+import FriendList from "./friendship/FriendList";
+import FriendRequest from "./friendship/FriendRequest";
 import { Login, Signup, EmailVerification, VerificationComplete } from "./auth";
 
 const Router = () => {
@@ -30,6 +33,11 @@ const Router = () => {
         <Route path="/mypage" element={<MyPage />} />
         <Route path="/mypage/edit" element={<MyPageEdit />} />
         <Route path="/mypage/password-reset" element={<PasswordReset />} />
+        
+        {/* Friendship Routes */}
+        <Route path="/friendship/add" element={<AddFriend />} />
+        <Route path="/friendship/list" element={<FriendList />} />
+        <Route path="/friendship/request" element={<FriendRequest />} />
         
         {/* Auth Routes */}
         <Route path="/auth/login" element={<Login />} />
