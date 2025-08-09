@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
+import { BackLightIcon } from '@assets/icons';
+import { css } from "@emotion/react";
 
 const ResetContainer = styled.div`
   width: 100%;
@@ -248,7 +250,14 @@ const PasswordReset = () => {
   return (
     <ResetContainer>
       <Header>
-        <BackButton src='/assets/back-purple.png' onClick={handleBack} />
+        <BackLightIcon 
+          css={css`
+            width: 24px;
+            height: 21px;
+            cursor: pointer;
+            margin-top: 2px;
+          `}
+          onClick={handleBack} />
         <HeaderTitle>비밀번호 재설정</HeaderTitle>
       </Header>
 
