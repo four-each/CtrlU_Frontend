@@ -97,7 +97,7 @@ const SuccessContainer = styled.div`
   width: 100%;
   max-width: 480px;
   height: 100vh;
-  background: linear-gradient(180deg, #ffffff 0%, #f1e7f9 100%);
+  background: linear-gradient(180deg, #f1e7f9 0%, #ffffff 50%, #f1e7f9 100%);
   display: flex;
   flex-direction: column;
   margin: 0 auto;
