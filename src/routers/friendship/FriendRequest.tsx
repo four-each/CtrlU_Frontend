@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
 import { BackLightIcon, RemoveIcon, AcceptIcon } from '@assets/icons';
+import profileIcon from '../../assets/icons/home/profile.svg';
 import { css } from "@emotion/react";
 
 const FriendRequestContainer = styled.div`
@@ -161,30 +162,30 @@ const FriendRequest = () => {
   const [showNotification, setShowNotification] = useState(false);
   
   const [receivedRequests, setReceivedRequests] = useState([
-    { id: 1, name: '강연주', profile: '/assets/default-profile.jpg' },
-    { id: 2, name: '김수진', profile: '/assets/default-profile.jpg' },
-    { id: 3, name: '정소민', profile: '/assets/default-profile.jpg' },
-    { id: 4, name: '강연주', profile: '/assets/default-profile.jpg' },
-    { id: 5, name: '김수진', profile: '/assets/default-profile.jpg' },
-    { id: 6, name: '정소민', profile: '/assets/default-profile.jpg' },
-    { id: 7, name: '강연주', profile: '/assets/default-profile.jpg' },
-    { id: 8, name: '김수진', profile: '/assets/default-profile.jpg' },
-    { id: 9, name: '정소민', profile: '/assets/default-profile.jpg' },
-    { id: 10, name: '강연주', profile: '/assets/default-profile.jpg' },
-    { id: 11, name: '김수진', profile: '/assets/default-profile.jpg' },
-    { id: 12, name: '정소민', profile: '/assets/default-profile.jpg' },
+    { id: 1, name: '강연주', profile: profileIcon },
+    { id: 2, name: '김수진', profile: profileIcon },
+    { id: 3, name: '정소민', profile: profileIcon },
+    { id: 4, name: '강연주', profile: profileIcon },
+    { id: 5, name: '김수진', profile: profileIcon },
+    { id: 6, name: '정소민', profile: profileIcon },
+    { id: 7, name: '강연주', profile: profileIcon },
+    { id: 8, name: '김수진', profile: profileIcon },
+    { id: 9, name: '정소민', profile: profileIcon },
+    { id: 10, name: '강연주', profile: profileIcon },
+    { id: 11, name: '김수진', profile: profileIcon },
+    { id: 12, name: '정소민', profile: profileIcon },
   ]);
 
   const [sentRequests, setSentRequests] = useState([
-    { id: 4, name: '강연주', profile: '/assets/default-profile.jpg' },
-    { id: 5, name: '김수진', profile: '/assets/default-profile.jpg' },
-    { id: 6, name: '정소민', profile: '/assets/default-profile.jpg' },
-    { id: 7, name: '강연주', profile: '/assets/default-profile.jpg' },
-    { id: 8, name: '김수진', profile: '/assets/default-profile.jpg' },
-    { id: 9, name: '정소민', profile: '/assets/default-profile.jpg' },
-    { id: 10, name: '강연주', profile: '/assets/default-profile.jpg' },
-    { id: 11, name: '김수진', profile: '/assets/default-profile.jpg' },
-    { id: 12, name: '정소민', profile: '/assets/default-profile.jpg' },
+    { id: 4, name: '강연주', profile: profileIcon },
+    { id: 5, name: '김수진', profile: profileIcon },
+    { id: 6, name: '정소민', profile: profileIcon },
+    { id: 7, name: '강연주', profile: profileIcon },
+    { id: 8, name: '김수진', profile: profileIcon },
+    { id: 9, name: '정소민', profile: profileIcon },
+    { id: 10, name: '강연주', profile: profileIcon },
+    { id: 11, name: '김수진', profile: profileIcon },
+    { id: 12, name: '정소민', profile: profileIcon },
   ]);
 
   const handleBack = () => {

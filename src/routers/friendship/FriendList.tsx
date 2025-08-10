@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
 import { BackLightIcon, SearchIcon, AlarmLightIcon, RemoveIcon } from '@assets/icons';
+import profileIcon from '../../assets/icons/home/profile.svg';
 import { css } from "@emotion/react";
 
 const FriendListContainer = styled.div`
@@ -170,15 +171,15 @@ const AddFriendButton = styled.button`
 const FriendListPage = () => {
   const navigate = useNavigate();
   const [friends, setFriends] = useState([
-    { id: 1, name: '강연주', profile: '/assets/default-profile.jpg' },
-    { id: 2, name: '김수진', profile: '/assets/default-profile.jpg' },
-    { id: 3, name: '정소민', profile: '/assets/default-profile.jpg' },
-    { id: 4, name: '송채영', profile: '/assets/default-profile.jpg' },
-    { id: 5, name: '김수진', profile: '/assets/default-profile.jpg' },
-    { id: 6, name: '김수진', profile: '/assets/default-profile.jpg' },
-    { id: 7, name: '김수진', profile: '/assets/default-profile.jpg' },
-    { id: 8, name: '김수진', profile: '/assets/default-profile.jpg' },
-    { id: 9, name: '김수진', profile: '/assets/default-profile.jpg' },
+    { id: 1, name: '강연주', profile: profileIcon },
+    { id: 2, name: '김수진', profile: profileIcon },
+    { id: 3, name: '정소민', profile: profileIcon },
+    { id: 4, name: '송채영', profile: profileIcon },
+    { id: 5, name: '김수진', profile: profileIcon },
+    { id: 6, name: '김수진', profile: profileIcon },
+    { id: 7, name: '김수진', profile: profileIcon },
+    { id: 8, name: '김수진', profile: profileIcon },
+    { id: 9, name: '김수진', profile: profileIcon },
   ]);
 
   // 동적으로 친구 수 계산

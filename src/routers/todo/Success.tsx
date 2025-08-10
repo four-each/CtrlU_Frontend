@@ -4,7 +4,10 @@ import Txt from '@components/common/Txt';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
 import { useNavigate } from 'react-router-dom';
-import backArrow from '@assets/icons/backArrow.svg';
+import backArrow from '../../assets/icons/detail/backArrow.svg';
+import profileIcon from '../../assets/icons/home/profile.svg';
+import ganadiIcon from '../../assets/icons/detail/ganadi.svg';
+import ringIcon from '../../assets/icons/detail/ring.svg';
 
 interface SuccessProps {
   taskName?: string;
@@ -33,11 +36,8 @@ const Success: React.FC<SuccessProps> = ({
     <SuccessContainer>
       {/* 헤더 */}
       <Header>
-                  <BackButton onClick={handleBack}>
+            <BackButton onClick={handleBack}>
             <img src={backArrow} alt="뒤로가기" />
-            <Txt fontSize="16px" fontWeight={500} color="#545656">
-              뒤로가기
-            </Txt>
           </BackButton>
       </Header>
 
@@ -46,7 +46,7 @@ const Success: React.FC<SuccessProps> = ({
         {/* 프로필 섹션 */}
         <ProfileSection>
           <ProfileImage>
-            <img src="/src/assets/icons/profile.png" alt="프로필" />
+            <img src={profileIcon} alt="프로필" />
           </ProfileImage>
           <Txt fontSize="22px" fontWeight={500} color="#1d1d1d">
             졸업하기
@@ -56,30 +56,9 @@ const Success: React.FC<SuccessProps> = ({
         {/* 원형 프로그레스 바 */}
         <ProgressSection>
           <ProgressCircle>
-            <svg width="272" height="272" viewBox="0 0 272 272" style={{ position: 'relative' }}>
-              <defs>
-                <linearGradient id="successGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#ffffff" />
-                  <stop offset="50%" stopColor="#9C41E8" />
-                  <stop offset="100%" stopColor="#9C41E8" />
-                </linearGradient>
-              </defs>
-              {/* 그라데이션을 적용한 테두리 원 */}
-              <circle 
-                cx="136" cy="136" r="120" 
-                stroke="url(#successGradient)" 
-                strokeWidth="20" 
-                fill="transparent"
-              />
-              {/* 내부를 채울 단색 원 */}
-              <circle 
-                cx="136" cy="136" r="110" 
-                fill="#f1e7f9" 
-                stroke="none"
-              />
-            </svg>
+            <RingImage src={ringIcon} alt="프로그레스 링" />
             <ProgressImage>
-              <img src="/src/assets/icons/default.png" alt="완료 이미지" />
+              <img src={ganadiIcon} alt="완료 이미지" />
             </ProgressImage>
           </ProgressCircle>
         </ProgressSection>
@@ -137,6 +116,7 @@ const BackButton = styled.button`
   border: none;
   cursor: pointer;
   padding: 0;
+  margin-left: 8px;
   
   img {
     width: 24px;
@@ -189,9 +169,19 @@ const ProgressCircle = styled.div`
   justify-content: center;
 `;
 
+const RingImage = styled.img`
+  width: 272px;
+  height: 272px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+`;
+
 const ProgressImage = styled.div`
-  width: 220px;
-  height: 220px;
+  width: 235px;
+  height: 235px;
   border-radius: 50%;
   overflow: hidden;
   position: absolute;

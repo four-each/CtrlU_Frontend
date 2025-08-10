@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
 import { BackLightIcon, ArchiveIcon, FriendListIcon, FriendRequestIcon, SettingIcon } from '@assets/icons';
+import profileIcon from '../../assets/icons/home/profile.svg';
 import { css } from "@emotion/react";
 
 const MyPageContainer = styled.div`
@@ -236,7 +237,7 @@ const MyPage = () => {
 
       <Content>
         <ProfileSection>
-          <ProfileImage src='/assets/default-profile.jpg' alt="프로필 이미지" />
+          <ProfileImage src={profileIcon} alt="프로필 이미지" />
           <ProfileInfo>
             <ProfileName>ㅇㅇ 님</ProfileName>
             <ProfileStatus>오늘의 목표는? 🔥</ProfileStatus>

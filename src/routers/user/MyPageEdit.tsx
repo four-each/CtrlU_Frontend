@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
 import { BackLightIcon, ImageUploadIcon } from '@assets/icons';
+import profileIcon from '../../assets/icons/home/profile.svg';
 import { css } from "@emotion/react";
 
 const EditContainer = styled.div`
@@ -205,7 +206,7 @@ const MyPageEdit = () => {
       <Content>
         <ProfileSection>
           <div style={{ position: 'relative' }}>
-            <ProfileImage src='/assets/default-profile.jpg' alt="프로필 이미지" onClick={handleCameraClick} />
+            <ProfileImage src={profileIcon} alt="프로필 이미지" onClick={handleCameraClick} />
             <Edit onClick={handleCameraClick}>
               <ImageUploadIcon 
                 css={css`
