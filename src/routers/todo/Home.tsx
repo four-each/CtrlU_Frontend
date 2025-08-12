@@ -398,8 +398,6 @@ const TaskList = styled.div`
   display: flex;
   flex-direction: column;
   gap: 15px;
-  max-height: 300px;
-  overflow: hidden;
 `;
 
 const FriendTaskList = styled.div`
@@ -408,6 +406,20 @@ const FriendTaskList = styled.div`
   gap: 15px;
   max-height: 400px;
   overflow-y: auto;
+  padding-bottom: 50px;
+  
+  &::-webkit-scrollbar {
+    width: 0;
+    background: transparent;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: transparent;
+  }
 `;
 
 const TaskItem = styled.div`
