@@ -25,6 +25,8 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [showWarningModal, setShowWarningModal] = useState(false);
+  const [warningMessage, setWarningMessage] = useState('');
   const [description, setDescription] = useState('');
   const [selectedHours, setSelectedHours] = useState(2);
   const [selectedMinutes, setSelectedMinutes] = useState(30);
@@ -195,15 +197,15 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
   // 스크롤 위치를 선택된 값으로 초기화
   useEffect(() => {
     if (showModal && hoursScrollRef.current && minutesScrollRef.current) {
-      const hoursElement = hoursScrollRef.current.children[selectedHours] as HTMLElement;
-      const minutesElement = minutesScrollRef.current.children[selectedMinutes] as HTMLElement;
-      
-      if (hoursElement) {
-        hoursScrollRef.current.scrollTop = hoursElement.offsetTop - hoursScrollRef.current.offsetHeight / 2 + hoursElement.offsetHeight / 2;
-      }
-      if (minutesElement) {
-        minutesScrollRef.current.scrollTop = minutesElement.offsetTop - minutesScrollRef.current.offsetHeight / 2 + minutesElement.offsetHeight / 2;
-      }
+      const itemHeight = 36; // 각 아이템의 높이
+
+      // 시간 스크롤 위치 계산
+      const hoursScrollTop = selectedHours * itemHeight;
+      hoursScrollRef.current.scrollTop = hoursScrollTop;
+
+      // 분 스크롤 위치 계산
+      const minutesScrollTop = selectedMinutes * itemHeight;
+      minutesScrollRef.current.scrollTop = minutesScrollTop;
     }
   }, [showModal]);
 
@@ -215,10 +217,8 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
       if (hoursScrollRef.current) {
         const scrollTop = hoursScrollRef.current.scrollTop;
         const itemHeight = 36;
-        const centerOffset = hoursScrollRef.current.offsetHeight / 2;
-        const selectedIndex = Math.floor((scrollTop + centerOffset) / itemHeight);
-        const clampedIndex = Math.max(0, Math.min(24, selectedIndex));
-        console.log('Hours scroll - scrollTop:', scrollTop, 'selectedIndex:', selectedIndex, 'clampedIndex:', clampedIndex);
+        const selectedIndex = Math.round(scrollTop / itemHeight);
+        const clampedIndex = Math.max(0, Math.min(9, selectedIndex));
         setSelectedHours(clampedIndex);
       }
     };
@@ -227,10 +227,8 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
       if (minutesScrollRef.current) {
         const scrollTop = minutesScrollRef.current.scrollTop;
         const itemHeight = 36;
-        const centerOffset = minutesScrollRef.current.offsetHeight / 2;
-        const selectedIndex = Math.floor((scrollTop + centerOffset) / itemHeight);
+        const selectedIndex = Math.round(scrollTop / itemHeight);
         const clampedIndex = Math.max(0, Math.min(59, selectedIndex));
-        console.log('Minutes scroll - scrollTop:', scrollTop, 'selectedIndex:', selectedIndex, 'clampedIndex:', clampedIndex);
         setSelectedMinutes(clampedIndex);
       }
     };
@@ -264,13 +262,22 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
 
   const handleModalComplete = () => {
     if (!description.trim()) {
-      alert('활동명을 입력해주세요.');
+      setWarningMessage('목표를 입력해주세요.');
+      setShowWarningModal(true);
+      return;
+    }
+
+    // 활동명 10자 제한 확인
+    if (description.trim().length > 10) {
+      setWarningMessage('목표는 10자 이내로 작성해주세요.');
+      setShowWarningModal(true);
       return;
     }
 
     const targetTime = selectedHours * 60 + selectedMinutes;
     if (targetTime === 0) {
-      alert('시간을 설정해주세요.');
+      setWarningMessage('목표 시간을 설정해주세요.');
+      setShowWarningModal(true);
       return;
     }
 
@@ -392,47 +399,51 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
           <ModalOverlay>
             <ModalContainer>
               <ModalHeader>
-                <ModalTitle>목표 설정</ModalTitle>
                 <CloseButton onClick={() => setShowModal(false)}>×</CloseButton>
               </ModalHeader>
               
               <ModalContent>
                 <ModalSection>
-                  <ModalSectionTitle>활동명</ModalSectionTitle>
+                  <ModalSectionTitle>목표 설정</ModalSectionTitle>
                   <ModalInput
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    placeholder="활동명을 입력하세요"
+                    placeholder="목표를 입력하세요"
+                    maxLength={10}
                   />
                 </ModalSection>
 
                 <ModalSection>
-                  <ModalSectionTitle>목표 시간</ModalSectionTitle>
+                  <ModalSectionTitle>시간 설정</ModalSectionTitle>
                   <TimePickerContainer>
                     <CustomTimePickerContainer>
                       <TimePickerColumn>
                         <TimePickerScroll ref={hoursScrollRef}>
-                                                  {Array.from({ length: 25 }, (_, i) => (
-                          <TimePickerOption
-                            key={i}
-                            isSelected={selectedHours === i}
-                          >
-                            {i.toString().padStart(2, '0')}
-                          </TimePickerOption>
-                        ))}
+                          <div style={{ height: '18px', flexShrink: 0 }} />
+                          {Array.from({ length: 10 }, (_, i) => (
+                            <TimePickerOption
+                              key={i}
+                              isSelected={selectedHours === i}
+                            >
+                              {i.toString().padStart(2, '0')}
+                            </TimePickerOption>
+                          ))}
+                          <div style={{ height: '18px', flexShrink: 0 }} />
                         </TimePickerScroll>
                         <TimePickerLabel>시간</TimePickerLabel>
                       </TimePickerColumn>
                       <TimePickerColumn>
                         <TimePickerScroll ref={minutesScrollRef}>
-                                                  {Array.from({ length: 60 }, (_, i) => (
-                          <TimePickerOption
-                            key={i}
-                            isSelected={selectedMinutes === i}
-                          >
-                            {i.toString().padStart(2, '0')}
-                          </TimePickerOption>
-                        ))}
+                          <div style={{ height: '18px', flexShrink: 0 }} />
+                          {Array.from({ length: 60 }, (_, i) => (
+                            <TimePickerOption
+                              key={i}
+                              isSelected={selectedMinutes === i}
+                            >
+                              {i.toString().padStart(2, '0')}
+                            </TimePickerOption>
+                          ))}
+                          <div style={{ height: '18px', flexShrink: 0 }} />
                         </TimePickerScroll>
                         <TimePickerLabel>분</TimePickerLabel>
                       </TimePickerColumn>
@@ -445,6 +456,27 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
               <ModalFooter>
                 <ModalCompleteButton onClick={handleModalComplete}>
                   완료
+                </ModalCompleteButton>
+              </ModalFooter>
+            </ModalContainer>
+          </ModalOverlay>
+        )}
+
+        {/* Warning Modal */}
+        {showWarningModal && (
+          <ModalOverlay>
+            <ModalContainer>
+              <ModalContent>
+                <ModalSection>
+                  <WarningMessage>
+                    {warningMessage}
+                  </WarningMessage>
+                </ModalSection>
+              </ModalContent>
+
+              <ModalFooter>
+                <ModalCompleteButton onClick={() => setShowWarningModal(false)}>
+                  확인
                 </ModalCompleteButton>
               </ModalFooter>
             </ModalContainer>
@@ -657,17 +689,10 @@ const ModalContainer = styled.div`
 
 const ModalHeader = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
-  padding: 20px 24px;
-  border-bottom: 1px solid #e5e7eb;
-`;
-
-const ModalTitle = styled.h2`
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: #1f2937;
+  padding-right: 24px;
+  padding-top: 10px;
 `;
 
 const CloseButton = styled.button`
@@ -676,7 +701,6 @@ const CloseButton = styled.button`
   font-size: 24px;
   color: #6b7280;
   cursor: pointer;
-  padding: 4px;
   border-radius: 4px;
   
   &:hover {
@@ -686,6 +710,8 @@ const CloseButton = styled.button`
 
 const ModalContent = styled.div`
   padding: 24px;
+  padding-top: 10px;
+  padding-bottom: 0px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -703,7 +729,7 @@ const ModalSection = styled.div`
 `;
 
 const ModalSectionTitle = styled.h3`
-  margin: 0 0 12px 0;
+  margin: 0 0 24px 0;
   font-size: 16px;
   font-weight: 600;
   color: #1f2937;
@@ -831,8 +857,8 @@ const TimePickerLabel = styled.div`
 const ModalFooter = styled.div`
   display: flex;
   justify-content: flex-end;
-  padding: 16px 24px;
-  border-top: 1px solid #e5e7eb;
+  padding-right: 24px;
+  padding-bottom: 10px;
 `;
 
 const ModalCompleteButton = styled.button`
@@ -842,10 +868,19 @@ const ModalCompleteButton = styled.button`
   font-weight: 600;
   color: #1f2937;
   cursor: pointer;
-  padding: 8px 16px;
+  padding: 0px 16px;
   border-radius: 6px;
+  margin-bottom: 15px;
   
   &:hover {
     background-color: #f3f4f6;
   }
+`;
+
+const WarningMessage = styled.div`
+  text-align: center;
+  font-size: 16px;
+  color: #832CC5;
+  font-weight: 500;
+  padding-top: 24px;
 `; 

@@ -178,6 +178,10 @@ const Home = () => {
     navigate('/camera/start');
   };
 
+  const handleSettingsClick = () => {
+    navigate('/mypage');
+  };
+
   const renderStoryItem = (item: StoryItem) => (
     <StoryItemContainer key={item.id} onClick={() => handleStoryItemClick(item)}>
       <StoryImage 
@@ -223,7 +227,7 @@ const Home = () => {
   const renderTaskItem = (task: Task | TaskWithUser) => {
     return (
       <TaskItem key={task.id} onClick={() => handleItemClick(task)}>
-        <TaskUserName>{'user' in task ? task.user.nickname : '나'}</TaskUserName>
+        <TaskUserName>{'user' in task ? task.user.nickname : '강연주'}</TaskUserName>
         <TaskContent>
           <TaskTitle>{task.title}</TaskTitle>
           <TaskTimer task={task} />
@@ -238,11 +242,7 @@ const Home = () => {
         {/* 스토리 섹션 */}
         <Section>
           <ProfileHeader>
-            <ProfileTextBox>
-              <ProfileText>내 프로필</ProfileText>
-              <ProfileText>활성화 프로필</ProfileText>
-            </ProfileTextBox>
-            <SettingsIcon src={settingsIcon} alt="설정" />
+            <SettingsIcon src={settingsIcon} alt="설정" onClick={handleSettingsClick} />
           </ProfileHeader>
           <StoryContainer>
             {/* 내 스토리 - 고정 */}
@@ -261,7 +261,6 @@ const Home = () => {
         <Section>
           <ProgressHeader>
             <SectionTitle>진행 목록</SectionTitle>
-            <RefreshIcon src={refreshIcon} alt="새로고침" />
           </ProgressHeader>
           <TaskList>
             {mockMyTasks.map(renderTaskItem)}
@@ -315,23 +314,12 @@ const SectionTitle = styled.h2`
 
 const ProfileHeader = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
 `;
 
-const ProfileTextBox = styled.div`
-  display: flex;
-  gap: 20px;
-  margin-bottom: -30px;
-`;
 
-const ProfileText = styled.span`
-  font-size: 14px;
-  font-weight: 700;
-  color: ${colors.textBlack};
-  font-family: 'Noto Sans KR', sans-serif;
-`;
 
 const SettingsIcon = styled.img`
   width: 25px;
@@ -374,7 +362,8 @@ const FriendStoryContainer = styled.div`
   overflow-x: auto;
   flex: 1;
   padding: 20px 0;
-  margin: -20px 0;
+  margin: -20px -20px -20px 0;
+  width: calc(100% + 20px);
 `;
 
 const StoryItemContainer = styled.div`
