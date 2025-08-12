@@ -24,7 +24,7 @@ const CreateTaskScreen: React.FC<CreateTaskScreenProps> = ({
   const startImage = location.state?.startImage || propStartImage;
   const [description, setDescription] = useState(location.state?.description || '');
   const [selectedHours, setSelectedHours] = useState(location.state?.selectedHours || 0);
-  const [selectedMinutes, setSelectedMinutes] = useState(location.state?.selectedMinutes || 30);
+  const [selectedMinutes, setSelectedMinutes] = useState(location.state?.selectedMinutes || 0);
 
   const handleTimeChange = (hours: number, minutes: number) => {
     setSelectedHours(hours);
