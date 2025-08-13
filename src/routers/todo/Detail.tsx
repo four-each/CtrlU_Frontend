@@ -6,13 +6,16 @@ import Timer, { FinishHandler } from "@components/timer/Timer";
 import styled from "@emotion/styled";
 import { colors } from "@styles/theme";
 import { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import profileIcon from "../../assets/icons/home/profile.svg";
+import ganadiIcon from "../../assets/icons/detail/ganadi.svg";
 
 const Detail = () => {
-  const isMe = true;
+  const [searchParams] = useSearchParams();
+  const isMe = searchParams.get('isMe') === 'true';
   const finishHandler = useRef<FinishHandler>(null);
   const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState<'complete' | 'quit'>('complete');
+  const [modalType, setModalType] = useState<'complete' | 'quit' | 'delete'>('complete');
   const navigate = useNavigate();
   return (
     <Container>
@@ -20,7 +23,10 @@ const Detail = () => {
       <Header
         isBack={true}
         isRight={true}
-        rightIcon={isMe ? <TrashIcon /> : null}
+        rightIcon={isMe ? <TrashIcon onClick={() => {
+          setModalType('delete');
+          setShowModal(true);
+        }} /> : null}
         title={isMe ? "" : "친구이름"}
         userName={isMe ? "나" : "친구이름"}
       />
@@ -32,7 +38,7 @@ const Detail = () => {
         padding={"50px 0 40px"}
         gap={15}
       >
-        <SmallImage src="/src/assets/icons/default.png" alt="smallImage" />
+        <SmallImage src={profileIcon} alt="smallImage" />
         <Txt
           fontSize="24px"
           fontWeight={500}
@@ -81,7 +87,9 @@ const Detail = () => {
         <ModalOverlay onClick={() => setShowModal(false)}>
           <ModalContent onClick={(e) => e.stopPropagation()}>
             <ModalTitle>
-              {modalType === 'complete' ? '미션을 완료할까요?' : '미션을 포기할까요?'}
+              {modalType === 'complete' ? '미션을 완료할까요?' : 
+               modalType === 'quit' ? '미션을 포기할까요?' : 
+               '미션을 삭제할까요?'}
             </ModalTitle>
             <ModalButtons>
               <ModalButton 
@@ -97,8 +105,11 @@ const Detail = () => {
                     finishHandler.current?.setFinished();
                     console.log("미션 완료");
                     navigate('/camera/complete');
-                  } else {
+                  } else if (modalType === 'quit') {
                     console.log("미션 포기");
+                    navigate('/');
+                  } else {
+                    console.log("미션 삭제");
                     navigate('/');
                   }
                   setShowModal(false);

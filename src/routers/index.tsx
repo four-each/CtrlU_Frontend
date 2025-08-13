@@ -4,12 +4,12 @@ import {
   Route,
   RouterProvider,
 } from "react-router-dom";
-import Home from "./Home";
-import Detail from "./Detail";
+import Home from "./todo/Home";
+import Detail from "./todo/Detail";
 import OnBoarding from "./OnBoarding";
-import Camera from "./Camera";
-import CreateTask from "./CreateTask";
-import Success from "./Success";
+import Camera from "./todo/Camera";
+import CreateTask from "./todo/CreateTask";
+import Success from "./todo/Success";
 import MyPage from "./user/MyPage";
 import MyPageEdit from "./user/MyPageEdit";
 import PasswordReset from "./user/PasswordReset";

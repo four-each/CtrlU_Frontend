@@ -6,6 +6,7 @@ import { Col } from "@components/common/flex/Flex";
 import styled from "@emotion/styled";
 import Txt from "@components/common/Txt";
 import { ForwardedRef, useImperativeHandle } from "react";
+import ganadiIcon from "../../assets/icons/detail/ganadi.svg";
 
 export type FinishHandler = {
   setFinished: () => void;
@@ -63,7 +64,7 @@ export default function Timer({ durationTime, endTime, timerRef }: TimerProps) {
               width: 84%;
               margin-top: -9px;
             `}
-            src="/src/assets/icons/default.png"
+            src={ganadiIcon}
             alt="mainImage"
           />
           <Percent 

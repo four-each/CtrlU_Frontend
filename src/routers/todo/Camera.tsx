@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Col, Row } from '@components/common/flex/Flex';
-import Header from '@components/common/header/Header';
 import Txt from '@components/common/Txt';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
 import { useNavigate, useParams } from 'react-router-dom';
+import backArrowWhiteIcon from '../../assets/icons/detail/backArrow_white.svg';
+import shootIcon from '../../assets/icons/detail/shoot.svg';
 
 interface CameraScreenProps {
   mode?: 'start' | 'complete';
@@ -24,7 +24,15 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
   const [isCapturing, setIsCapturing] = useState(false);
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [showWarningModal, setShowWarningModal] = useState(false);
+  const [warningMessage, setWarningMessage] = useState('');
+  const [description, setDescription] = useState('');
+  const [selectedHours, setSelectedHours] = useState(2);
+  const [selectedMinutes, setSelectedMinutes] = useState(30);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const hoursScrollRef = useRef<HTMLDivElement>(null);
+  const minutesScrollRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -173,16 +181,119 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
     console.log('태스크 ID:', taskId);
     
     if (mode === 'start') {
-      // 시작 모드일 때는 CreateTask.tsx로 이동
-      navigate('/create-task', { 
+      // 시작 모드일 때는 모달을 띄움
+      setShowModal(true);
+    } else {
+      // 완료 모드일 때는 Success.tsx로 이동하면서 사진 데이터 전달
+      navigate('/success', { 
         state: { 
-          startImage: capturedImage 
+          capturedImage: capturedImage 
         } 
       });
-    } else {
-      // 완료 모드일 때는 Success.tsx로 이동
-      navigate('/success');
     }
+  };
+
+  const handleTimeChange = (hours: number, minutes: number) => {
+    setSelectedHours(hours);
+    setSelectedMinutes(minutes);
+  };
+
+  // 스크롤 위치를 선택된 값으로 초기화
+  useEffect(() => {
+    if (showModal && hoursScrollRef.current && minutesScrollRef.current) {
+      const itemHeight = 36; // 각 아이템의 높이
+
+      // 시간 스크롤 위치 계산
+      const hoursScrollTop = selectedHours * itemHeight;
+      hoursScrollRef.current.scrollTop = hoursScrollTop;
+
+      // 분 스크롤 위치 계산
+      const minutesScrollTop = selectedMinutes * itemHeight;
+      minutesScrollRef.current.scrollTop = minutesScrollTop;
+    }
+  }, [showModal]);
+
+  // 스크롤 이벤트 핸들러 추가
+  useEffect(() => {
+    if (!showModal) return;
+
+    const handleHoursScroll = () => {
+      if (hoursScrollRef.current) {
+        const scrollTop = hoursScrollRef.current.scrollTop;
+        const itemHeight = 36;
+        const selectedIndex = Math.round(scrollTop / itemHeight);
+        const clampedIndex = Math.max(0, Math.min(9, selectedIndex));
+        setSelectedHours(clampedIndex);
+      }
+    };
+
+    const handleMinutesScroll = () => {
+      if (minutesScrollRef.current) {
+        const scrollTop = minutesScrollRef.current.scrollTop;
+        const itemHeight = 36;
+        const selectedIndex = Math.round(scrollTop / itemHeight);
+        const clampedIndex = Math.max(0, Math.min(59, selectedIndex));
+        setSelectedMinutes(clampedIndex);
+      }
+    };
+
+    // 모달이 열린 후 약간의 지연을 두고 이벤트 리스너 추가
+    const timer = setTimeout(() => {
+      const hoursElement = hoursScrollRef.current;
+      const minutesElement = minutesScrollRef.current;
+
+      if (hoursElement) {
+        hoursElement.addEventListener('scroll', handleHoursScroll);
+      }
+      if (minutesElement) {
+        minutesElement.addEventListener('scroll', handleMinutesScroll);
+      }
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+      const hoursElement = hoursScrollRef.current;
+      const minutesElement = minutesScrollRef.current;
+
+      if (hoursElement) {
+        hoursElement.removeEventListener('scroll', handleHoursScroll);
+      }
+      if (minutesElement) {
+        minutesElement.removeEventListener('scroll', handleMinutesScroll);
+      }
+    };
+  }, [showModal]);
+
+  const handleModalComplete = () => {
+    if (!description.trim()) {
+      setWarningMessage('목표를 입력해주세요.');
+      setShowWarningModal(true);
+      return;
+    }
+
+    // 활동명 10자 제한 확인
+    if (description.trim().length > 10) {
+      setWarningMessage('목표는 10자 이내로 작성해주세요.');
+      setShowWarningModal(true);
+      return;
+    }
+
+    const targetTime = selectedHours * 60 + selectedMinutes;
+    if (targetTime === 0) {
+      setWarningMessage('목표 시간을 설정해주세요.');
+      setShowWarningModal(true);
+      return;
+    }
+
+    // CreateTask.tsx로 이동하면서 입력받은 데이터 전달
+    navigate('/create-task', { 
+      state: { 
+        startImage: capturedImage,
+        description: description.trim(),
+        selectedHours,
+        selectedMinutes
+      } 
+    });
   };
 
   return (
@@ -191,7 +302,7 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
       <HeaderSection>
         <HeaderContent>
           <BackButton onClick={() => window.history.back()}>
-            <BackIcon src="/assets/back.png" alt="뒤로가기" />
+            <BackIcon src={backArrowWhiteIcon} alt="뒤로가기" />
           </BackButton>
           <Title>{mode === 'start' ? '시작' : '완료'}</Title>
         </HeaderContent>
@@ -248,7 +359,7 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
         {!capturedImage ? (
           <CaptureButtonContainer>
             <CaptureButton onClick={handleCapture} disabled={isCapturing || !isCameraActive}>
-              <ShootIcon src="/assets/shoot.png" alt="촬영" />
+              <ShootIcon src={shootIcon} alt="촬영" />
             </CaptureButton>
             {cameraError && (
               <ErrorButtons>
@@ -273,7 +384,7 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
         )}
       </BottomSection>
 
-        <input
+                <input
           ref={fileInputRef}
           type="file"
           accept="image/*"
@@ -286,9 +397,98 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
           ref={canvasRef}
           style={{ display: 'none' }}
         />
+
+        {/* Mission Setting Modal */}
+        {showModal && (
+          <ModalOverlay>
+            <ModalContainer>
+              <ModalHeader>
+                <CloseButton onClick={() => setShowModal(false)}>×</CloseButton>
+              </ModalHeader>
+              
+              <ModalContent>
+                <ModalSection>
+                  <ModalSectionTitle>목표 설정</ModalSectionTitle>
+                  <ModalInput
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="목표를 입력하세요"
+                    maxLength={10}
+                  />
+                </ModalSection>
+
+                <ModalSection>
+                  <ModalSectionTitle>시간 설정</ModalSectionTitle>
+                  <TimePickerContainer>
+                    <CustomTimePickerContainer>
+                      <TimePickerColumn>
+                        <TimePickerScroll ref={hoursScrollRef}>
+                          <div style={{ height: '18px', flexShrink: 0 }} />
+                          {Array.from({ length: 10 }, (_, i) => (
+                            <TimePickerOption
+                              key={i}
+                              isSelected={selectedHours === i}
+                            >
+                              {i.toString().padStart(2, '0')}
+                            </TimePickerOption>
+                          ))}
+                          <div style={{ height: '18px', flexShrink: 0 }} />
+                        </TimePickerScroll>
+                        <TimePickerLabel>시간</TimePickerLabel>
+                      </TimePickerColumn>
+                      <TimePickerColumn>
+                        <TimePickerScroll ref={minutesScrollRef}>
+                          <div style={{ height: '18px', flexShrink: 0 }} />
+                          {Array.from({ length: 60 }, (_, i) => (
+                            <TimePickerOption
+                              key={i}
+                              isSelected={selectedMinutes === i}
+                            >
+                              {i.toString().padStart(2, '0')}
+                            </TimePickerOption>
+                          ))}
+                          <div style={{ height: '18px', flexShrink: 0 }} />
+                        </TimePickerScroll>
+                        <TimePickerLabel>분</TimePickerLabel>
+                      </TimePickerColumn>
+                    </CustomTimePickerContainer>
+                    <SelectedTimeHighlight />
+                  </TimePickerContainer>
+                </ModalSection>
+              </ModalContent>
+
+              <ModalFooter>
+                <ModalCompleteButton onClick={handleModalComplete}>
+                  완료
+                </ModalCompleteButton>
+              </ModalFooter>
+            </ModalContainer>
+          </ModalOverlay>
+        )}
+
+        {/* Warning Modal */}
+        {showWarningModal && (
+          <ModalOverlay>
+            <ModalContainer>
+              <ModalContent>
+                <ModalSection>
+                  <WarningMessage>
+                    {warningMessage}
+                  </WarningMessage>
+                </ModalSection>
+              </ModalContent>
+
+              <ModalFooter>
+                <ModalCompleteButton onClick={() => setShowWarningModal(false)}>
+                  확인
+                </ModalCompleteButton>
+              </ModalFooter>
+            </ModalContainer>
+          </ModalOverlay>
+        )}
       </Container>
-  );
-};
+    );
+  };
 
 export default CameraScreen;
 
@@ -465,4 +665,226 @@ const SubmitButton = styled.button`
   &:hover {
     opacity: 0.9;
   }
+`;
+
+// Modal Styles
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+`;
+
+const ModalContainer = styled.div`
+  background-color: white;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 320px;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+`;
+
+const ModalHeader = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding-right: 24px;
+  padding-top: 10px;
+`;
+
+const CloseButton = styled.button`
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #6b7280;
+  cursor: pointer;
+  border-radius: 4px;
+  
+  &:hover {
+    background-color: #f3f4f6;
+  }
+`;
+
+const ModalContent = styled.div`
+  padding: 24px;
+  padding-top: 10px;
+  padding-bottom: 0px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const ModalSection = styled.div`
+  margin-bottom: 24px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+`;
+
+const ModalSectionTitle = styled.h3`
+  margin: 0 0 24px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  text-align: left;
+  width: 100%;
+`;
+
+const ModalInput = styled.input`
+  width: 100%;
+  padding: 8px 40px;
+  max-width: 233px;
+  background-color: #f5f5f5;
+  border-radius: 50px;
+  box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
+  color: #57534e;
+  font-size: 16px;
+  text-align: center;
+  border: none;
+  outline: none;
+  align-self: center;
+  
+  &::placeholder {
+    color: #a8a29e;
+  }
+  
+  &:focus {
+    box-shadow: 0px 0px 4px rgba(124, 58, 237, 0.3);
+  }
+`;
+
+// Custom Time Picker Styles (Image-like design)
+const TimePickerContainer = styled.div`
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const CustomTimePickerContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  background-color: transparent;
+  padding: 20px;
+  align-self: center;
+  position: relative;
+  width: 200px;
+  height: 100px;
+`;
+
+const SelectedTimeHighlight = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: calc(233 / 375 * 100vw);
+  max-width: 233px;
+  height: 35px;
+  background-color: #f5f5f5;
+  border-radius: 50px;
+  box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
+  z-index: 0;
+  pointer-events: none;
+`;
+
+const TimePickerColumn = styled.div`
+  display: flex;
+  align-items: center;
+  position: relative;
+  flex: 1;
+  justify-content: center;
+`;
+
+const TimePickerScroll = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 72px;
+  overflow-y: auto;
+  position: relative;
+  align-items: center;
+  
+  &::-webkit-scrollbar {
+    width: 0;
+    background: transparent;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: transparent;
+  }
+`;
+
+const TimePickerOption = styled.div<{ isSelected: boolean }>`
+  padding: 8px 10px;
+  font-size: 18px;
+  font-weight: ${props => props.isSelected ? '400' : '200'};
+  color: ${props => props.isSelected ? '#000' : '#999'};
+  text-align: center;
+  transition: all 0.2s ease;
+  min-height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: ${props => props.isSelected ? '2' : '1'};
+  width: 40px;
+  background-color: transparent;
+  border-radius: 8px;
+  margin: 8px 0;
+`;
+
+const TimePickerLabel = styled.div`
+  font-size: 13px;
+  font-weight: 400;
+  color: #333;
+  margin-left: 4px;
+  position: absolute;
+  right: -20px;
+  z-index: 10;
+`;
+
+const ModalFooter = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 24px;
+  padding-bottom: 10px;
+`;
+
+const ModalCompleteButton = styled.button`
+  background: none;
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  cursor: pointer;
+  padding: 0px 16px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  
+  &:hover {
+    background-color: #f3f4f6;
+  }
+`;
+
+const WarningMessage = styled.div`
+  text-align: center;
+  font-size: 16px;
+  color: #832CC5;
+  font-weight: 500;
+  padding-top: 24px;
 `; 
