@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
-import { ImageUploadIcon } from '@assets/icons';
+import { ImageUploadIcon, ProfileIcon } from '@assets/icons';
 import { css } from "@emotion/react";
 import { usePresignUpload, useSignup } from "src/api/useSignup";
 import { postUploadToS3 } from '@utils/s3';
@@ -24,19 +24,6 @@ const ProfileSection = styled.div`
   gap: 20px;
   margin-bottom: 24px;
   margin-top: 60px;
-`;
-
-const ProfileImage = styled.img`
-  width: 102px;
-  height: 102px;
-  border-radius: 50%;
-  border: 2px solid #c8b0db;
-  background: #f6f6f6;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  cursor: pointer;
 `;
 
 const Upload = styled.div`
@@ -264,7 +251,20 @@ const Signup = () => {
     <SignupContainer>
       <ProfileSection>
         <div style={{ position: 'relative' }}>
-          <ProfileImage src={profileImagePreview} alt="프로필 이미지" onClick={handleCameraClick} />
+          <ProfileIcon 
+            css={css`
+              width: 102px;
+              height: 102px;
+              border-radius: 50%;
+              border: 2px solid #c8b0db;
+              background: #f6f6f6;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              position: relative;
+              cursor: pointer;
+            `}  
+            onClick={handleCameraClick} />
           <Upload onClick={handleCameraClick}>
             <ImageUploadIcon 
               css={css`

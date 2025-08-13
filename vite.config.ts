@@ -8,12 +8,5 @@ export default defineConfig({
   plugins: [react(), tsconfigPaths(), svgr()],
   server: {
     host: true,
-    proxy: {
-      "/": {
-        target: "https://ctrlu.site.api",
-        changeOrigin: true,
-        secure: false,
-      },
-    },
   }
 });

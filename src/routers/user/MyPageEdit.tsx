@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
-import { BackLightIcon, ImageUploadIcon } from '@assets/icons';
-import profileIcon from '../../assets/icons/home/profile.svg';
+import { BackLightIcon, ImageUploadIcon, ProfileIcon } from '@assets/icons';
 import { css } from "@emotion/react";
 
 const EditContainer = styled.div`
@@ -53,15 +52,6 @@ const ProfileSection = styled.div`
   align-items: center;
   gap: 20px;
   margin-top: 20px;
-`;
-
-const ProfileImage = styled.img`
-  width: 102px;
-  height: 102px;
-  border-radius: 50%;
-  border: 2px solid #c8b0db;
-  object-fit: cover;
-  position: relative;
 `;
 
 const Edit = styled.div`
@@ -206,7 +196,16 @@ const MyPageEdit = () => {
       <Content>
         <ProfileSection>
           <div style={{ position: 'relative' }}>
-            <ProfileImage src={profileIcon} alt="프로필 이미지" onClick={handleCameraClick} />
+            <ProfileIcon 
+              css={css`
+                width: 102px;
+                height: 102px;
+                border-radius: 50%;
+                border: 2px solid #c8b0db;
+                object-fit: cover;
+                position: relative;
+              `}
+              onClick={handleCameraClick} />
             <Edit onClick={handleCameraClick}>
               <ImageUploadIcon 
                 css={css`

@@ -14,6 +14,7 @@ import ArchiveIcon from "./mypage/archive.svg?react";
 import FriendListIcon from "./mypage/friend_list.svg?react";
 import FriendRequestIcon from "./mypage/friend_request.svg?react";
 import SettingIcon from "./mypage/setting.svg?react";
+import ProfileIcon from "./home/profile.svg?react";
 
 export {
   BackIcon,
@@ -32,4 +33,5 @@ export {
   FriendListIcon,
   FriendRequestIcon,
   SettingIcon,
+  ProfileIcon,
 };

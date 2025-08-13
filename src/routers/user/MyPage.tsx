@@ -2,8 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
-import { BackLightIcon, ArchiveIcon, FriendListIcon, FriendRequestIcon, SettingIcon } from '@assets/icons';
-import profileIcon from '../../assets/icons/home/profile.svg';
+import { BackLightIcon, ArchiveIcon, FriendListIcon, FriendRequestIcon, SettingIcon, ProfileIcon } from '@assets/icons';
 import { css } from "@emotion/react";
 
 const MyPageContainer = styled.div`
@@ -56,16 +55,6 @@ const ProfileSection = styled.div`
   align-items: flex-start;
   gap: 20px;
   position: relative;
-`;
-
-const ProfileImage = styled.img`
-  width: 66px;
-  height: 66px;
-  border-radius: 50%;
-  border: 2px solid #c8b0db;
-  object-fit: cover;
-  margin-left: 20px;
-  margin-top: 20px;
 `;
 
 const ProfileInfo = styled.div`
@@ -237,7 +226,17 @@ const MyPage = () => {
 
       <Content>
         <ProfileSection>
-          <ProfileImage src={profileIcon} alt="프로필 이미지" />
+          <ProfileIcon 
+            css={css`
+              width: 66px;
+              height: 66px;
+              border-radius: 50%;
+              border: 2px solid #c8b0db;
+              object-fit: cover;
+              margin-left: 20px;
+              margin-top: 20px;
+            `}
+            onClick={handleEdit} />
           <ProfileInfo>
             <ProfileName>ㅇㅇ 님</ProfileName>
             <ProfileStatus>오늘의 목표는? 🔥</ProfileStatus>

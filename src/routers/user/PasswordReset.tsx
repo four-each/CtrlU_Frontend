@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
-import { BackLightIcon } from '@assets/icons';
+import { BackLightIcon, ProfileIcon } from '@assets/icons';
 import { css } from "@emotion/react";
 
 const ResetContainer = styled.div`
@@ -52,14 +52,6 @@ const ProfileSection = styled.div`
   align-items: center;
   gap: 20px;
   margin-top: 20px;
-`;
-
-const ProfileImage = styled.img`
-  width: 102px;
-  height: 102px;
-  border-radius: 50%;
-  border: 2px solid #c8b0db;
-  object-fit: cover;
 `;
 
 const FormSection = styled.div`
@@ -250,7 +242,14 @@ const PasswordReset = () => {
 
       <Content>
         <ProfileSection>
-          <ProfileImage src='/assets/default-profile.jpg' alt="프로필 이미지" />
+          <ProfileIcon 
+            css={css`
+              width: 102px;
+              height: 102px;
+              border-radius: 50%;
+              border: 2px solid #c8b0db;
+              object-fit: cover;
+            `} />
         </ProfileSection>
 
         <FormSection>
