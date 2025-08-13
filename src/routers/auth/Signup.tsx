@@ -129,13 +129,62 @@ const SignupButton = styled.button`
   }
 `;
 
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.div`
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 80%;
+  max-width: 300px;
+`;
+
+const ModalButton = styled.button`
+  padding: 15px;
+  border: none;
+  border-radius: 5px;
+  background-color: #832cc5;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #6a1fa0;
+  }
+`;
+
+const CancelButton = styled(ModalButton)`
+  background-color: #ccc;
+  color: #333;
+
+  &:hover {
+    background-color: #bbb;
+  }
+`;
+
 const Signup = () => {
   const navigate = useNavigate();
   const signupMutation = useSignup();
   const presignMutation = usePresignUpload();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [profileImagePreview, setProfileImagePreview] = useState<string>('../src/assets/icons/profile.png');
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+  const [profileImagePreview, setProfileImagePreview] = useState<string>('');
   const [profileFile, setProfileFile] = useState<File | null>(null);
+  const [isOptionModalVisible, setIsOptionModalVisible] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -156,7 +205,6 @@ const Signup = () => {
       [name]: value
     }));
     
-    // Clear error when user starts typing
     if (errors[name as keyof typeof errors]) {
       setErrors(prev => ({
         ...prev,
@@ -217,7 +265,7 @@ const Signup = () => {
 
           await postUploadToS3(presignedUrl, imageKey, profileFile);
 
-          profileImageKey = imageKey; // e.g., profiles/abc-123.jpg
+          profileImageKey = imageKey;
         }
 
         const result = await signupMutation.mutateAsync({
@@ -236,7 +284,7 @@ const Signup = () => {
   };
 
   const handleCameraClick = () => {
-    fileInputRef.current?.click();
+    setIsOptionModalVisible(true);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -245,26 +293,58 @@ const Signup = () => {
     const previewUrl = URL.createObjectURL(file);
     setProfileImagePreview(previewUrl);
     setProfileFile(file);
+    setIsOptionModalVisible(false);
+  };
+
+  const handleTakePhoto = () => {
+    cameraInputRef.current?.click();
+  };
+
+  const handleChooseFromGallery = () => {
+    galleryInputRef.current?.click();
   };
 
   return (
     <SignupContainer>
+      {isOptionModalVisible && (
+        <ModalOverlay onClick={() => setIsOptionModalVisible(false)}>
+          <ModalContent onClick={(e) => e.stopPropagation()}>
+            <ModalButton onClick={handleTakePhoto}>사진 촬영</ModalButton>
+            <ModalButton onClick={handleChooseFromGallery}>갤러리에서 선택</ModalButton>
+            <CancelButton onClick={() => setIsOptionModalVisible(false)}>취소</CancelButton>
+          </ModalContent>
+        </ModalOverlay>
+      )}
+
       <ProfileSection>
         <div style={{ position: 'relative' }}>
-          <ProfileIcon 
-            css={css`
-              width: 102px;
-              height: 102px;
-              border-radius: 50%;
-              border: 2px solid #c8b0db;
-              background: #f6f6f6;
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              position: relative;
-              cursor: pointer;
-            `}  
-            onClick={handleCameraClick} />
+          {profileImagePreview ? (
+            <img 
+              src={profileImagePreview} 
+              alt="Profile Preview" 
+              css={css`
+                width: 102px;
+                height: 102px;
+                border-radius: 50%;
+                border: 2px solid #c8b0db;
+                object-fit: cover;
+                cursor: pointer;
+              `}
+              onClick={handleCameraClick}
+            />
+          ) : (
+            <ProfileIcon
+              css={css`
+                width: 102px;
+                height: 102px;
+                border-radius: 50%;
+                border: 2px solid #c8b0db;
+                background: #f6f6f6;
+                cursor: pointer;
+              `}
+              onClick={handleCameraClick} 
+            />
+          )}
           <Upload onClick={handleCameraClick}>
             <ImageUploadIcon 
               css={css`
@@ -274,10 +354,17 @@ const Signup = () => {
             />
           </Upload>
           <input
-            ref={fileInputRef}
+            ref={cameraInputRef}
             type="file"
             accept="image/*"
             capture="environment"
+            style={{ display: 'none' }}
+            onChange={handleFileChange}
+          />
+          <input
+            ref={galleryInputRef}
+            type="file"
+            accept="image/*"
             style={{ display: 'none' }}
             onChange={handleFileChange}
           />
@@ -343,4 +430,4 @@ const Signup = () => {
   );
 };
 
-export default Signup; 
+export default Signup;
