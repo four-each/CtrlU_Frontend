@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { ImageUploadIcon } from '@assets/icons';
 import { css } from "@emotion/react";
+import { usePresignUpload, useSignup } from "src/api/useSignup";
+import { postUploadToS3 } from '@utils/s3';
 
 const SignupContainer = styled.div`
   width: 100%;
@@ -142,6 +144,11 @@ const SignupButton = styled.button`
 
 const Signup = () => {
   const navigate = useNavigate();
+  const signupMutation = useSignup();
+  const presignMutation = usePresignUpload();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [profileImagePreview, setProfileImagePreview] = useState<string>('../src/assets/icons/profile.png');
+  const [profileFile, setProfileFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -211,24 +218,53 @@ const Signup = () => {
     return !Object.values(newErrors).some(error => error);
   };
 
-  const handleSignup = () => {
+  const handleSignup = async () => {
     if (validateForm()) {
-      // TODO: 실제 회원가입 로직 구현
-      console.log('회원가입 시도:', formData);
-      navigate('/auth/email-verification');
+      try {
+        let profileImageKey: string | undefined = undefined;
+
+        if (profileFile) {
+          const fileExtension = profileFile.name.split('.').pop()?.toLowerCase() || 'jpg';
+          const imageType = "PROFILE";
+          const { presignedUrl, imageKey } = await presignMutation.mutateAsync({ imageType, fileExtension });
+
+          await postUploadToS3(presignedUrl, imageKey, profileFile);
+
+          profileImageKey = imageKey; // e.g., profiles/abc-123.jpg
+        }
+
+        const result = await signupMutation.mutateAsync({
+          email: formData.email,
+          password: formData.password,
+          nickname: formData.nickname,
+          profileImageKey: profileImageKey || '',
+        });
+        console.log('회원가입 성공:', result);
+        navigate('/auth/email-verification');
+      } catch (error) {
+        const message = error instanceof Error ? error.message : '회원가입 실패';
+        alert(message);
+      }
     }
   };
 
   const handleCameraClick = () => {
-    // TODO: 카메라 기능 구현
-    console.log('프로필 사진 촬영');
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const previewUrl = URL.createObjectURL(file);
+    setProfileImagePreview(previewUrl);
+    setProfileFile(file);
   };
 
   return (
     <SignupContainer>
       <ProfileSection>
         <div style={{ position: 'relative' }}>
-          <ProfileImage src='/assets/default-profile.jpg' alt="프로필 이미지" onClick={handleCameraClick} />
+          <ProfileImage src={profileImagePreview} alt="프로필 이미지" onClick={handleCameraClick} />
           <Upload onClick={handleCameraClick}>
             <ImageUploadIcon 
               css={css`
@@ -237,6 +273,14 @@ const Signup = () => {
               `}
             />
           </Upload>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            style={{ display: 'none' }}
+            onChange={handleFileChange}
+          />
         </div>
       </ProfileSection>
 
@@ -291,8 +335,8 @@ const Signup = () => {
             <HelperText>한글, 영어, 숫자만 가능</HelperText>
           )}
         </InputGroup>
-        <SignupButton onClick={handleSignup}>
-          완료
+        <SignupButton onClick={handleSignup} disabled={signupMutation.isPending || presignMutation.isPending}>
+          {signupMutation.isPending || presignMutation.isPending ? '처리중...' : '완료'}
         </SignupButton>
       </FormContainer>
     </SignupContainer>

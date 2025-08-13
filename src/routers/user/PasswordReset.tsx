@@ -25,19 +25,6 @@ const Header = styled.div`
   position: relative;
 `;
 
-const BackButton = styled.img`
-  width: 24px;
-  height: 21px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  margin-top: 2px;
-`;
-
 const HeaderTitle = styled.h1`
   font-family: 'Noto Sans KR', sans-serif;
   font-weight: 500;
