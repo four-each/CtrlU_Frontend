@@ -184,8 +184,12 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
       // 시작 모드일 때는 모달을 띄움
       setShowModal(true);
     } else {
-      // 완료 모드일 때는 Success.tsx로 이동
-      navigate('/success');
+      // 완료 모드일 때는 Success.tsx로 이동하면서 사진 데이터 전달
+      navigate('/success', { 
+        state: { 
+          capturedImage: capturedImage 
+        } 
+      });
     }
   };
 

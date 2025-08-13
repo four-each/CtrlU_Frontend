@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Col, Row } from '@components/common/flex/Flex';
 import Txt from '@components/common/Txt';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import backArrow from '../../assets/icons/detail/backArrow.svg';
 import profileIcon from '../../assets/icons/home/profile.svg';
 import ganadiIcon from '../../assets/icons/detail/ganadi.svg';
 import ringIcon from '../../assets/icons/detail/ring.svg';
+import whiteCircleIcon from '../../assets/icons/detail/whiteCircle.svg';
+import arrowIcon from '../../assets/icons/detail/arrow.svg';
 
 interface SuccessProps {
   taskName?: string;
@@ -23,6 +25,22 @@ const Success: React.FC<SuccessProps> = ({
   onClose 
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [showCapturedImage, setShowCapturedImage] = useState(false);
+  const [isRotating, setIsRotating] = useState(false);
+  const [showPurpleOverlay, setShowPurpleOverlay] = useState(false);
+  const overlayTimerRef = useRef<number | null>(null);
+  
+  // location.state에서 사진 데이터 가져오기
+  const capturedImage = location.state?.capturedImage || null;
+  const startImage = location.state?.startImage || null;
+
+  // 컴포넌트 마운트 시 ganadi 아이콘에 보라색 오버레이 적용
+  useEffect(() => {
+    overlayTimerRef.current = setTimeout(() => {
+      setShowPurpleOverlay(true);
+    }, 1000);
+  }, []);
 
   const handleBack = () => {
     if (onClose) {
@@ -30,6 +48,27 @@ const Success: React.FC<SuccessProps> = ({
     } else {
       navigate('/');
     }
+  };
+
+  const handleImageClick = () => {
+    // 기존 타이머가 있으면 클리어
+    if (overlayTimerRef.current) {
+      clearTimeout(overlayTimerRef.current);
+    }
+    
+    // 오버레이 숨기기
+    setShowPurpleOverlay(false);
+    
+    setIsRotating(true);
+    setTimeout(() => {
+      setShowCapturedImage(!showCapturedImage);
+      setIsRotating(false);
+      
+      // 1초 후에 보라색 오버레이 표시 (사진이든 아이콘이든)
+      overlayTimerRef.current = setTimeout(() => {
+        setShowPurpleOverlay(true);
+      }, 1000);
+    }, 300); // 애니메이션 중간에 이미지 변경
   };
 
   return (
@@ -57,9 +96,23 @@ const Success: React.FC<SuccessProps> = ({
         <ProgressSection>
           <ProgressCircle>
             <RingImage src={ringIcon} alt="프로그레스 링" />
-            <ProgressImage>
-              <img src={ganadiIcon} alt="완료 이미지" />
+            <WhiteCircleImage src={whiteCircleIcon} alt="흰색 원 배경" />
+            <ProgressImage 
+              onClick={handleImageClick}
+              style={{ cursor: 'pointer' }}
+              isRotating={isRotating}
+            >
+              <img 
+                src={showCapturedImage && (capturedImage || startImage) ? (capturedImage || startImage) : ganadiIcon} 
+                alt={showCapturedImage && (capturedImage || startImage) ? "사진" : "완료 이미지"} 
+              />
+              {showPurpleOverlay && (
+                <PurpleOverlay />
+              )}
             </ProgressImage>
+            {showPurpleOverlay && (
+              <ArrowIcon src={arrowIcon} alt="화살표" />
+            )}
           </ProgressCircle>
         </ProgressSection>
 
@@ -147,6 +200,7 @@ const ProfileImage = styled.div`
   border-radius: 50%;
   border: 2px solid #c8b0db;
   overflow: hidden;
+  background-color: white;
   
   img {
     width: 100%;
@@ -179,7 +233,63 @@ const RingImage = styled.img`
   z-index: 1;
 `;
 
-const ProgressImage = styled.div`
+const WhiteCircleImage = styled.img`
+  width: 235px;
+  height: 235px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+`;
+
+const PurpleOverlay = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #832cc5;
+  opacity: 0.6;
+  z-index: 3;
+  border-radius: 50%;
+  animation: fadeIn 0.5s ease-in-out;
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 0.6;
+    }
+  }
+`;
+
+const ArrowIcon = styled.img`
+  width: 30px;
+  height: 35px;
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: bounce 1s ease-in-out infinite;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  z-index: 4;
+  
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+      transform: translateX(-50%) translateY(0);
+    }
+    40% {
+      transform: translateX(-50%) translateY(-10px);
+    }
+    60% {
+      transform: translateX(-50%) translateY(-5px);
+    }
+  }
+`;
+
+const ProgressImage = styled.div<{ isRotating: boolean }>`
   width: 235px;
   height: 235px;
   border-radius: 50%;
@@ -190,18 +300,13 @@ const ProgressImage = styled.div`
   transform: translate(-50%, -50%);
   z-index: 2;
   border: 2px solid #ffffff;
+  transition: transform 0.6s ease-in-out;
   
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #832cc5;
-    opacity: 0.5;
-    z-index: 1;
-  }
+  ${(props) =>
+    props.isRotating &&
+    `
+    animation: rotate 0.6s ease-in-out;
+  `}
   
   img {
     width: 100%;
@@ -209,6 +314,19 @@ const ProgressImage = styled.div`
     object-fit: cover;
     position: relative;
     z-index: 2;
+    transition: opacity 0.3s ease-in-out;
+  }
+  
+  @keyframes rotate {
+    0% {
+      transform: translate(-50%, -50%) rotateY(0deg);
+    }
+    50% {
+      transform: translate(-50%, -50%) rotateY(90deg);
+    }
+    100% {
+      transform: translate(-50%, -50%) rotateY(180deg);
+    }
   }
 `;
 
