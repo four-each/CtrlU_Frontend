@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
@@ -149,6 +149,9 @@ const MyPageEdit = () => {
   const navigate = useNavigate();
   const [nickname, setNickname] = useState('ㅇㅇㅇ');
   const [isValid, setIsValid] = useState(true);
+  const [profileImagePreview, setProfileImagePreview] = useState<string>('');
+  const [profileFile, setProfileFile] = useState<File | null>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
 
   const handleBack = () => {
     navigate(-1);
@@ -179,6 +182,18 @@ const MyPageEdit = () => {
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const previewUrl = URL.createObjectURL(file);
+    setProfileImagePreview(previewUrl);
+    setProfileFile(file);
+  };
+
+  const handleChooseFromGallery = () => {
+    galleryInputRef.current?.click();
+  };
+
   return (
     <EditContainer>
       <Header>
@@ -196,17 +211,34 @@ const MyPageEdit = () => {
       <Content>
         <ProfileSection>
           <div style={{ position: 'relative' }}>
-            <ProfileIcon 
-              css={css`
-                width: 102px;
-                height: 102px;
-                border-radius: 50%;
-                border: 2px solid #c8b0db;
-                object-fit: cover;
-                position: relative;
-              `}
-              onClick={handleCameraClick} />
-            <Edit onClick={handleCameraClick}>
+            {profileImagePreview ? (
+              <img 
+                src={profileImagePreview} 
+                alt="Profile Preview" 
+                css={css`
+                  width: 102px;
+                  height: 102px;
+                  border-radius: 50%;
+                  border: 2px solid #c8b0db;
+                  object-fit: cover;
+                  cursor: pointer;
+                `}
+                onClick={handleChooseFromGallery}
+              />
+            ) : (
+              <ProfileIcon
+                css={css`
+                  width: 102px;
+                  height: 102px;
+                  border-radius: 50%;
+                  border: 2px solid #c8b0db;
+                  background: #f6f6f6;
+                  cursor: pointer;
+                `}
+                onClick={handleChooseFromGallery}
+              />
+            )}
+            <Edit onClick={handleChooseFromGallery}>
               <ImageUploadIcon 
                 css={css`
                   width: 14px;
@@ -214,6 +246,13 @@ const MyPageEdit = () => {
                 `}
               />
             </Edit>
+            <input
+              ref={galleryInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
+            />
           </div>
         </ProfileSection>
 

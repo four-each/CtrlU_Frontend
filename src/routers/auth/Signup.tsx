@@ -129,62 +129,13 @@ const SignupButton = styled.button`
   }
 `;
 
-const ModalOverlay = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-`;
-
-const ModalContent = styled.div`
-  background-color: white;
-  padding: 20px;
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 80%;
-  max-width: 300px;
-`;
-
-const ModalButton = styled.button`
-  padding: 15px;
-  border: none;
-  border-radius: 5px;
-  background-color: #832cc5;
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
-
-  &:hover {
-    background-color: #6a1fa0;
-  }
-`;
-
-const CancelButton = styled(ModalButton)`
-  background-color: #ccc;
-  color: #333;
-
-  &:hover {
-    background-color: #bbb;
-  }
-`;
-
 const Signup = () => {
   const navigate = useNavigate();
   const signupMutation = useSignup();
   const presignMutation = usePresignUpload();
-  const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const [profileImagePreview, setProfileImagePreview] = useState<string>('');
   const [profileFile, setProfileFile] = useState<File | null>(null);
-  const [isOptionModalVisible, setIsOptionModalVisible] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -283,21 +234,12 @@ const Signup = () => {
     }
   };
 
-  const handleCameraClick = () => {
-    setIsOptionModalVisible(true);
-  };
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const previewUrl = URL.createObjectURL(file);
     setProfileImagePreview(previewUrl);
     setProfileFile(file);
-    setIsOptionModalVisible(false);
-  };
-
-  const handleTakePhoto = () => {
-    cameraInputRef.current?.click();
   };
 
   const handleChooseFromGallery = () => {
@@ -306,16 +248,6 @@ const Signup = () => {
 
   return (
     <SignupContainer>
-      {isOptionModalVisible && (
-        <ModalOverlay onClick={() => setIsOptionModalVisible(false)}>
-          <ModalContent onClick={(e) => e.stopPropagation()}>
-            <ModalButton onClick={handleTakePhoto}>사진 촬영</ModalButton>
-            <ModalButton onClick={handleChooseFromGallery}>갤러리에서 선택</ModalButton>
-            <CancelButton onClick={() => setIsOptionModalVisible(false)}>취소</CancelButton>
-          </ModalContent>
-        </ModalOverlay>
-      )}
-
       <ProfileSection>
         <div style={{ position: 'relative' }}>
           {profileImagePreview ? (
@@ -330,7 +262,7 @@ const Signup = () => {
                 object-fit: cover;
                 cursor: pointer;
               `}
-              onClick={handleCameraClick}
+              onClick={handleChooseFromGallery}
             />
           ) : (
             <ProfileIcon
@@ -342,10 +274,10 @@ const Signup = () => {
                 background: #f6f6f6;
                 cursor: pointer;
               `}
-              onClick={handleCameraClick} 
+              onClick={handleChooseFromGallery}
             />
           )}
-          <Upload onClick={handleCameraClick}>
+          <Upload onClick={handleChooseFromGallery}>
             <ImageUploadIcon 
               css={css`
                 width: 14px;
@@ -353,14 +285,6 @@ const Signup = () => {
               `}
             />
           </Upload>
-          <input
-            ref={cameraInputRef}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            style={{ display: 'none' }}
-            onChange={handleFileChange}
-          />
           <input
             ref={galleryInputRef}
             type="file"
