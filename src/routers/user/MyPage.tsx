@@ -39,14 +39,13 @@ const HeaderTitle = styled.h1`
 `;
 
 const Content = styled.div`
-  padding: 40px 20px 0px 20px;
+  padding-top: 40px;
   display: flex;
   flex-direction: column;
   gap: 30px;
 `;
 
 const ProfileSection = styled.div`
-  width: 100%;
   height: 110px;
   background: #ffffff;
   border-radius: 10px;
@@ -55,6 +54,7 @@ const ProfileSection = styled.div`
   align-items: flex-start;
   gap: 20px;
   position: relative;
+  margin: 0 20px;
 `;
 
 const ProfileInfo = styled.div`
@@ -85,6 +85,7 @@ const FriendsSection = styled.div`
   display: flex;
   gap: 10px;
   justify-content: space-between;
+  margin: 0 20px;
 `;
 
 const FriendTab = styled.div`
@@ -126,18 +127,19 @@ const SettingsTitle = styled.h3`
   color: #1d1d1d;
   margin: 0px;
   padding-top: 2px;
+  margin: 0 20px;
 `;
 
 const SettingsDivider = styled.div`
   width: 100%;
+  max-width: 480px;
   height: 15px;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(219, 229, 229, 0.3) 100%);
-  border-radius: 8px;
   margin-bottom: 4px;
+  margin-top: 2px;
 `;
 
 const SettingsItem = styled.div`
-  width: 100%;
   height: 50px;
   background: #f4f4f4;
   border-radius: 8px;
@@ -146,8 +148,8 @@ const SettingsItem = styled.div`
   padding: 0 26px;
   cursor: pointer;
   transition: background-color 0.2s;
-  margin-top: 12px;
-  
+  margin: 12px 20px 0px 20px;
+
   &:hover {
     background: #e8e8e8;
   }
@@ -158,6 +160,7 @@ const SettingsText = styled.span`
   font-weight: 400;
   font-size: 14px;
   color: #1d1d1d;
+  margin: 0 20px;
 `;
 
 const MyPage = () => {
