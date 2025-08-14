@@ -53,6 +53,9 @@ const Detail = () => {
         endTime="00:20:05"
         timerRef={finishHandler}
       />
+      {!isMe && (
+        <div style={{ marginBottom: '40px' }}></div>
+      )}
       {isMe && (
         <Row
           justify="center"
