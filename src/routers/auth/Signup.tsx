@@ -196,8 +196,8 @@ const Signup = () => {
       newErrors.nickname = '닉네임을 입력해주세요';
     } else if (!/^[가-힣a-zA-Z0-9]+$/.test(formData.nickname)) {
       newErrors.nickname = '한글, 영어, 숫자만 가능합니다';
-    } else if (formData.nickname.length < 2) {
-      newErrors.nickname = '닉네임은 2자 이상 입력해주세요';
+    } else if (formData.nickname.length < 2 || formData.nickname.length > 4) {
+      newErrors.nickname = '닉네임은 2~4자로 입력해주세요';
     }
 
     setErrors(newErrors);
@@ -342,9 +342,6 @@ const Signup = () => {
             onChange={handleInputChange}
           />
           {errors.nickname && <ErrorMessage>{errors.nickname}</ErrorMessage>}
-          {!errors.nickname && formData.nickname && (
-            <HelperText>한글, 영어, 숫자만 가능</HelperText>
-          )}
         </InputGroup>
         <SignupButton onClick={handleSignup} disabled={signupMutation.isPending || presignMutation.isPending}>
           {signupMutation.isPending || presignMutation.isPending ? '처리중...' : '완료'}
