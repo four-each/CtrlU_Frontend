@@ -337,9 +337,9 @@ const TimePickerScroll = styled.div`
 const TimePickerOption = styled.div<{ isSelected: boolean }>`
   padding: 8px 12px;
   font-size: 18px;
-  font-weight: ${props => props.isSelected ? '600' : '400'};
-  color: ${props => props.isSelected ? '#7c3aed' : '#374151'};
-  background-color: ${props => props.isSelected ? '#f3e8ff' : 'transparent'};
+  font-weight: ${props => props.isSelected ? '700' : '400'};
+  color: ${props => props.isSelected ? '#ffffff' : '#374151'};
+  background-color: ${props => props.isSelected ? '#7c3aed' : 'transparent'};
   cursor: pointer;
   text-align: center;
   transition: all 0.2s ease;
@@ -347,9 +347,11 @@ const TimePickerOption = styled.div<{ isSelected: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  z-index: ${props => props.isSelected ? '2' : '1'};
   
   &:hover {
-    background-color: ${props => props.isSelected ? '#f3e8ff' : '#f9fafb'};
+    background-color: ${props => props.isSelected ? '#7c3aed' : '#f9fafb'};
   }
   
   &:first-child {
