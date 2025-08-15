@@ -186,6 +186,8 @@ const Login = () => {
           navigate('/');
         } else if (result.status === 401) {
           setLoginError('이메일 또는 비밀번호가 일치하지 않습니다.');
+        } else if (result.status === 404) {
+          setLoginError('존재하지 않는 이메일입니다.');
         }
       } catch (error) {
         setLoginError('로그인에 실패했습니다. 다시 시도해주세요.');
