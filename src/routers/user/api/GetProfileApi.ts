@@ -13,6 +13,6 @@ export interface UserProfileResponse {
 export async function getUserProfileApi(): Promise<UserProfileResponse> {
     return http<UserProfileResponse>(`/users/profile`, {
         method: "GET",
-        skipAuth: true,
+        skipAuth: false,
     });
 }
