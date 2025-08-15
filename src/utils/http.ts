@@ -6,7 +6,8 @@ export interface HttpRequestOptions<TBody = unknown> {
   body?: TBody;
 }
 
-const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || "";
+// const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || "";
+const API_BASE = "https://api.ctrlu.site";
 
 export async function http<TResponse = unknown, TBody = unknown>(
   url: string,
