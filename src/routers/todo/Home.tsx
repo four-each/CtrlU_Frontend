@@ -268,7 +268,7 @@ const Home = () => {
         </Section>
 
         {/* 친구 할 일 섹션 */}
-        <Section>
+        <Section style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, marginBottom: 0 }}>
           <SectionTitle>친구</SectionTitle>
           <FriendTaskList>
             {mockFriendTasks.map(renderTaskItem)}
@@ -293,16 +293,19 @@ const Container = styled.div`
   background-color: ${colors.white};
   margin: 0 auto;
   position: relative;
+  overflow: hidden;
 `;
 
 const Content = styled.div`
-  padding: 20px;
-  height: calc(100vh - 60px);
-  overflow: hidden;
+  padding: 20px 20px 0 20px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
 `;
 
 const Section = styled.div`
   margin-bottom: 30px;
+  flex-shrink: 0;
 `;
 
 const SectionTitle = styled.h2`
@@ -404,9 +407,8 @@ const FriendTaskList = styled.div`
   display: flex;
   flex-direction: column;
   gap: 15px;
-  max-height: 400px;
+  flex: 1;
   overflow-y: auto;
-  padding-bottom: 50px;
   
   &::-webkit-scrollbar {
     width: 0;

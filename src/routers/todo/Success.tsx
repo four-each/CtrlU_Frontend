@@ -111,7 +111,12 @@ const Success: React.FC<SuccessProps> = ({
               )}
             </ProgressImage>
             {showPurpleOverlay && (
-              <ArrowIcon src={arrowIcon} alt="화살표" />
+              <ArrowIcon 
+                src={arrowIcon} 
+                alt="화살표" 
+                onClick={handleImageClick}
+                style={{ cursor: 'pointer' }}
+              />
             )}
           </ProgressCircle>
         </ProgressSection>
@@ -149,11 +154,27 @@ export default Success;
 const SuccessContainer = styled.div`
   width: 100%;
   max-width: 480px;
-  height: 100vh;
-  background: linear-gradient(180deg, #f1e7f9 0%, #ffffff 50%, #f1e7f9 100%);
+  min-height: 100vh;
+  min-height: 100dvh;
+  min-height: -webkit-fill-available;
+  background: linear-gradient(180deg, #f1e7f9 0%, #ffffff 30%, #f1e7f9 100%);
+  background-attachment: fixed;
   display: flex;
   flex-direction: column;
   margin: 0 auto;
+  position: relative;
+  
+  @media (max-aspect-ratio: 9/16) {
+    /* 세로가 긴 화면 (대부분의 모바일) */
+    background: linear-gradient(180deg, #f1e7f9 0%, #ffffff 25%, #f1e7f9 100%);
+    background-attachment: fixed;
+  }
+  
+  @media (min-aspect-ratio: 9/16) and (max-aspect-ratio: 1/1) {
+    /* 가로가 긴 화면 */
+    background: linear-gradient(180deg, #f1e7f9 0%, #ffffff 35%, #f1e7f9 100%);
+    background-attachment: fixed;
+  }
 `;
 
 const Header = styled.div`
@@ -191,7 +212,17 @@ const ProfileSection = styled.div`
   flex-direction: column;
   align-items: center;
   gap: 15px;
-  margin-top: 50px;
+  margin-top: 8vh;
+  
+  @media (max-aspect-ratio: 9/16) {
+    /* 세로가 긴 화면 (대부분의 모바일) */
+    margin-top: 6vh;
+  }
+  
+  @media (min-aspect-ratio: 9/16) and (max-aspect-ratio: 1/1) {
+    /* 가로가 긴 화면 */
+    margin-top: 10vh;
+  }
 `;
 
 const ProfileImage = styled.div`
@@ -210,8 +241,18 @@ const ProfileImage = styled.div`
 `;
 
 const ProgressSection = styled.div`
-  margin-top: 60px;
+  margin-top: 8vh;
   position: relative;
+  
+  @media (max-aspect-ratio: 9/16) {
+    /* 세로가 긴 화면 (대부분의 모바일) */
+    margin-top: 6vh;
+  }
+  
+  @media (min-aspect-ratio: 9/16) and (max-aspect-ratio: 1/1) {
+    /* 가로가 긴 화면 */
+    margin-top: 10vh;
+  }
 `;
 
 const ProgressCircle = styled.div`
@@ -333,7 +374,17 @@ const ProgressImage = styled.div<{ isRotating: boolean }>`
 
 
 const TargetTimeSection = styled.div`
-  margin-top: 30px;
+  margin-top: 4vh;
+  
+  @media (max-aspect-ratio: 9/16) {
+    /* 세로가 긴 화면 (대부분의 모바일) */
+    margin-top: 3vh;
+  }
+  
+  @media (min-aspect-ratio: 9/16) and (max-aspect-ratio: 1/1) {
+    /* 가로가 긴 화면 */
+    margin-top: 5vh;
+  }
 `;
 
 const TargetTimeBox = styled.div`
@@ -345,14 +396,37 @@ const TargetTimeBox = styled.div`
 `;
 
 const ActualTimeSection = styled.div`
-  margin-top: 20px;
+  margin-top: 2vh;
   text-align: center;
+  
+  @media (max-aspect-ratio: 9/16) {
+    /* 세로가 긴 화면 (대부분의 모바일) */
+    margin-top: 1.5vh;
+  }
+  
+  @media (min-aspect-ratio: 9/16) and (max-aspect-ratio: 1/1) {
+    /* 가로가 긴 화면 */
+    margin-top: 3vh;
+  }
 `;
 
 const CelebrationSection = styled.div`
-  margin-top: 30px;
+  margin-top: 4vh;
+  margin-bottom: 10vh;
   text-align: center;
   padding: 0 20px;
+  
+  @media (max-aspect-ratio: 9/16) {
+    /* 세로가 긴 화면 (대부분의 모바일) */
+    margin-top: 3vh;
+    margin-bottom: 6vh;
+  }
+  
+  @media (min-aspect-ratio: 9/16) and (max-aspect-ratio: 1/1) {
+    /* 가로가 긴 화면 */
+    margin-top: 5vh;
+    margin-bottom: 3vh;
+  }
 `;
 
 const CelebrationText = styled.div`

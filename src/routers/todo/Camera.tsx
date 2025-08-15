@@ -321,7 +321,9 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
               style={{ 
                 width: '100%', 
                 height: '100%', 
-                objectFit: 'cover',
+                maxWidth: '100vw',
+                maxHeight: '70vh',
+                objectFit: 'contain',
                 backgroundColor: '#000',
                 display: isCameraActive ? 'block' : 'none'
               }}
@@ -581,6 +583,9 @@ const VideoContainer = styled.div`
   height: 100%;
   overflow: hidden;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 const CameraIcon = styled.div`
