@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { ImageUploadIcon, ProfileIcon } from '@assets/icons';
 import { css } from "@emotion/react";
-import { usePresignUpload, useSignup } from "src/api/useSignup";
+import { usePresignUpload, useSignup } from "@hooks/api/auth/useSignup";
 import { postUploadToS3 } from '@utils/s3';
 
 const SignupContainer = styled.div`
