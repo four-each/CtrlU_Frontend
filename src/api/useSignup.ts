@@ -1,8 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
-import { signupApi, SignupRequest, SignupResponse, getPresignedUrl, PresignResponse, PresignRequest } from "@routers/auth/api";
+import { signupApi, SignupRequest, BaseResponse, getPresignedUrl, PresignResponse, PresignRequest } from "@routers/auth/api";
 
 export function useSignup() {
-  return useMutation<SignupResponse, Error, SignupRequest>({
+  return useMutation<BaseResponse, Error, SignupRequest>({
     mutationKey: ["auth", "signup"],
     mutationFn: (payload) => signupApi(payload),
   });

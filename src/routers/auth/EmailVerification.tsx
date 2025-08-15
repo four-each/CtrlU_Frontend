@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Col } from '@components/common/flex/Flex';
 import Txt from '@components/common/Txt';
 import styled from '@emotion/styled';
@@ -110,7 +110,7 @@ const VerifyButton = styled.button`
 `;
 
 const EmailVerification = () => {
-  const [email] = useState('abcd12345@naver.com'); // 실제로는 props나 context에서 받아올 예정
+  const { email } = useLocation().state as { email: string };
 
   return (
     <VerificationContainer>

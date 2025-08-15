@@ -212,7 +212,7 @@ const Signup = () => {
         if (profileFile) {
           const fileExtension = profileFile.name.split('.').pop()?.toLowerCase() || 'jpg';
           const imageType = "PROFILE";
-          const { presignedUrl, imageKey } = await presignMutation.mutateAsync({ imageType, fileExtension });
+          const { result: { presignedUrl, imageKey } } = await presignMutation.mutateAsync({ imageType, fileExtension });
 
           await postUploadToS3(presignedUrl, imageKey, profileFile);
 
@@ -225,8 +225,12 @@ const Signup = () => {
           nickname: formData.nickname,
           profileImageKey: profileImageKey || '',
         });
-        console.log('회원가입 성공:', result);
-        navigate('/auth/email-verification');
+
+        if (result.status === 200) {
+          navigate('/auth/email-verification', { state: { email: formData.email } });
+        } else if (result.status === 401) {
+          alert('이미 가입된 이메일입니다. 이메일 인증을 완료해주세요.');
+        }
       } catch (error) {
         const message = error instanceof Error ? error.message : '회원가입 실패';
         alert(message);
