@@ -66,6 +66,7 @@ const Input = styled.input`
 const ErrorText = styled(Txt)`
   color: #bf6a6a;
   font-size: 12px;
+  padding-left: 5px;
 `;
 
 const LoginButton = styled.button`
@@ -238,7 +239,7 @@ const Login = () => {
           {errors.password && <Txt color="#bf6a6a" fontSize="12px">{errors.password}</Txt>}
         </InputGroup>
 
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'baseline', gap: '10px' }}>
           <LoginButton onClick={handleLogin} disabled={loginMutation.isPending}>
             로그인
           </LoginButton>
