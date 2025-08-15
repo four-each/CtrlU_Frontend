@@ -10,8 +10,20 @@ export default defineConfig({
     host: true,
     port: 3000,
     proxy: {
-      // '/api'로 시작하는 모든 요청을 백엔드 서버로 전달
-      '/': {
+      '/friendships': {
+        target: 'https://api.ctrlu.site', // 백엔드 서버의 주소
+        changeOrigin: true, // 대상 서버의 출처를 변경
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+      '/auth': {
+        target: 'https://api.ctrlu.site', // 백엔드 서버의 주소
+        changeOrigin: true, // 대상 서버의 출처를 변경
+      },
+      '/todos': {
+        target: 'https://api.ctrlu.site', // 백엔드 서버의 주소
+        changeOrigin: true, // 대상 서버의 출처를 변경
+      },
+      '/users': {
         target: 'https://api.ctrlu.site', // 백엔드 서버의 주소
         changeOrigin: true, // 대상 서버의 출처를 변경
       },
