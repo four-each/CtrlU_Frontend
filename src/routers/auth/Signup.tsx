@@ -227,7 +227,7 @@ const Signup = () => {
         });
 
         if (result.status === 200) {
-          navigate('/auth/email-verification', { state: { email: formData.email } });
+          navigate('/auth/email-verification', { state: { email: formData.email, nickname: formData.nickname } });
         } else if (result.status === 401) {
           alert('이미 가입된 이메일입니다. 이메일 인증을 완료해주세요.');
         }
