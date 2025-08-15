@@ -4,6 +4,8 @@ import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
 import { BackLightIcon, ArchiveIcon, FriendListIcon, FriendRequestIcon, SettingIcon, ProfileIcon } from '@assets/icons';
 import { css } from "@emotion/react";
+import { useUserProfile } from '../../api/useUserProfile';
+import { useLogout } from '../../hooks/api/auth/useLogout';
 
 const MyPageContainer = styled.div`
   width: 100%;
@@ -165,6 +167,8 @@ const SettingsText = styled.span`
 
 const MyPage = () => {
   const navigate = useNavigate();
+  const { data: profileData, isLoading, error } = useUserProfile();
+  const { mutate: logout } = useLogout();
 
   const handleBack = () => {
     navigate(-1);
@@ -175,15 +179,11 @@ const MyPage = () => {
   };
 
   const handleFriendList = () => {
-    // TODO: 친구 목록 페이지로 이동
-    console.log('친구 목록');
-    navigate('/friendship/list');
+    navigate('/friendships/list');
   };
 
   const handleFriendRequest = () => {
-    // TODO: 친구 요청 페이지로 이동
-    console.log('친구 요청');
-    navigate('/friendship/request');
+    navigate('/friendships/request');
   };
 
   const handleArchive = () => {
@@ -203,15 +203,59 @@ const MyPage = () => {
   };
 
   const handleLogout = () => {
-    // TODO: 로그아웃 로직
-    console.log('로그아웃');
-    navigate('/auth/login');
+    logout();
   };
 
   const handleWithdraw = () => {
     // TODO: 계정 탈퇴 로직
     console.log('계정 탈퇴');
   };
+
+  // 로딩 상태 처리
+  if (isLoading) {
+    return (
+      <MyPageContainer>
+        <Header>
+          <BackLightIcon 
+            css={css`
+              width: 24px;
+              height: 21px;
+              cursor: pointer;
+              margin-top: 2px;
+            `}
+            onClick={handleBack} />
+          <HeaderTitle>마이페이지</HeaderTitle>
+        </Header>
+        <Content>
+          <div style={{ textAlign: 'center', padding: '50px' }}>로딩 중...</div>
+        </Content>
+      </MyPageContainer>
+    );
+  }
+
+  // 에러 상태 처리
+  if (error) {
+    return (
+      <MyPageContainer>
+        <Header>
+          <BackLightIcon 
+            css={css`
+              width: 24px;
+              height: 21px;
+              cursor: pointer;
+              margin-top: 2px;
+            `}
+            onClick={handleBack} />
+          <HeaderTitle>마이페이지</HeaderTitle>
+        </Header>
+        <Content>
+          <div style={{ textAlign: 'center', padding: '50px', color: '#bf6a6a' }}>
+            프로필을 불러오는데 실패했습니다.
+          </div>
+        </Content>
+      </MyPageContainer>
+    );
+  }
 
   return (
     <MyPageContainer>
@@ -229,7 +273,9 @@ const MyPage = () => {
 
       <Content>
         <ProfileSection>
-          <ProfileIcon 
+          <img 
+            src={profileData?.result?.profileImage || '../../assets/icons/home/profile.svg'} 
+            alt="프로필 이미지"
             css={css`
               width: 66px;
               height: 66px;
@@ -238,10 +284,11 @@ const MyPage = () => {
               object-fit: cover;
               margin-left: 20px;
               margin-top: 20px;
+              cursor: pointer;
             `}
             onClick={handleEdit} />
           <ProfileInfo>
-            <ProfileName>ㅇㅇ 님</ProfileName>
+            <ProfileName>{profileData?.result?.nickname || '사용자'} 님</ProfileName>
             <ProfileStatus>오늘의 목표는? 🔥</ProfileStatus>
           </ProfileInfo>
           <SettingIcon 
