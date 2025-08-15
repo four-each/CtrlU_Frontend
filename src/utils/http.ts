@@ -9,8 +9,8 @@ export interface HttpRequestOptions<TBody = unknown> {
   skipAuth?: boolean; // 인증이 필요 없는 요청을 위한 옵션
 }
 
-// const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || "";
-const API_BASE = "https://api.ctrlu.site";
+// 프록시를 사용하도록 설정
+const API_BASE = "";
 
 export async function http<TResponse = unknown, TBody = unknown>(
   url: string,
@@ -22,9 +22,20 @@ export async function http<TResponse = unknown, TBody = unknown>(
   const authHeaders: Record<string, string> = { ...headers };
   if (!skipAuth) {
     const token = getValidToken();
+    console.log('🔐 Token check:', { 
+      skipAuth, 
+      hasToken: !!token, 
+      tokenLength: token?.length,
+      url 
+    });
     if (token) {
       authHeaders['Authorization'] = `Bearer ${token}`;
+      console.log('✅ Authorization header added');
+    } else {
+      console.log('❌ No valid token found');
     }
+  } else {
+    console.log('🚫 Auth skipped for:', url);
   }
 
   const init: RequestInit = {
@@ -37,10 +48,16 @@ export async function http<TResponse = unknown, TBody = unknown>(
     credentials: "include",
   };
 
-  const requestUrl =
-    url.startsWith("http") || (API_BASE && url.startsWith(String(API_BASE)))
-      ? url
-      : `${API_BASE}${url}`;
+  // 프록시를 사용하여 상대 경로로 요청
+  const requestUrl = url.startsWith("http") ? url : url;
+  
+  console.log('🌐 Request details:', {
+    method,
+    url: requestUrl,
+    headers: authHeaders,
+    skipAuth
+  });
+
   const response = await fetch(requestUrl, init);
   const contentType = response.headers.get("content-type") || "";
 
@@ -60,6 +77,13 @@ export async function http<TResponse = unknown, TBody = unknown>(
       (typeof errorPayload === "object" && errorPayload !== null && "message" in errorPayload
         ? errorPayload.message
         : undefined) || response.statusText || "Request failed";
+
+    console.error('❌ Request failed:', {
+      status: response.status,
+      statusText: response.statusText,
+      message,
+      errorPayload
+    });
 
     throw new Error(String(message));
   }
