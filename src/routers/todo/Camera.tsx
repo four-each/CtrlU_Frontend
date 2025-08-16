@@ -781,6 +781,7 @@ const CustomTimePickerContainer = styled.div`
   position: relative;
   width: 200px;
   height: 100px;
+  z-index: 1;
 `;
 
 const SelectedTimeHighlight = styled.div`
