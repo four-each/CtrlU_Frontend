@@ -841,7 +841,6 @@ const TimePickerOption = styled.div<{ isSelected: boolean }>`
   align-items: center;
   justify-content: center;
   position: relative;
-  z-index: 99;
   width: 40px;
   background-color: transparent;
   border-radius: 8px;
