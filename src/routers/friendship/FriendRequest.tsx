@@ -47,21 +47,44 @@ const HeaderTitle = styled.h1`
 const Content = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 30px;
-  height: calc(100vh - 61px - 55px);
-  margin-top: 55px;
-  overflow-y: auto;
-  padding-bottom: 60px;
-  -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-  mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+  gap: 0;
+  height: calc(100vh - 61px);
+  margin-top: 0;
 `;
 
-const SectionTitle = styled.div`
+const TabContainer = styled.div`
+  display: flex;
+  width: 100%;
+  height: 55px;
+  background: #ffffff;
+  border-bottom: 1px solid #F6F6F6;
+`;
+
+const Tab = styled.div<{ isActive: boolean }>`
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-family: 'Noto Sans KR', sans-serif;
   font-weight: 500;
   font-size: 16px;
-  color: #1d1d1d;
-  margin-left: 16px;
+  color: ${props => props.isActive ? '#832cc5' : '#bababa'};
+  cursor: pointer;
+  border-bottom: 2px solid ${props => props.isActive ? '#832cc5' : 'transparent'};
+  transition: all 0.2s;
+  
+  &:hover {
+    color: ${props => props.isActive ? '#832cc5' : '#1d1d1d'};
+  }
+`;
+
+const TabContent = styled.div<{ isVisible: boolean }>`
+  display: ${props => props.isVisible ? 'flex' : 'none'};
+  flex-direction: column;
+  gap: 30px;
+  height: calc(100vh - 61px - 55px);
+  padding: 10px 0;
+  overflow-y: auto;
 `;
 
 const FriendList = styled.div`
@@ -160,6 +183,7 @@ const ConfirmButton = styled.button`
 const FriendRequest = () => {
   const navigate = useNavigate();
   const [showNotification, setShowNotification] = useState(false);
+  const [activeTab, setActiveTab] = useState<'received' | 'sent'>('received');
   
   const [receivedRequests, setReceivedRequests] = useState([
     { id: 1, name: '강연주', profile: profileIcon },
@@ -177,6 +201,9 @@ const FriendRequest = () => {
   ]);
 
   const [sentRequests, setSentRequests] = useState([
+    { id: 1, name: '강연주', profile: profileIcon },
+    { id: 2, name: '김수진', profile: profileIcon },
+    { id: 3, name: '정소민', profile: profileIcon },
     { id: 4, name: '강연주', profile: profileIcon },
     { id: 5, name: '김수진', profile: profileIcon },
     { id: 6, name: '정소민', profile: profileIcon },
@@ -233,8 +260,22 @@ const FriendRequest = () => {
       </Header>
 
       <Content>
-        <div>
-          <SectionTitle>받은 요청</SectionTitle>
+        <TabContainer>
+          <Tab 
+            isActive={activeTab === 'received'} 
+            onClick={() => setActiveTab('received')}
+          >
+            받은 요청
+          </Tab>
+          <Tab 
+            isActive={activeTab === 'sent'} 
+            onClick={() => setActiveTab('sent')}
+          >
+            보낸 요청
+          </Tab>
+        </TabContainer>
+
+        <TabContent isVisible={activeTab === 'received'}>
           <FriendList>
             {receivedRequests.map((friend) => (
               <FriendItem key={friend.id}>
@@ -263,10 +304,9 @@ const FriendRequest = () => {
               </FriendItem>
             ))}
           </FriendList>
-        </div>
+        </TabContent>
 
-        <div>
-          <SectionTitle>보낸 요청</SectionTitle>
+        <TabContent isVisible={activeTab === 'sent'}>
           <FriendList>
             {sentRequests.map((friend) => (
               <FriendItem key={friend.id}>
@@ -285,7 +325,7 @@ const FriendRequest = () => {
               </FriendItem>
             ))}
           </FriendList>
-        </div>
+        </TabContent>
       </Content>
 
       {showNotification && (

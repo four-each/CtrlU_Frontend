@@ -42,6 +42,16 @@ export const globalStyles = css`
     }
   }
 
+  /* 모든 요소에 스크롤바 숨김 적용 */
+  * {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    
+    ::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
   button {
     padding: 0;
     overflow: visible;

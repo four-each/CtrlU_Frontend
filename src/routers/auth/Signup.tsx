@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { ImageUploadIcon, ProfileIcon } from '@assets/icons';
 import { css } from "@emotion/react";
-import { usePresignUpload, useSignup } from "src/api/useSignup";
+import { usePresignUpload, useSignup } from "@hooks/api/auth/useSignup";
 import { postUploadToS3 } from '@utils/s3';
 
 const SignupContainer = styled.div`
@@ -182,8 +182,8 @@ const Signup = () => {
       newErrors.password = '비밀번호를 입력해주세요';
     } else if (formData.password.length < 8 || formData.password.length > 12) {
       newErrors.password = '비밀번호는 8~12자로 입력해주세요';
-    } else if (!/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&^])[A-Za-z\d@$!%*#?&^]{8,}$/.test(formData.password)) {
-      newErrors.password = '영문, 숫자, 특수문자를 포함하여 입력해주세요';
+    } else if (!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,12}$/.test(formData.password)) {
+      newErrors.password = '영문, 숫자를 포함하여 입력해주세요';
     }
 
     if (!formData.confirmPassword) {
@@ -196,8 +196,8 @@ const Signup = () => {
       newErrors.nickname = '닉네임을 입력해주세요';
     } else if (!/^[가-힣a-zA-Z0-9]+$/.test(formData.nickname)) {
       newErrors.nickname = '한글, 영어, 숫자만 가능합니다';
-    } else if (formData.nickname.length < 2) {
-      newErrors.nickname = '닉네임은 2자 이상 입력해주세요';
+    } else if (formData.nickname.length < 2 || formData.nickname.length > 4) {
+      newErrors.nickname = '닉네임은 2~4자로 입력해주세요';
     }
 
     setErrors(newErrors);
@@ -212,7 +212,7 @@ const Signup = () => {
         if (profileFile) {
           const fileExtension = profileFile.name.split('.').pop()?.toLowerCase() || 'jpg';
           const imageType = "PROFILE";
-          const { presignedUrl, imageKey } = await presignMutation.mutateAsync({ imageType, fileExtension });
+          const { result: { presignedUrl, imageKey } } = await presignMutation.mutateAsync({ imageType, fileExtension });
 
           await postUploadToS3(presignedUrl, imageKey, profileFile);
 
@@ -225,8 +225,12 @@ const Signup = () => {
           nickname: formData.nickname,
           profileImageKey: profileImageKey || '',
         });
-        console.log('회원가입 성공:', result);
-        navigate('/auth/email-verification');
+
+        if (result.status === 200) {
+          navigate('/auth/email-verification', { state: { email: formData.email, nickname: formData.nickname } });
+        } else if (result.status === 401) {
+          alert('이미 가입된 이메일입니다. 이메일 인증을 완료해주세요.');
+        }
       } catch (error) {
         const message = error instanceof Error ? error.message : '회원가입 실패';
         alert(message);
@@ -342,9 +346,6 @@ const Signup = () => {
             onChange={handleInputChange}
           />
           {errors.nickname && <ErrorMessage>{errors.nickname}</ErrorMessage>}
-          {!errors.nickname && formData.nickname && (
-            <HelperText>한글, 영어, 숫자만 가능</HelperText>
-          )}
         </InputGroup>
         <SignupButton onClick={handleSignup} disabled={signupMutation.isPending || presignMutation.isPending}>
           {signupMutation.isPending || presignMutation.isPending ? '처리중...' : '완료'}

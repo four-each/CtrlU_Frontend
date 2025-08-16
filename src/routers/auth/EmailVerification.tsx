@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Col } from '@components/common/flex/Flex';
 import Txt from '@components/common/Txt';
 import styled from '@emotion/styled';
@@ -110,7 +110,7 @@ const VerifyButton = styled.button`
 `;
 
 const EmailVerification = () => {
-  const [email] = useState('abcd12345@naver.com'); // 실제로는 props나 context에서 받아올 예정
+  const { email, nickname } = useLocation().state as { email: string, nickname: string };
 
   return (
     <VerificationContainer>
@@ -124,7 +124,7 @@ const EmailVerification = () => {
         <Title>이메일 인증 링크 발송</Title>
         
         <Description>
-          {`안녕하세요 000님,\nCtrl U 서비스 이용을 위해\n아래의 이메일 주소로\n인증 링크를 전송하였습니다.\n\n인증 링크를 클릭하여 인증을 완료해주세요.`}
+          {`안녕하세요 ${nickname}님,\nCtrl U 서비스 이용을 위해\n아래의 이메일 주소로\n인증 링크를 전송하였습니다.\n\n인증 링크를 클릭하여 인증을 완료해주세요.`}
         </Description>
 
         <EmailBox>

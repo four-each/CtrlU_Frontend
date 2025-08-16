@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Col } from '@components/common/flex/Flex';
 import Txt from '@components/common/Txt';
 import styled from '@emotion/styled';
-import { colors } from '@styles/theme';
 import { CTRULogo, Owl } from '@assets/icons';
 import { css } from "@emotion/react";
+import { useLogin } from '@hooks/api/auth/useLogin';
 
 const LoginContainer = styled.div`
   width: 100%;
@@ -64,6 +63,12 @@ const Input = styled.input`
   }
 `;
 
+const ErrorText = styled(Txt)`
+  color: #bf6a6a;
+  font-size: 12px;
+  padding-left: 5px;
+`;
+
 const LoginButton = styled.button`
   width: 100%;
   height: 56px;
@@ -117,6 +122,7 @@ const Divider = styled.div`
 `;
 
 const Login = () => {
+  const loginMutation = useLogin();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
@@ -126,6 +132,7 @@ const Login = () => {
     email: '',
     password: '',
   });
+  const [loginError, setLoginError] = useState('');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -140,6 +147,11 @@ const Login = () => {
         ...prev,
         [name]: ''
       }));
+    }
+    
+    // Clear login error when user starts typing
+    if (loginError) {
+      setLoginError('');
     }
   };
 
@@ -167,11 +179,18 @@ const Login = () => {
     return !Object.values(newErrors).some(error => error);
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (validateForm()) {
-      // TODO: 실제 로그인 로직 구현
-      console.log('로그인 시도:', formData);
-      navigate('/');
+      try {
+        const result = await loginMutation.mutateAsync(formData);
+        if (result.status === 200) {
+          navigate('/');
+        } else {
+          setLoginError('이메일 또는 비밀번호가 일치하지 않습니다.');
+        }
+      } catch (error) {
+        setLoginError('로그인에 실패했습니다. 다시 시도해주세요.');
+      }
     }
   };
 
@@ -218,9 +237,12 @@ const Login = () => {
           {errors.password && <Txt color="#bf6a6a" fontSize="12px">{errors.password}</Txt>}
         </InputGroup>
 
-        <LoginButton onClick={handleLogin}>
-          로그인
-        </LoginButton>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'baseline', gap: '10px' }}>
+          <LoginButton onClick={handleLogin} disabled={loginMutation.isPending}>
+            로그인
+          </LoginButton>
+          {loginError && <ErrorText>{loginError}</ErrorText>}
+        </div>
 
         <LinksContainer>
           <Link onClick={handleForgotPassword}>
