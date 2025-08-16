@@ -5,6 +5,7 @@ import { ImageUploadIcon, ProfileIcon } from '@assets/icons';
 import { css } from "@emotion/react";
 import { usePresignUpload, useSignup } from "@hooks/api/auth/useSignup";
 import { postUploadToS3 } from '@utils/s3';
+import Txt from '@components/common/Txt';
 
 const SignupContainer = styled.div`
   width: 100%;
@@ -129,6 +130,12 @@ const SignupButton = styled.button`
   }
 `;
 
+const ErrorText = styled(Txt)`
+  color: #bf6a6a;
+  font-size: 12px;
+  padding-left: 5px;
+`;
+
 const Signup = () => {
   const navigate = useNavigate();
   const signupMutation = useSignup();
@@ -148,6 +155,7 @@ const Signup = () => {
     confirmPassword: '',
     nickname: '',
   });
+  const [signupError, setSignupError] = useState('');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -161,6 +169,10 @@ const Signup = () => {
         ...prev,
         [name]: ''
       }));
+    }
+
+    if (signupError) {
+      setSignupError('');
     }
   };
 
@@ -229,7 +241,9 @@ const Signup = () => {
         if (result.status === 200) {
           navigate('/auth/email-verification', { state: { email: formData.email, nickname: formData.nickname } });
         } else if (result.status === 401) {
-          alert('이미 가입된 이메일입니다. 이메일 인증을 완료해주세요.');
+          setSignupError('이미 가입된 이메일입니다. 이메일 인증을 완료해주세요.');
+        } else if (result.status === 409) {
+          setSignupError('이미 가입된 이메일입니다.');
         }
       } catch (error) {
         const message = error instanceof Error ? error.message : '회원가입 실패';
@@ -347,9 +361,12 @@ const Signup = () => {
           />
           {errors.nickname && <ErrorMessage>{errors.nickname}</ErrorMessage>}
         </InputGroup>
-        <SignupButton onClick={handleSignup} disabled={signupMutation.isPending || presignMutation.isPending}>
-          {signupMutation.isPending || presignMutation.isPending ? '처리중...' : '완료'}
-        </SignupButton>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'baseline', gap: '10px' }}>
+          <SignupButton onClick={handleSignup} disabled={signupMutation.isPending || presignMutation.isPending}>
+            {signupMutation.isPending || presignMutation.isPending ? '처리중...' : '완료'}
+          </SignupButton>
+          {signupError && <ErrorText>{signupError}</ErrorText>}
+        </div>
       </FormContainer>
     </SignupContainer>
   );
