@@ -34,9 +34,15 @@ export interface TaskWithUser extends Task {
   isViewed: boolean; // 친구가 본 여부
 }
 
-export interface StoryItem {
+export interface Story {
   id: string;
-  task: TaskWithUser;
-  isMyTask: boolean;
+  task: Task;
   timestamp: Date;
+  isViewed?: boolean;
+}
+
+export interface UserWithStories {
+  user: User;
+  stories: Story[];
+  isMyStories: boolean;
 } 

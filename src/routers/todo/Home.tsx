@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
-import { Task, TaskWithUser, StoryItem } from '../../types';
-import { getStoryItems, getStoryStatusColor } from '../../utils/helpers';
+import { Task, TaskWithUser, UserWithStories, Story } from '../../types';
 import settingsIcon from '../../assets/icons/home/setting.svg';
 import refreshIcon from '../../assets/icons/home/refresh.svg';
 import cameraIcon from '../../assets/icons/home/shoot.svg';
 import profileIcon from '../../assets/icons/home/profile.svg';
 import useTimer from '../../hooks/useTimer';
+import StoryViewer from './StoryViewer';
 
 // 임시 데이터
 const mockMyTasks: Task[] = [
@@ -50,7 +50,7 @@ const mockFriendTasks: TaskWithUser[] = [
   },
   {
     id: '3',
-    userId: 'user3',
+    userId: 'user2',
     title: '청소하기',
     description: '방 정리',
     targetTime: 45,
@@ -63,16 +63,16 @@ const mockFriendTasks: TaskWithUser[] = [
     createdAt: new Date(),
     updatedAt: new Date(Date.now() - 1 * 60 * 60 * 1000),
     user: {
-      id: 'user3',
-      username: 'friend2',
-      nickname: '친구2',
+      id: 'user2',
+      username: 'friend1',
+      nickname: '친구1',
       profileImage: profileIcon,
     },
     isViewed: true,
   },
   {
     id: '4',
-    userId: 'user4',
+    userId: 'user3',
     title: '운동하기',
     description: '헬스장 가기',
     targetTime: 90,
@@ -83,71 +83,9 @@ const mockFriendTasks: TaskWithUser[] = [
     createdAt: new Date(),
     updatedAt: new Date(),
     user: {
-      id: 'user4',
-      username: 'friend3',
-      nickname: '친구3',
-      profileImage: profileIcon,
-    },
-    isViewed: false,
-  },
-  {
-    id: '5',
-    userId: 'user5',
-    title: '독서하기',
-    description: '책 읽기',
-    targetTime: 120,
-    startTime: new Date(Date.now() - 3 * 60 * 60 * 1000), // 3시간 전 시작
-    endTime: new Date(Date.now() - 1.5 * 60 * 60 * 1000), // 1.5시간 전 완료
-    startImage: profileIcon,
-    endImage: profileIcon,
-    isCompleted: true,
-    isAbandoned: false,
-    createdAt: new Date(),
-    updatedAt: new Date(Date.now() - 1.5 * 60 * 60 * 1000),
-    user: {
-      id: 'user5',
-      username: 'friend4',
-      nickname: '친구4',
-      profileImage: profileIcon,
-    },
-    isViewed: true,
-  },
-  {
-    id: '6',
-    userId: 'user6',
-    title: '게임하기',
-    description: '롤 게임',
-    targetTime: 60,
-    startTime: new Date(Date.now() - 15 * 60 * 1000), // 15분 전 시작
-    startImage: profileIcon,
-    isCompleted: false,
-    isAbandoned: false,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    user: {
-      id: 'user6',
-      username: 'friend5',
-      nickname: '친구5',
-      profileImage: profileIcon,
-    },
-    isViewed: false,
-  },
-  {
-    id: '7',
-    userId: 'user7',
-    title: '쇼핑하기',
-    description: '온라인 쇼핑',
-    targetTime: 30,
-    startTime: new Date(Date.now() - 10 * 60 * 1000), // 10분 전 시작
-    startImage: profileIcon,
-    isCompleted: false,
-    isAbandoned: false,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    user: {
-      id: 'user7',
-      username: 'friend6',
-      nickname: '친구6',
+      id: 'user3',
+      username: 'friend2',
+      nickname: '친구2',
       profileImage: profileIcon,
     },
     isViewed: false,
@@ -156,22 +94,65 @@ const mockFriendTasks: TaskWithUser[] = [
 
 const Home = () => {
   const navigate = useNavigate();
-  const [storyItems, setStoryItems] = useState<StoryItem[]>([]);
+  const [usersWithStories, setUsersWithStories] = useState<UserWithStories[]>([]);
+  const [showStoryViewer, setShowStoryViewer] = useState(false);
+  const [selectedUserIndex, setSelectedUserIndex] = useState(0);
 
   useEffect(() => {
-    const items = getStoryItems(mockMyTasks, mockFriendTasks);
-    setStoryItems(items);
+    const myUser = {
+      id: 'user1',
+      username: 'me',
+      nickname: '나',
+      profileImage: profileIcon,
+    };
+
+    const myStories: Story[] = mockMyTasks.map((task, index) => ({
+      id: `story-my-${index}`,
+      task: task,
+      timestamp: task.startTime,
+    }));
+
+    const myStoriesWithUser: UserWithStories = {
+      user: myUser,
+      stories: myStories,
+      isMyStories: true,
+    };
+
+    const friendStoriesGrouped = mockFriendTasks.reduce((acc, taskWithUser) => {
+      const { user, isViewed, ...task } = taskWithUser;
+      if (!acc[user.id]) {
+        acc[user.id] = {
+          user: user,
+          stories: [],
+          isMyStories: false,
+        };
+      }
+      acc[user.id].stories.push({
+        id: `story-friend-${task.id}`,
+        task: task,
+        timestamp: task.startTime,
+        isViewed: isViewed,
+      });
+      return acc;
+    }, {} as { [key: string]: UserWithStories });
+
+    const friendUsersWithStories = Object.values(friendStoriesGrouped);
+
+    setUsersWithStories([myStoriesWithUser, ...friendUsersWithStories]);
   }, []);
 
   const handleItemClick = (task: Task | TaskWithUser) => {
-    // 내 태스크인지 확인 ('user' 속성이 없으면 내 태스크)
     const isMyTask = !('user' in task);
     navigate(`/detail?isMe=${isMyTask}`);
   };
 
-  const handleStoryItemClick = (item: StoryItem) => {
-    // 스토리 아이템의 isMyTask 속성을 사용
-    navigate(`/detail?isMe=${item.isMyTask}`);
+  const handleStoryItemClick = (userIndex: number) => {
+    setSelectedUserIndex(userIndex);
+    setShowStoryViewer(true);
+  };
+
+  const handleCloseStoryViewer = () => {
+    setShowStoryViewer(false);
   };
 
   const handleCameraClick = () => {
@@ -182,18 +163,34 @@ const Home = () => {
     navigate('/mypage');
   };
 
-  const renderStoryItem = (item: StoryItem) => (
-    <StoryItemContainer key={item.id} onClick={() => handleStoryItemClick(item)}>
-      <StoryImage 
-        src={item.task.startImage} 
-        alt="story"
-        statusColor={getStoryStatusColor(item)}
-      />
-      <StoryName>
-        {item.isMyTask ? '나' : item.task.user.nickname}
-      </StoryName>
-    </StoryItemContainer>
-  );
+  const renderStoryItem = (userWithStories: UserWithStories, index: number) => {
+    const { user, stories, isMyStories } = userWithStories;
+
+    const hasUnviewedStory = !isMyStories && stories.some(story => !story.isViewed);
+
+    const getStatusColor = (): string => {
+      if (isMyStories) {
+        return '#71d596'; // green
+      }
+      if (hasUnviewedStory) {
+        return '#71d596'; // green
+      }
+      return '#bababa'; // grey
+    };
+
+    return (
+        <StoryItemContainer key={user.id} onClick={() => handleStoryItemClick(index)}>
+        <StoryImage 
+            src={user.profileImage} 
+            alt="story"
+            statusColor={getStatusColor()}
+        />
+        <StoryName>
+            {user.nickname}
+        </StoryName>
+        </StoryItemContainer>
+    );
+  }
 
   const TaskTimer = ({ task }: { task: Task | TaskWithUser }) => {
     const now = new Date();
@@ -207,7 +204,6 @@ const Home = () => {
       return `+ ${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     };
 
-    // 1초마다 업데이트
     const [currentTime, setCurrentTime] = useState(new Date());
 
     useEffect(() => {
@@ -245,12 +241,7 @@ const Home = () => {
             <SettingsIcon src={settingsIcon} alt="설정" onClick={handleSettingsClick} />
           </ProfileHeader>
           <StoryContainer>
-            {/* 내 스토리 - 고정 */}
-            {storyItems.filter(item => item.isMyTask).map(renderStoryItem)}
-            {/* 친구 스토리 - 스크롤 */}
-            <FriendStoryContainer>
-              {storyItems.filter(item => !item.isMyTask).map(renderStoryItem)}
-            </FriendStoryContainer>
+            {usersWithStories.map((item, index) => renderStoryItem(item, index))}
           </StoryContainer>
         </Section>
 
@@ -280,6 +271,17 @@ const Home = () => {
       <CameraButton onClick={handleCameraClick}>
         <CameraIcon src={cameraIcon} alt="카메라" />
       </CameraButton>
+
+      {/* 스토리 뷰어 */}
+      {showStoryViewer && (
+        <StoryViewerOverlay>
+          <StoryViewer
+            usersWithStories={usersWithStories}
+            initialUserIndex={selectedUserIndex}
+            onClose={handleCloseStoryViewer}
+          />
+        </StoryViewerOverlay>
+      )}
     </Container>
   );
 };
@@ -322,8 +324,6 @@ const ProfileHeader = styled.div`
   margin-bottom: 10px;
 `;
 
-
-
 const SettingsIcon = styled.img`
   width: 25px;
   height: 25px;
@@ -357,16 +357,23 @@ const StoryContainer = styled.div`
   gap: 15px;
   margin-bottom: -10px;
   padding-top: 3px;
-`;
-
-const FriendStoryContainer = styled.div`
-  display: flex;
-  gap: 15px;
   overflow-x: auto;
-  flex: 1;
   padding: 20px 0;
   margin: -20px -20px -20px 0;
   width: calc(100% + 20px);
+  
+  &::-webkit-scrollbar {
+    width: 0;
+    background: transparent;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: transparent;
+  }
 `;
 
 const StoryItemContainer = styled.div`
@@ -504,4 +511,16 @@ const CameraIcon = styled.img`
   width: 80px;
   height: 80px;
   object-fit: contain;
+`;
+
+const StoryViewerOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
