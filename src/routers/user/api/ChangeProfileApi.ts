@@ -13,7 +13,7 @@ export interface ChangeProfileRequest {
 
 export async function changeProfileApi(payload: ChangeProfileRequest): Promise<BaseResponse> {
     return http<BaseResponse>(`/users/profile`, {
-        method: "PATCH",
+        method: "POST",
         body: payload,
         skipAuth: false,
     });

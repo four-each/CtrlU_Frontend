@@ -191,7 +191,7 @@ const MyPageEdit = () => {
 
         const { presignedUrl, imageKey } = presignResponse.result;
 
-          await postUploadToS3(presignedUrl, imageKey, profileFile, contentType);
+        await postUploadToS3(presignedUrl, imageKey, profileFile, contentType);
 
         profileImageKey = imageKey;
       }
