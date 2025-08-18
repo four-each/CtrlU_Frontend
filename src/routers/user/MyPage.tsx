@@ -168,7 +168,7 @@ const SettingsText = styled.span`
 const MyPage = () => {
   const navigate = useNavigate();
   const { data: profileData, isLoading, error } = useUserProfile();
-  const { mutate: logout } = useLogout();
+  const logoutMutation = useLogout();
 
   const handleBack = () => {
     navigate(-1);
@@ -202,8 +202,11 @@ const MyPage = () => {
     console.log('개인정보 처리방침');
   };
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    const result = await logoutMutation.mutateAsync();
+    if (result.status === 200) {
+      navigate('/auth/login');
+    }
   };
 
   const handleWithdraw = () => {
