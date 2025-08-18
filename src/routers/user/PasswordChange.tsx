@@ -310,7 +310,7 @@ const PasswordReset = () => {
               <ErrorText>{errors.confirmPassword}</ErrorText>
             )}
           </InputGroup>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'baseline', gap: '10px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '10px' }}>
             <ResetButton onClick={handleReset} disabled={!isFormValid()}>
               재설정 완료
             </ResetButton>
