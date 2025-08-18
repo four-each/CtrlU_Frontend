@@ -184,11 +184,14 @@ const MyPageEdit = () => {
       let profileImageKey: string | undefined = undefined;
 
       if (profileFile) {
-        const fileExtension = profileFile.name.split('.').pop()?.toLowerCase() || 'jpg';
+        const fileExtension = profileFile.name.split('.').pop()?.toLowerCase() || '.'.concat('jpg');
         const imageType = "PROFILE";
-        const { result: { presignedUrl, imageKey } } = await presignMutation.mutateAsync({ imageType, fileExtension });
+        const contentType = profileFile.type;
+        const presignResponse = await presignMutation.mutateAsync({ imageType, fileExtension: `.${fileExtension}`, contentType });
 
-        await postUploadToS3(presignedUrl, imageKey, profileFile);
+        const { presignedUrl, imageKey } = presignResponse.result;
+
+          await postUploadToS3(presignedUrl, imageKey, profileFile);
 
         profileImageKey = imageKey;
       }
