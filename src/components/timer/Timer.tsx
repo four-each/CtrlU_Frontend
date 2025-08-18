@@ -138,7 +138,7 @@ const Percent = styled.div<{ isOver: boolean; percentage: number }>`
     
     return `
       left: calc(50% + ${x}px);
-      top: calc(50% + ${y}px);
+      top: calc(50% + ${y - 4}px);
       transform: translate(-50%, -50%);
     `;
   }}

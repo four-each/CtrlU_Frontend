@@ -117,7 +117,7 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
   const swipeHandlers = useSwipeable({
     onSwipedLeft: () => handleNextUser(),
     onSwipedRight: () => handlePreviousUser(),
-    preventScrollOnSwipe: true,
+    preventScrollOnSwipe: false,
     trackMouse: true
   });
 
@@ -171,23 +171,25 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
           </Txt>
         </Col>
         
-        <Timer
-          durationTime={currentStory.task.targetTime * 60 * 1000}
-          endTime={formatTime(currentStory.task.targetTime)}
-          timerRef={finishHandler}
-        />
+        <TimerContainer>
+          <Timer
+            durationTime={currentStory.task.targetTime * 60 * 1000}
+            endTime={formatTime(currentStory.task.targetTime)}
+            timerRef={finishHandler}
+          />
 
-        {showLeftArrow && (
-          <NavigationButton position="left" onClick={handlePrevious}>
-            <ArrowIcon src={leftArrowIcon} alt="이전" />
-          </NavigationButton>
-        )}
-        
-        {showRightArrow && (
-          <NavigationButton position="right" onClick={handleNext}>
-            <ArrowIcon src={rightArrowIcon} alt="다음" />
-          </NavigationButton>
-        )}
+          {showLeftArrow && (
+            <NavigationButton position="left" onClick={handlePrevious}>
+              <ArrowIcon src={leftArrowIcon} alt="이전" />
+            </NavigationButton>
+          )}
+          
+          {showRightArrow && (
+            <NavigationButton position="right" onClick={handleNext}>
+              <ArrowIcon src={rightArrowIcon} alt="다음" />
+            </NavigationButton>
+          )}
+        </TimerContainer>
       </AnimatedCol>
     </Container>
   );
@@ -206,9 +208,19 @@ const Container = styled.div`
 const AnimatedCol = styled(Col)<{ animation: 'left' | 'right' | 'none' }>`
   height: 100%;
   animation: ${({ animation }) => animation === 'left' ? slideInLeft : animation === 'right' ? slideInRight : 'none'} 0.5s forwards;
+  overflow-y: auto;
+  padding-bottom: 40px;
 `;
 
 const HeaderContainer = styled.div`
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const TimerContainer = styled.div`
+  position: relative;
   width: 100%;
   display: flex;
   align-items: center;
@@ -250,7 +262,7 @@ const SmallImage = styled.img`
 
 const NavigationButton = styled.button<{ position: 'left' | 'right' }>`
   position: absolute;
-  top: 50%;
+  top: 30%;
   ${({ position }) => position}: 20px;
   transform: translateY(-50%);
   background: rgba(255, 255, 255, 0.2);
