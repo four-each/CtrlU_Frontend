@@ -38,7 +38,8 @@ async function refreshAccessToken(): Promise<string | null> {
       return token;
     }
     return null;
-  } catch {
+  } catch (error) {
+    console.error("Token refresh failed:", error);
     return null;
   }
 }
@@ -74,6 +75,9 @@ export async function http<TResponse = unknown, TBody = unknown>(
       : `${API_BASE}${url}`;
 
   let response = await fetch(requestUrl, init);
+
+  // 401 처리 디버깅을 위한 로그 추가
+  console.log(`[HTTP] Status: ${response.status}, SkipAuth: ${skipAuth}, RetryOn401: ${retryOn401}`);
 
   // 401 처리: 토큰 만료 시 refresh 후 1회 재시도
   if (response.status === 401 && !skipAuth && retryOn401) {
