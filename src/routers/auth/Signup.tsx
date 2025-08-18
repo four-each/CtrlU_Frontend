@@ -226,7 +226,7 @@ const Signup = () => {
 
           const { presignedUrl, imageKey } = presignResponse.result;
 
-          await postUploadToS3(presignedUrl, imageKey, profileFile);
+          await postUploadToS3(presignedUrl, imageKey, profileFile, contentType);
 
           profileImageKey = imageKey;
         }
