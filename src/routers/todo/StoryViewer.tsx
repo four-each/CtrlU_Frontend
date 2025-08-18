@@ -197,6 +197,7 @@ const Container = styled.div`
 const AnimatedCol = styled(Col)<{ animation: 'left' | 'right' | 'none' }>`
   height: 100%;
   animation: ${({ animation }) => animation === 'left' ? slideInLeft : animation === 'right' ? slideInRight : 'none'} 0.5s forwards;
+  padding-bottom: 40px;
 `;
 
 const ContentContainer = styled.div`
