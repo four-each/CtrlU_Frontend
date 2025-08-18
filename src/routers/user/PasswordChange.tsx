@@ -146,14 +146,15 @@ const PasswordReset = () => {
     confirmPassword: ''
   });
   const changePasswordMutation = useChangePassword();
+  const [resetError, setResetError] = useState('');
 
   const handleBack = () => {
     navigate(-1);
   };
 
   const validatePassword = (password: string) => {
-    // 비밀번호 유효성 검사: 8~12자, 영문/숫자/특수문자 포함
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&^])[A-Za-z\d@$!%*#?&^]{8,12}$/;
+    // 비밀번호 유효성 검사: 8~12자, 영문/숫자 포함
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,12}$/;
     return passwordRegex.test(password);
   };
 
@@ -177,10 +178,10 @@ const PasswordReset = () => {
         ...prev, 
         newPassword: '비밀번호는 8~12자로 입력해주세요' 
       }));
-    } else if (!/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&^])[A-Za-z\d@$!%*#?&^]{8,12}$/.test(value)) {
+    } else if (!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,12}$/.test(value)) {
       setErrors(prev => ({ 
         ...prev, 
-        newPassword: '영문, 숫자, 특수문자를 포함하여 입력해주세요' 
+        newPassword: '영문, 숫자를 포함하여 입력해주세요' 
       }));
     } else {
       setErrors(prev => ({ ...prev, newPassword: '' }));
@@ -205,7 +206,7 @@ const PasswordReset = () => {
     const newErrors = {
       currentPassword: currentPassword.length === 0 ? '기존 비밀번호를 입력해주세요.' : '',
       newPassword: newPassword.length === 0 ? '새 비밀번호를 입력해주세요.' : 
-                   !validatePassword(newPassword) ? '비밀번호는 8자 이상, 영문/숫자/특수문자를 포함해야 합니다.' : '',
+                   !validatePassword(newPassword) ? '비밀번호는 8~12자, 영문/숫자를 포함해야 합니다.' : '',
       confirmPassword: confirmPassword.length === 0 ? '새 비밀번호 확인을 입력해주세요.' :
                       confirmPassword !== newPassword ? '비밀번호가 일치하지 않습니다.' : ''
     };
@@ -220,8 +221,8 @@ const PasswordReset = () => {
       });
       if (result.status === 200) {
         navigate(-1);
-      } else {
-        alert("비밀번호 변경에 실패했습니다.");
+      } else if (result.status === 401) {
+        setResetError("기존 비밀번호가 유효하지 않습니다.");
       }
     }
   };
@@ -299,9 +300,12 @@ const PasswordReset = () => {
               <ErrorText>{errors.confirmPassword}</ErrorText>
             )}
           </InputGroup>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'baseline', gap: '10px' }}>
           <ResetButton onClick={handleReset} disabled={!isFormValid()}>
             재설정 완료
           </ResetButton>
+          {resetError && <ErrorText>{resetError}</ErrorText>}
+        </div>
         </FormSection>
       </Content>
     </ResetContainer>
