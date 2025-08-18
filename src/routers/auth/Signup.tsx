@@ -214,12 +214,13 @@ const Signup = () => {
         let profileImageKey: string | undefined = undefined;
 
         if (profileFile) {
+          console.log(profileFile);
           const fileExtension = profileFile.name.split('.').pop()?.toLowerCase() || '.'.concat('jpg');
           const imageType = "PROFILE";
           const presignResponse = await presignMutation.mutateAsync({ imageType, fileExtension: `.${fileExtension}` });
 
           if (!presignResponse?.result?.presignedUrl) {
-            throw new Error('Failed to get presigned URL from server. The API response is invalid.');
+            console.log('Failed to get presigned URL from server. The API response is invalid.');
           }
 
           const { presignedUrl, imageKey } = presignResponse.result;
