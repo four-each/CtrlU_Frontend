@@ -172,7 +172,7 @@ const MyPageEdit = () => {
     setNickname(value);
     
     // 닉네임 유효성 검사
-    if (value.length >= 2 && /^[가-힣a-zA-Z0-9]+$/.test(value)) {
+    if (value.length <= 4 && value.length >= 2 && /^[가-힣a-zA-Z0-9]+$/.test(value)) {
       setIsValid(true);
     } else {
       setIsValid(false);
