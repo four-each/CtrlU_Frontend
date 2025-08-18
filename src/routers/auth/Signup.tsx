@@ -218,7 +218,7 @@ const Signup = () => {
           const fileExtension = profileFile.name.split('.').pop()?.toLowerCase() || '.'.concat('jpg');
           const imageType = "PROFILE";
           const contentType = profileFile.type;
-          const presignResponse = await presignMutation.mutateAsync({ imageType, fileExtension: `.${fileExtension}` });
+          const presignResponse = await presignMutation.mutateAsync({ imageType, fileExtension: `.${fileExtension}`, contentType });
 
           if (!presignResponse?.result?.presignedUrl) {
             console.log('Failed to get presigned URL from server. The API response is invalid.');
@@ -226,7 +226,7 @@ const Signup = () => {
 
           const { presignedUrl, imageKey } = presignResponse.result;
 
-          await postUploadToS3(presignedUrl, imageKey, profileFile);
+          await postUploadToS3(presignedUrl, imageKey, profileFile, contentType);
 
           profileImageKey = imageKey;
         }
