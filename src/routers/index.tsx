@@ -12,7 +12,7 @@ import CreateTask from "./todo/CreateTask";
 import Success from "./todo/Success";
 import MyPage from "./user/MyPage";
 import MyPageEdit from "./user/MyPageEdit";
-import PasswordReset from "./user/PasswordReset";
+import PasswordChange from "./user/PasswordChange";
 import AddFriend from "./friendship/AddFriend";
 import FriendList from "./friendship/FriendList";
 import FriendRequest from "./friendship/FriendRequest";
@@ -32,7 +32,7 @@ const Router = () => {
         {/* User Routes */}
         <Route path="/mypage" element={<MyPage />} />
         <Route path="/mypage/edit" element={<MyPageEdit />} />
-        <Route path="/mypage/password-reset" element={<PasswordReset />} />
+        <Route path="/mypage/password-change" element={<PasswordChange />} />
         
         {/* Friendship Routes */}
         <Route path="/friendship/add" element={<AddFriend />} />

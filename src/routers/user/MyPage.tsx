@@ -5,7 +5,7 @@ import { colors } from '@styles/theme';
 import { BackLightIcon, ArchiveIcon, FriendListIcon, FriendRequestIcon, SettingIcon, ProfileIcon } from '@assets/icons';
 import { css } from "@emotion/react";
 import { useUserProfile } from '../../api/useUserProfile';
-import { useLogout } from '../../hooks/api/auth/useLogout';
+import { useLogout } from '../../hooks/api/user/useLogout';
 
 const MyPageContainer = styled.div`
   width: 100%;
@@ -194,7 +194,7 @@ const MyPage = () => {
   const handlePasswordChange = () => {
     // TODO: 비밀번호 변경 페이지로 이동
     console.log('비밀번호 변경');
-    navigate('/mypage/password-reset');
+    navigate('/mypage/password-change');
   };
 
   const handlePrivacy = () => {

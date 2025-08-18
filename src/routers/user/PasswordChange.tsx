@@ -4,6 +4,7 @@ import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
 import { BackLightIcon, ProfileIcon } from '@assets/icons';
 import { css } from "@emotion/react";
+import { useChangePassword } from '@hooks/api/user/useChangePassword';
 
 const ResetContainer = styled.div`
   width: 100%;
@@ -144,6 +145,7 @@ const PasswordReset = () => {
     newPassword: '',
     confirmPassword: ''
   });
+  const changePasswordMutation = useChangePassword();
 
   const handleBack = () => {
     navigate(-1);
@@ -198,7 +200,7 @@ const PasswordReset = () => {
     }
   };
 
-  const handleReset = () => {
+  const handleReset = async () => {
     // 모든 필드 검증
     const newErrors = {
       currentPassword: currentPassword.length === 0 ? '기존 비밀번호를 입력해주세요.' : '',
@@ -212,9 +214,15 @@ const PasswordReset = () => {
 
     // 모든 에러가 없으면 재설정 진행
     if (!Object.values(newErrors).some(error => error !== '')) {
-      // TODO: 실제 비밀번호 재설정 API 호출
-      console.log('비밀번호 재설정:', { currentPassword, newPassword });
-      navigate(-1);
+      const result = await changePasswordMutation.mutateAsync({
+        currentPassword,
+        newPassword
+      });
+      if (result.status === 200) {
+        navigate(-1);
+      } else {
+        alert("비밀번호 변경에 실패했습니다.");
+      }
     }
   };
 
@@ -292,8 +300,8 @@ const PasswordReset = () => {
             )}
           </InputGroup>
           <ResetButton onClick={handleReset} disabled={!isFormValid()}>
-          재설정 완료
-        </ResetButton>
+            재설정 완료
+          </ResetButton>
         </FormSection>
       </Content>
     </ResetContainer>
