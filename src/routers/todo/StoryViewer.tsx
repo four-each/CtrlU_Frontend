@@ -162,11 +162,13 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
           </Txt>
         </ContentContainer>
         
-        <Timer
-          durationTime={currentStory.task.targetTime * 60 * 1000}
-          endTime={formatTime(currentStory.task.targetTime)}
-          timerRef={finishHandler}
-        />
+        <TimerContainer>
+          <Timer
+            durationTime={currentStory.task.targetTime * 60 * 1000}
+            endTime={formatTime(currentStory.task.targetTime)}
+            timerRef={finishHandler}
+          />
+        </TimerContainer>
 
         {showLeftArrow && (
           <NavigationButton position="left" onClick={handlePrevious}>
@@ -208,6 +210,10 @@ const ContentContainer = styled.div`
   width: 100%;
   padding: 0 20px;
   gap: 15px;
+`;
+
+const TimerContainer = styled.div`
+  margin-bottom: 40px;
 `;
 
 const ProgressBarContainer = styled.div`
