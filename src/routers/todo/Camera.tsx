@@ -30,6 +30,8 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
   const [description, setDescription] = useState('');
   const [selectedHours, setSelectedHours] = useState(2);
   const [selectedMinutes, setSelectedMinutes] = useState(30);
+  const [currentCamera, setCurrentCamera] = useState<'front' | 'back'>('back');
+  const [availableCameras, setAvailableCameras] = useState<MediaDeviceInfo[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const hoursScrollRef = useRef<HTMLDivElement>(null);
   const minutesScrollRef = useRef<HTMLDivElement>(null);
@@ -37,15 +39,28 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
+  // 사용 가능한 카메라 목록 가져오기
+  const getAvailableCameras = async () => {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(device => device.kind === 'videoinput');
+      setAvailableCameras(videoDevices);
+      console.log('사용 가능한 카메라:', videoDevices);
+    } catch (error) {
+      console.error('카메라 목록 가져오기 실패:', error);
+    }
+  };
+
   // 컴포넌트 마운트 시 카메라 자동 시작
   useEffect(() => {
+    getAvailableCameras();
     startCamera();
     
     // 컴포넌트 언마운트 시 카메라 정리
     return () => {
       stopCamera();
     };
-  }, []);
+  }, [currentCamera]);
 
   const startCamera = async () => {
     try {
@@ -57,10 +72,15 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
         throw new Error('이 브라우저는 카메라를 지원하지 않습니다.');
       }
       
-      // 더 간단한 카메라 설정으로 시도
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: true // 기본 설정으로 시도
-      });
+      // 후면 카메라 우선 시도
+      const constraints = {
+        video: {
+          facingMode: currentCamera === 'back' ? 'environment' : 'user'
+        }
+      };
+      
+      console.log('카메라 제약 조건:', constraints);
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
       
       console.log('카메라 스트림 획득 성공:', stream);
       console.log('videoRef.current:', videoRef.current);
@@ -173,6 +193,10 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
     }
     // 카메라 다시 시작
     startCamera();
+  };
+
+  const handleCameraSwitch = () => {
+    setCurrentCamera(currentCamera === 'back' ? 'front' : 'back');
   };
 
   const handleSubmit = () => {
@@ -313,19 +337,24 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
         {!capturedImage ? (
           <CameraPreview>
             <VideoContainer>
-                          <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              style={{ 
-                width: '100%', 
-                height: '100%', 
-                objectFit: 'cover',
-                backgroundColor: '#000',
-                display: isCameraActive ? 'block' : 'none'
-              }}
-            />
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                style={{ 
+                  width: '100%', 
+                  height: '100%', 
+                  objectFit: 'cover',
+                  backgroundColor: '#000',
+                  display: isCameraActive ? 'block' : 'none'
+                }}
+              />
+              {isCameraActive && (
+                <CameraSwitchButton onClick={handleCameraSwitch}>
+                  <CameraSwitchIcon>🔄</CameraSwitchIcon>
+                </CameraSwitchButton>
+              )}
               {!isCameraActive && cameraError && (
                 <CameraPlaceholder>
                   <CameraIcon>⚠️</CameraIcon>
@@ -585,6 +614,31 @@ const VideoContainer = styled.div`
 
 const CameraIcon = styled.div`
   font-size: 48px;
+`;
+
+const CameraSwitchButton = styled.button`
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  background-color: rgba(0, 0, 0, 0.5);
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+  }
+`;
+
+const CameraSwitchIcon = styled.div`
+  font-size: 20px;
+  color: white;
 `;
 
 const CapturedImageContainer = styled.div`
