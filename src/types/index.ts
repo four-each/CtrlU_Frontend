@@ -45,4 +45,11 @@ export interface UserWithStories {
   user: User;
   stories: Story[];
   isMyStories: boolean;
+}
+
+export interface StoryItem {
+  id: string;
+  task: TaskWithUser;
+  isMyTask: boolean;
+  timestamp: Date;
 } 
