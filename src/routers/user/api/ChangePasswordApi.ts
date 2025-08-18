@@ -13,7 +13,7 @@ export interface ChangePasswordRequest {
 
 export async function changePasswordApi(payload: ChangePasswordRequest): Promise<BaseResponse> {
     return http<BaseResponse>(`/users/password`, {
-        method: "POST",
+        method: "PATCH",
         body: payload,
         skipAuth: false,
     });
