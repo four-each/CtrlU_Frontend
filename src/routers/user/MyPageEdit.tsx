@@ -4,6 +4,9 @@ import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
 import { BackLightIcon, ImageUploadIcon, ProfileIcon } from '@assets/icons';
 import { css } from "@emotion/react";
+import { useChangeProfile } from '@hooks/api/user/useChangeProfile';
+import { usePresignUpload } from "@hooks/api/auth/useSignup";
+import { postUploadToS3 } from '@utils/s3';
 
 const EditContainer = styled.div`
   width: 100%;
@@ -152,6 +155,8 @@ const MyPageEdit = () => {
   const [profileImagePreview, setProfileImagePreview] = useState<string>('');
   const [profileFile, setProfileFile] = useState<File | null>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
+  const changeProfileMutation = useChangeProfile()
+  const presignMutation = usePresignUpload();
 
   const handleBack = () => {
     navigate(-1);
@@ -174,11 +179,27 @@ const MyPageEdit = () => {
     }
   };
 
-  const handleEdit = () => {
+  const handleEdit = async () => {
     if (isValid) {
-      // TODO: 실제 수정 로직 구현
-      console.log('수정 완료:', nickname);
-      navigate(-1);
+      let profileImageKey: string | undefined = undefined;
+
+      if (profileFile) {
+        const fileExtension = profileFile.name.split('.').pop()?.toLowerCase() || 'jpg';
+        const imageType = "PROFILE";
+        const { result: { presignedUrl, imageKey } } = await presignMutation.mutateAsync({ imageType, fileExtension });
+
+        await postUploadToS3(presignedUrl, imageKey, profileFile);
+
+        profileImageKey = imageKey;
+      }
+
+      const result = await changeProfileMutation.mutateAsync({
+        nickname,
+        profileImageKey: profileImageKey || '',
+      });
+      if (result.status === 200) {
+        navigate(-1);
+      } 
     }
   };
 
