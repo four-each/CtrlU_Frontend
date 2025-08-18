@@ -155,8 +155,8 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
           align="center"
           width="100%"
           height="100%"
-          padding={"50px 0 40px"}
-          gap={15}
+          padding={"30px 0 20px"}
+          gap={12}
         >
           <SmallImage src={currentStory.task.startImage} alt="smallImage" />
           <Txt
@@ -196,11 +196,17 @@ export default StoryViewer;
 const Container = styled.div`
   width: 100%;
   max-width: 480px;
-  height: 100vh;
+  min-height: 100vh;
   background-color: ${colors.purple1};
   margin: 0 auto;
   position: relative;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
+  
+  @media (max-height: 600px) {
+    min-height: 100vh;
+    padding-bottom: 20px;
+  }
 `;
 
 const AnimatedCol = styled(Col)<{ animation: 'left' | 'right' | 'none' }>`
