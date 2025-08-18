@@ -4,7 +4,7 @@ import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
 import { BackLightIcon, ArchiveIcon, FriendListIcon, FriendRequestIcon, SettingIcon, ProfileIcon } from '@assets/icons';
 import { css } from "@emotion/react";
-import { useUserProfile } from '../../api/useUserProfile';
+import { useUserProfile } from '../../hooks/api/user/useUserProfile';
 import { useLogout } from '../../hooks/api/user/useLogout';
 
 const MyPageContainer = styled.div`
