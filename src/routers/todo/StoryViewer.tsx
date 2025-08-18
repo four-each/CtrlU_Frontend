@@ -150,14 +150,7 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
           ))}
         </ProgressBarContainer>
 
-        <Col
-          justify="flex-start"
-          align="center"
-          width="100%"
-          height="100%"
-          padding={"30px 0 20px"}
-          gap={12}
-        >
+        <ContentContainer>
           <SmallImage src={currentStory.task.startImage} alt="smallImage" />
           <Txt
             fontSize="24px"
@@ -167,7 +160,7 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
           >
             {currentStory.task.title}
           </Txt>
-        </Col>
+        </ContentContainer>
         
         <Timer
           durationTime={currentStory.task.targetTime * 60 * 1000}
@@ -196,21 +189,25 @@ export default StoryViewer;
 const Container = styled.div`
   width: 100%;
   max-width: 480px;
-  min-height: 100vh;
+  height: 100vh;
   background-color: ${colors.purple1};
   margin: 0 auto;
-  position: relative;
-  overflow-y: auto;
-  overflow-x: hidden;
-  
-  @media (max-height: 600px) {
-    min-height: 100vh;
-    padding-bottom: 20px;
-  }
 `;
 
 const AnimatedCol = styled(Col)<{ animation: 'left' | 'right' | 'none' }>`
+  height: 100%;
   animation: ${({ animation }) => animation === 'left' ? slideInLeft : animation === 'right' ? slideInRight : 'none'} 0.5s forwards;
+`;
+
+const ContentContainer = styled.div`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0 20px;
+  gap: 15px;
 `;
 
 const ProgressBarContainer = styled.div`
