@@ -34,8 +34,7 @@ async function refreshAccessToken(): Promise<string | null> {
 
     const token = data?.result?.accessToken || data?.accessToken || null;
     if (token) {
-      // 만료 시간이 응답에 없다면 기본 1시간으로 저장
-      saveToken(token, 3600);
+      saveToken(token, 300);
       return token;
     }
     return null;

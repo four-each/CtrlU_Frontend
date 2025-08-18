@@ -14,5 +14,6 @@ export async function getUserProfileApi(): Promise<UserProfileResponse> {
     return http<UserProfileResponse>(`/users/profile`, {
         method: "GET",
         skipAuth: false,
+        retryOn401: true,
     });
 }
