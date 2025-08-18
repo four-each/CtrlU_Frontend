@@ -1,11 +1,10 @@
-export const postUploadToS3 = async (presignedUrl: string, imageKey: string, file: File, contentType: string) => {
+export const postUploadToS3 = async (presignedUrl: string, imageKey: string, file: File) => {
     try {
       //  FormData 생성 및 파일 업로드
       const formData = new FormData();
-      formData.append("Content-Type", contentType);
+      formData.append("Content-Type", file.type);
       formData.append("file", file);
   
-      console.log(`Uploading to S3 with Content-Type: '${contentType}'`);
       const uploadRes = await fetch(presignedUrl, {
         method: "PUT",
         body: formData,

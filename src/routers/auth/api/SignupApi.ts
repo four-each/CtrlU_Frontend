@@ -23,7 +23,6 @@ export async function signupApi(payload: SignupRequest): Promise<BaseResponse> {
 export interface PresignRequest {
   imageType: string;
   fileExtension: string; // e.g., 'jpg', 'png'
-  contentType: string;
 }
 
 export interface PresignResponse extends BaseResponse {
