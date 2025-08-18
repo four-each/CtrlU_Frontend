@@ -131,13 +131,15 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
   return (
     <Container {...swipeHandlers}>
       <AnimatedCol align="center" animation={animation}>
-        <Header
-          isBack={true}
-          isRight={false}
-          title=""
-          userName={currentUser.user.nickname}
-          onBack={onClose}
-        />
+        <HeaderContainer>
+          <Header
+            isBack={true}
+            isRight={false}
+            title=""
+            userName={currentUser.user.nickname}
+            onBack={onClose}
+          />
+        </HeaderContainer>
         
         <ProgressBarContainer>
           {currentUser.stories.map((_, index) => (
@@ -150,7 +152,14 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
           ))}
         </ProgressBarContainer>
 
-        <ContentContainer>
+        <Col
+          justify="flex-start"
+          align="center"
+          width="100%"
+          height="auto"
+          padding={"50px 0 40px"}
+          gap={15}
+        >
           <SmallImage src={currentStory.task.startImage} alt="smallImage" />
           <Txt
             fontSize="24px"
@@ -160,15 +169,13 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
           >
             {currentStory.task.title}
           </Txt>
-        </ContentContainer>
+        </Col>
         
-        <TimerContainer>
-          <Timer
-            durationTime={currentStory.task.targetTime * 60 * 1000}
-            endTime={formatTime(currentStory.task.targetTime)}
-            timerRef={finishHandler}
-          />
-        </TimerContainer>
+        <Timer
+          durationTime={currentStory.task.targetTime * 60 * 1000}
+          endTime={formatTime(currentStory.task.targetTime)}
+          timerRef={finishHandler}
+        />
 
         {showLeftArrow && (
           <NavigationButton position="left" onClick={handlePrevious}>
@@ -199,28 +206,19 @@ const Container = styled.div`
 const AnimatedCol = styled(Col)<{ animation: 'left' | 'right' | 'none' }>`
   height: 100%;
   animation: ${({ animation }) => animation === 'left' ? slideInLeft : animation === 'right' ? slideInRight : 'none'} 0.5s forwards;
-  padding-bottom: 40px;
 `;
 
-const ContentContainer = styled.div`
+const HeaderContainer = styled.div`
+  width: 100%;
   display: flex;
-  flex: 1;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  padding: 0 20px;
-  gap: 15px;
-`;
-
-const TimerContainer = styled.div`
-  margin-bottom: 40px;
 `;
 
 const ProgressBarContainer = styled.div`
   display: flex;
   gap: 4px;
-  padding: 12px 20px;
+  padding: 8px 16px 12px 16px;
   width: 100%;
 `;
 
