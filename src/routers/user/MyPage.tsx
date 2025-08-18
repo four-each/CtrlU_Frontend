@@ -147,7 +147,6 @@ const SettingsItem = styled.div`
   border-radius: 8px;
   display: flex;
   align-items: center;
-  padding: 0 26px;
   cursor: pointer;
   transition: background-color 0.2s;
   margin: 12px 20px 0px 20px;
@@ -179,11 +178,11 @@ const MyPage = () => {
   };
 
   const handleFriendList = () => {
-    navigate('/friendships/list');
+    navigate('/friendship/list');
   };
 
   const handleFriendRequest = () => {
-    navigate('/friendships/request');
+    navigate('/friendship/request');
   };
 
   const handleArchive = () => {
