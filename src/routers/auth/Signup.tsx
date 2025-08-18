@@ -97,14 +97,6 @@ const ErrorMessage = styled.div`
   text-align: left;
 `;
 
-const HelperText = styled.div`
-  font-family: 'Noto Sans KR', sans-serif;
-  font-size: 16px;
-  font-weight: 400;
-  color: #bababa;
-  margin-top: 4px;
-`;
-
 const SignupButton = styled.button`
   width: 100%;
   max-width: 335px;

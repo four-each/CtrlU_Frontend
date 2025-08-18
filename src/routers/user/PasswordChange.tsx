@@ -165,6 +165,8 @@ const PasswordReset = () => {
       ...prev,
       currentPassword: value.length === 0 ? '기존 비밀번호를 입력해주세요.' : ''
     }));
+    // 서버 에러 메시지 초기화
+    if (resetError) setResetError('');
   };
 
   const handleNewPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -186,6 +188,7 @@ const PasswordReset = () => {
     } else {
       setErrors(prev => ({ ...prev, newPassword: '' }));
     }
+    if (resetError) setResetError('');
   };
 
   const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -199,6 +202,7 @@ const PasswordReset = () => {
     } else {
       setErrors(prev => ({ ...prev, confirmPassword: '' }));
     }
+    if (resetError) setResetError('');
   };
 
   const handleReset = async () => {
@@ -215,14 +219,20 @@ const PasswordReset = () => {
 
     // 모든 에러가 없으면 재설정 진행
     if (!Object.values(newErrors).some(error => error !== '')) {
-      const result = await changePasswordMutation.mutateAsync({
-        currentPassword,
-        newPassword
-      });
-      if (result.status === 200) {
-        navigate(-1);
-      } else if (result.status === 401) {
-        setResetError("기존 비밀번호가 유효하지 않습니다.");
+      try {
+        const result = await changePasswordMutation.mutateAsync({
+          currentPassword,
+          newPassword
+        });
+        if (result.status === 200) {
+          navigate(-1);
+        } else {
+          // 예상치 못한 형태의 응답 대비
+          setResetError('비밀번호 변경에 실패했습니다. 다시 시도해주세요.');
+        }
+      } catch (error) {
+        // http 유틸이 !ok에서 throw 하므로 여기서 401 처리
+        setResetError('기존 비밀번호가 유효하지 않습니다.');
       }
     }
   };
@@ -301,11 +311,11 @@ const PasswordReset = () => {
             )}
           </InputGroup>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'baseline', gap: '10px' }}>
-          <ResetButton onClick={handleReset} disabled={!isFormValid()}>
-            재설정 완료
-          </ResetButton>
-          {resetError && <ErrorText>{resetError}</ErrorText>}
-        </div>
+            <ResetButton onClick={handleReset} disabled={!isFormValid()}>
+              재설정 완료
+            </ResetButton>
+            {resetError && <ErrorText>{resetError}</ErrorText>}
+          </div>
         </FormSection>
       </Content>
     </ResetContainer>
