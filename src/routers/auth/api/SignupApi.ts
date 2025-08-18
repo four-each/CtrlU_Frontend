@@ -35,7 +35,7 @@ export interface PresignResponse extends BaseResponse {
 
 export async function getPresignedUrl(payload: PresignRequest): Promise<PresignResponse> {
   return http<PresignResponse, PresignRequest>(`/auth/presigned-url`, {
-    method: "PUT",
+    method: "POST",
     body: payload,
   });
 }

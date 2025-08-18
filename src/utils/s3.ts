@@ -7,7 +7,7 @@ export const postUploadToS3 = async (presignedUrl: string, imageKey: string, fil
   
       console.log(`Uploading to S3 with Content-Type: '${contentType}'`);
       const uploadRes = await fetch(presignedUrl, {
-        method: "POST",
+        method: "PUT",
         body: formData,
       });
   
