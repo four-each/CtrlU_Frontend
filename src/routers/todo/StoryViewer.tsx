@@ -208,13 +208,21 @@ const Container = styled.div`
 const AnimatedCol = styled(Col)<{ animation: 'left' | 'right' | 'none' }>`
   height: 100%;
   animation: ${({ animation }) => animation === 'left' ? slideInLeft : animation === 'right' ? slideInRight : 'none'} 0.5s forwards;
+  padding-top: 60px;
 `;
 
 const HeaderContainer = styled.div`
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
   width: 100%;
+  max-width: 480px;
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 20;
+  background-color: transparent;
 `;
 
 const TimerContainer = styled.div`
