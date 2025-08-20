@@ -155,7 +155,7 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
       <AnimatedCol 
         align="center" 
         animation={animation}
-        style={{ paddingTop: '120px', paddingBottom: '80px' }}
+        style={{ paddingTop: '70px', paddingBottom: '80px' }}
       >
         <Col
           justify="flex-start"
