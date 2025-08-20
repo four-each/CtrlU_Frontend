@@ -130,7 +130,17 @@ const Percent = styled.div<{ isOver: boolean; percentage: number }>`
   z-index: 1;
   
   /* 원형 진행바를 따라 움직이도록 위치 계산 */
-  ${({ percentage }) => {
+  ${({ isOver, percentage }) => {
+    // 시간 초과 시에는 시작 위치(12시 방향)에 고정
+    if (isOver) {
+      return `
+        left: 50%;
+        top: calc(50% - 136px - 4px);
+        transform: translate(-50%, -50%);
+      `;
+    }
+    
+    // 정상 진행 시에는 원형 진행바를 따라 움직임
     const angle = (percentage / 100) * 360 - 90; // -90도로 시작점을 12시 방향으로
     const radius = 136; // 원형 진행바의 반지름 (272px / 2)
     const x = Math.cos((angle * Math.PI) / 180) * radius;

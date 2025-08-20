@@ -265,7 +265,7 @@ const NavigationButton = styled.button<{ position: 'left' | 'right' }>`
   top: 30%;
   ${({ position }) => position}: 20px;
   transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(170, 32, 240, 0.3);
   border: none;
   border-radius: 50%;
   width: 40px;
@@ -278,7 +278,7 @@ const NavigationButton = styled.button<{ position: 'left' | 'right' }>`
   z-index: 10;
   
   &:hover {
-    background-color: rgba(255, 255, 255, 0.3);
+    background-color: rgba(170, 32, 240, 0.5);
   }
 `;
 
