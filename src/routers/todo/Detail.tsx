@@ -5,7 +5,7 @@ import Txt from "@components/common/Txt";
 import Timer, { FinishHandler } from "@components/timer/Timer";
 import styled from "@emotion/styled";
 import { colors } from "@styles/theme";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import profileIcon from "../../assets/icons/home/profile.svg";
 import ganadiIcon from "../../assets/icons/detail/ganadi.svg";
@@ -17,19 +17,30 @@ const Detail = () => {
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<'complete' | 'quit' | 'delete'>('complete');
   const navigate = useNavigate();
+
+  // 페이지 마운트 시 스크롤을 맨 위로 초기화
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <Container>
-      <Col align="center">
-      <Header
-        isBack={true}
-        isRight={true}
-        rightIcon={isMe ? <TrashIcon onClick={() => {
-          setModalType('delete');
-          setShowModal(true);
-        }} /> : null}
-        title={isMe ? "" : "친구이름"}
-        userName={isMe ? "나" : "친구이름"}
-      />
+      {/* 헤더를 고정된 상단 영역으로 분리 */}
+      <FixedHeaderContainer>
+        <Header
+          isBack={true}
+          isRight={true}
+          rightIcon={isMe ? <TrashIcon onClick={() => {
+            setModalType('delete');
+            setShowModal(true);
+          }} /> : null}
+          title={isMe ? "" : "친구이름"}
+          userName={isMe ? "나" : "친구이름"}
+        />
+      </FixedHeaderContainer>
+
+      {/* 콘텐츠 영역 */}
+      <ContentContainer>
       <Col
         justify="flex-start"
         align="center"
@@ -124,7 +135,7 @@ const Detail = () => {
           </ModalContent>
         </ModalOverlay>
       )}
-      </Col>
+      </ContentContainer>
     </Container>
   );
 };
@@ -137,6 +148,23 @@ const Container = styled.div`
   height: 100vh;
   background-color: ${colors.white};
   margin: 0 auto;
+  overflow-y: scroll;
+  position: relative;
+`;
+
+const FixedHeaderContainer = styled.div`
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  background-color: ${colors.white};
+  z-index: 100;
+`;
+
+const ContentContainer = styled.div`
+  padding-top: 60px;
 `;
 
 const SmallImage = styled.img`
