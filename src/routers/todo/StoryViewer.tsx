@@ -130,17 +130,15 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
 
   return (
     <Container {...swipeHandlers}>
-      <AnimatedCol align="center" animation={animation}>
-        <HeaderContainer>
-          <Header
-            isBack={true}
-            isRight={false}
-            title=""
-            userName={currentUser.user.nickname}
-            onBack={onClose}
-          />
-        </HeaderContainer>
-        
+      {/* 헤더와 진행바를 고정된 상단 영역으로 분리 */}
+      <FixedHeaderContainer>
+        <Header
+          isBack={true}
+          isRight={false}
+          title=""
+          userName={currentUser.user.nickname}
+          onBack={onClose}
+        />
         <ProgressBarContainer>
           {currentUser.stories.map((_, index) => (
             <ProgressBarItem key={index} onClick={() => handleProgressBarClick(index)}>
@@ -151,7 +149,14 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
             </ProgressBarItem>
           ))}
         </ProgressBarContainer>
+      </FixedHeaderContainer>
 
+      {/* 애니메이션이 적용될 콘텐츠 영역 */}
+      <AnimatedCol 
+        align="center" 
+        animation={animation}
+        style={{ paddingTop: '120px' }}
+      >
         <Col
           justify="flex-start"
           align="center"
@@ -203,26 +208,31 @@ const Container = styled.div`
   height: 100vh;
   background-color: ${colors.purple1};
   margin: 0 auto;
+  overflow-y: scroll;
+  position: relative;
 `;
 
 const AnimatedCol = styled(Col)<{ animation: 'left' | 'right' | 'none' }>`
-  height: 100%;
+  min-height: 100%;
   animation: ${({ animation }) => animation === 'left' ? slideInLeft : animation === 'right' ? slideInRight : 'none'} 0.5s forwards;
-  padding-top: 60px;
 `;
 
-const HeaderContainer = styled.div`
+const FixedHeaderContainer = styled(Col)`
   position: fixed;
   top: 0;
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
   max-width: 480px;
+  background-color: ${colors.purple1};
+  z-index: 100;
+`;
+
+const HeaderContainer = styled.div`
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 20;
-  background-color: transparent;
 `;
 
 const TimerContainer = styled.div`
