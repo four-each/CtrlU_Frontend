@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
 import { BackLightIcon, RemoveIcon, AcceptIcon } from '@assets/icons';
-import profileIcon from '../../assets/icons/home/profile.svg';
 import { css } from "@emotion/react";
+import { useGetReceivedRequests, useGetSentRequests } from '../../hooks/api/friendship/useGetRequests';
 
 const FriendRequestContainer = styled.div`
   width: 100%;
@@ -184,36 +184,11 @@ const FriendRequest = () => {
   const navigate = useNavigate();
   const [showNotification, setShowNotification] = useState(false);
   const [activeTab, setActiveTab] = useState<'received' | 'sent'>('received');
-  
-  const [receivedRequests, setReceivedRequests] = useState([
-    { id: 1, name: '강연주', profile: profileIcon },
-    { id: 2, name: '김수진', profile: profileIcon },
-    { id: 3, name: '정소민', profile: profileIcon },
-    { id: 4, name: '강연주', profile: profileIcon },
-    { id: 5, name: '김수진', profile: profileIcon },
-    { id: 6, name: '정소민', profile: profileIcon },
-    { id: 7, name: '강연주', profile: profileIcon },
-    { id: 8, name: '김수진', profile: profileIcon },
-    { id: 9, name: '정소민', profile: profileIcon },
-    { id: 10, name: '강연주', profile: profileIcon },
-    { id: 11, name: '김수진', profile: profileIcon },
-    { id: 12, name: '정소민', profile: profileIcon },
-  ]);
+  const { data: receivedRequests } = useGetReceivedRequests();
+  const { data: sentRequests } = useGetSentRequests();
 
-  const [sentRequests, setSentRequests] = useState([
-    { id: 1, name: '강연주', profile: profileIcon },
-    { id: 2, name: '김수진', profile: profileIcon },
-    { id: 3, name: '정소민', profile: profileIcon },
-    { id: 4, name: '강연주', profile: profileIcon },
-    { id: 5, name: '김수진', profile: profileIcon },
-    { id: 6, name: '정소민', profile: profileIcon },
-    { id: 7, name: '강연주', profile: profileIcon },
-    { id: 8, name: '김수진', profile: profileIcon },
-    { id: 9, name: '정소민', profile: profileIcon },
-    { id: 10, name: '강연주', profile: profileIcon },
-    { id: 11, name: '김수진', profile: profileIcon },
-    { id: 12, name: '정소민', profile: profileIcon },
-  ]);
+  const apiReceivedRequests = receivedRequests?.result.friends ?? [];
+  const apiSentRequests = sentRequests?.result.friends ?? [];
 
   const handleBack = () => {
     navigate(-1);
@@ -222,19 +197,16 @@ const FriendRequest = () => {
   const handleAcceptRequest = (friendId: number) => {
     // TODO: 친구 요청 수락 API 호출
     console.log('친구 요청 수락:', friendId);
-    setReceivedRequests(receivedRequests.filter(friend => friend.id !== friendId));
   };
 
   const handleRejectRequest = (friendId: number) => {
     // TODO: 친구 요청 거절 API 호출
     console.log('친구 요청 거절:', friendId);
-    setReceivedRequests(receivedRequests.filter(friend => friend.id !== friendId));
   };
 
   const handleCancelSentRequest = (friendId: number) => {
     // TODO: 보낸 친구 요청 취소 API 호출
     console.log('보낸 친구 요청 취소:', friendId);
-    setSentRequests(sentRequests.filter(friend => friend.id !== friendId));
     setShowNotification(true);
   };
 
@@ -277,11 +249,11 @@ const FriendRequest = () => {
 
         <TabContent isVisible={activeTab === 'received'}>
           <FriendList>
-            {receivedRequests.map((friend) => (
+            {apiReceivedRequests.map((friend) => (
               <FriendItem key={friend.id}>
                 <FriendCard>
-                  <ProfileImage src={friend.profile} alt={`${friend.name} 프로필`} />
-                  <FriendName>{friend.name}</FriendName>
+                  <ProfileImage src={friend.image} alt={`${friend.nickname} 프로필`} />
+                  <FriendName>{friend.nickname}</FriendName>
                   <ActionButtons>
                     <AcceptIcon 
                       css={css`
@@ -308,11 +280,11 @@ const FriendRequest = () => {
 
         <TabContent isVisible={activeTab === 'sent'}>
           <FriendList>
-            {sentRequests.map((friend) => (
+            {apiSentRequests.map((friend) => (
               <FriendItem key={friend.id}>
                 <FriendCard>
-                  <ProfileImage src={friend.profile} alt={`${friend.name} 프로필`} />
-                  <FriendName>{friend.name}</FriendName>
+                  <ProfileImage src={friend.image} alt={`${friend.nickname} 프로필`} />
+                  <FriendName>{friend.nickname}</FriendName>
                   <RemoveIcon 
                     css={css`
                       width: 24px;
