@@ -5,6 +5,7 @@ import { colors } from '@styles/theme';
 import { BackLightIcon, RemoveIcon, AcceptIcon } from '@assets/icons';
 import { css } from "@emotion/react";
 import { useGetReceivedRequests, useGetSentRequests } from '../../hooks/api/friendship/useGetRequests';
+import profileIcon from '../../assets/icons/home/profile.svg';
 
 const FriendRequestContainer = styled.div`
   width: 100%;
@@ -283,7 +284,7 @@ const FriendRequest = () => {
             {apiSentRequests.map((friend) => (
               <FriendItem key={friend.id}>
                 <FriendCard>
-                  <ProfileImage src={friend.image} alt={`${friend.nickname} 프로필`} />
+                  <ProfileImage src={friend.image || profileIcon} alt={`${friend.nickname} 프로필`} />
                   <FriendName>{friend.nickname}</FriendName>
                   <RemoveIcon 
                     css={css`
