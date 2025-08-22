@@ -6,6 +6,7 @@ import { BackLightIcon, SearchIcon, AlarmLightIcon, RemoveIcon } from '@assets/i
 import profileIcon from '../../assets/icons/home/profile.svg';
 import { css } from "@emotion/react";
 import { useGetFriends } from '../../hooks/api/friendship/useGetFriends';
+import { useDeleteFriend } from '../../hooks/api/friendship/useFriendRequestActions';
 
 const FriendListContainer = styled.div`
   width: 100%;
@@ -172,6 +173,7 @@ const AddFriendButton = styled.button`
 const FriendListPage = () => {
   const navigate = useNavigate();
   const { data: friendsData, isLoading, error } = useGetFriends();
+  const deleteFriendMutation = useDeleteFriend();
 
   // 동적으로 친구 수 계산 (API 데이터 우선)
   const apiFriends = friendsData?.result.friends ?? [];
@@ -187,8 +189,14 @@ const FriendListPage = () => {
   };
 
   const handleRemoveFriend = (friendId: number) => {
-    // TODO: 친구 삭제 API 연동 후 목록 invalidate 처리
-    console.log('친구 삭제:', friendId);
+    deleteFriendMutation.mutate(friendId, {
+      onSuccess: () => {
+        console.log('친구 삭제 성공:', friendId);
+      },
+      onError: (error) => {
+        console.error('친구 삭제 실패:', error);
+      }
+    });
   };
 
   const handleAddFriend = () => {
@@ -243,11 +251,13 @@ const FriendListPage = () => {
               <FriendCard>
                 <ProfileImage src={friend.image || profileIcon} alt={`${friend.nickname} 프로필`} />
                 <FriendName>{friend.nickname}</FriendName>
-                <RemoveIcon
-                  onClick={() => handleRemoveFriend(friend.id)}
+                <RemoveIcon 
+                  onClick={() => !deleteFriendMutation.isPending && handleRemoveFriend(friend.id)}
                   css={css`
                     width: 24px;
                     height: 24px;
+                    cursor: ${deleteFriendMutation.isPending ? 'not-allowed' : 'pointer'};
+                    opacity: ${deleteFriendMutation.isPending ? 0.5 : 1};
                   `}
                 />
               </FriendCard>

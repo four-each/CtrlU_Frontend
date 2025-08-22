@@ -7,7 +7,7 @@ export interface FriendRequestActionResponse {
 }
 
 export async function acceptFriendRequestApi(friendId: number): Promise<FriendRequestActionResponse> {
-    return http<FriendRequestActionResponse>(`/friendships/${friendId}/accept`, {
+    return http<FriendRequestActionResponse>(`/friendships/${friendId}`, {
         method: "PATCH",
         skipAuth: false
     });
@@ -22,6 +22,13 @@ export async function rejectFriendRequestApi(friendId: number): Promise<FriendRe
 
 export async function cancelSentRequestApi(friendId: number): Promise<FriendRequestActionResponse> {
     return http<FriendRequestActionResponse>(`/friendships/${friendId}/cancel`, {
+        method: "DELETE",
+        skipAuth: false
+    });
+}
+
+export async function deleteFriendApi(friendId: number): Promise<FriendRequestActionResponse> {
+    return http<FriendRequestActionResponse>(`/friendships/${friendId}`, {
         method: "DELETE",
         skipAuth: false
     });

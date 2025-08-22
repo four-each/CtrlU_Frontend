@@ -3,6 +3,7 @@ import {
     acceptFriendRequestApi, 
     rejectFriendRequestApi, 
     cancelSentRequestApi,
+    deleteFriendApi,
     FriendRequestActionResponse 
 } from "@routers/friendship/api/FriendRequestActionsApi";
 
@@ -39,6 +40,18 @@ export function useCancelSentRequest() {
         onSuccess: () => {
             // 보낸 친구 요청 목록을 새로고침
             queryClient.invalidateQueries({ queryKey: ["friendship", "sent-requests"] });
+        },
+    });
+}
+
+export function useDeleteFriend() {
+    const queryClient = useQueryClient();
+    
+    return useMutation<FriendRequestActionResponse, Error, number>({
+        mutationFn: deleteFriendApi,
+        onSuccess: () => {
+            // 친구 목록을 새로고침
+            queryClient.invalidateQueries({ queryKey: ["friendship", "friends-list"] });
         },
     });
 }
