@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
 import { BackLightIcon, SearchIcon, AlarmLightIcon, RemoveIcon } from '@assets/icons';
 import profileIcon from '../../assets/icons/home/profile.svg';
 import { css } from "@emotion/react";
+import { useGetFriends } from '../../hooks/api/friendship/useGetFriends';
 
 const FriendListContainer = styled.div`
   width: 100%;
@@ -170,20 +171,11 @@ const AddFriendButton = styled.button`
 
 const FriendListPage = () => {
   const navigate = useNavigate();
-  const [friends, setFriends] = useState([
-    { id: 1, name: '강연주', profile: profileIcon },
-    { id: 2, name: '김수진', profile: profileIcon },
-    { id: 3, name: '정소민', profile: profileIcon },
-    { id: 4, name: '송채영', profile: profileIcon },
-    { id: 5, name: '김수진', profile: profileIcon },
-    { id: 6, name: '김수진', profile: profileIcon },
-    { id: 7, name: '김수진', profile: profileIcon },
-    { id: 8, name: '김수진', profile: profileIcon },
-    { id: 9, name: '김수진', profile: profileIcon },
-  ]);
+  const { data: friendsData, isLoading, error } = useGetFriends();
 
-  // 동적으로 친구 수 계산
-  const totalFriends = friends.length;
+  // 동적으로 친구 수 계산 (API 데이터 우선)
+  const apiFriends = friendsData?.result.friends ?? [];
+  const totalFriends = apiFriends.length;
   const maxFriends = 20; // 최대 친구 수
 
   const handleBack = () => {
@@ -195,9 +187,8 @@ const FriendListPage = () => {
   };
 
   const handleRemoveFriend = (friendId: number) => {
-    // TODO: 친구 삭제 API 호출
+    // TODO: 친구 삭제 API 연동 후 목록 invalidate 처리
     console.log('친구 삭제:', friendId);
-    setFriends(friends.filter(friend => friend.id !== friendId));
   };
 
   const handleAddFriend = () => {
@@ -247,12 +238,12 @@ const FriendListPage = () => {
         </SearchSection>
 
         <FriendList>
-          {friends.map((friend) => (
+          {apiFriends.map((friend) => (
             <FriendItem key={friend.id}>
               <FriendCard>
-                <ProfileImage src={friend.profile} alt={`${friend.name} 프로필`} />
-                <FriendName>{friend.name}</FriendName>
-                <RemoveIcon 
+                <ProfileImage src={friend.image || profileIcon} alt={`${friend.nickname} 프로필`} />
+                <FriendName>{friend.nickname}</FriendName>
+                <RemoveIcon
                   onClick={() => handleRemoveFriend(friend.id)}
                   css={css`
                     width: 24px;
