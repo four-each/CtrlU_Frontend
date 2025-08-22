@@ -253,7 +253,7 @@ const FriendRequest = () => {
             {apiReceivedRequests.map((friend) => (
               <FriendItem key={friend.id}>
                 <FriendCard>
-                  <ProfileImage src={friend.image} alt={`${friend.nickname} 프로필`} />
+                  <ProfileImage src={friend.image || profileIcon} alt={`${friend.nickname} 프로필`} />
                   <FriendName>{friend.nickname}</FriendName>
                   <ActionButtons>
                     <AcceptIcon 
