@@ -4,7 +4,7 @@ import { getReceivedRequestListApi, ReceivedRequestListResponse, getSentRequestL
 
 export function useGetReceivedRequests() {
     return useQuery<ReceivedRequestListResponse, Error>({
-      queryKey: ["friendship", "friend"],
+      queryKey: ["friendship", "received-requests"],
       queryFn: getReceivedRequestListApi,
       staleTime: 5 * 60 * 1000, // 5분간 캐시
       retry: 1,
@@ -13,7 +13,7 @@ export function useGetReceivedRequests() {
 
 export function useGetSentRequests() {
     return useQuery<SentRequestListResponse, Error>({
-        queryKey: ["friendship", "friend"],
+        queryKey: ["friendship", "sent-requests"],
         queryFn: getSentRequestListApi,
         staleTime: 5 * 60 * 1000, // 5분간 캐시
         retry: 1,

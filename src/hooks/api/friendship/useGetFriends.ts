@@ -4,7 +4,7 @@ import { getFriendListApi, FriendListResponse } from "@routers/friendship/api/Ge
 
 export function useGetFriends() {
     return useQuery<FriendListResponse, Error>({
-      queryKey: ["friendship", "friend"],
+      queryKey: ["friendship", "friends-list"],
       queryFn: getFriendListApi,
       staleTime: 5 * 60 * 1000, // 5분간 캐시
       retry: 1,
