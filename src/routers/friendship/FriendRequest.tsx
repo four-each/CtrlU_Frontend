@@ -5,6 +5,7 @@ import { colors } from '@styles/theme';
 import { BackLightIcon, RemoveIcon, AcceptIcon } from '@assets/icons';
 import { css } from "@emotion/react";
 import { useGetReceivedRequests, useGetSentRequests } from '../../hooks/api/friendship/useGetRequests';
+import { useAcceptFriendRequest, useRejectFriendRequest, useCancelSentRequest } from '../../hooks/api/friendship/useFriendRequestActions';
 import profileIcon from '../../assets/icons/home/profile.svg';
 
 const FriendRequestContainer = styled.div`
@@ -187,6 +188,9 @@ const FriendRequest = () => {
   const [activeTab, setActiveTab] = useState<'received' | 'sent'>('received');
   const { data: receivedRequests } = useGetReceivedRequests();
   const { data: sentRequests } = useGetSentRequests();
+  const acceptMutation = useAcceptFriendRequest();
+  const rejectMutation = useRejectFriendRequest();
+  const cancelMutation = useCancelSentRequest();
 
   const apiReceivedRequests = receivedRequests?.result.friends ?? [];
   const apiSentRequests = sentRequests?.result.friends ?? [];
@@ -196,19 +200,37 @@ const FriendRequest = () => {
   };
 
   const handleAcceptRequest = (friendId: number) => {
-    // TODO: 친구 요청 수락 API 호출
-    console.log('친구 요청 수락:', friendId);
+    acceptMutation.mutate(friendId, {
+      onSuccess: () => {
+        console.log('친구 요청 수락 성공:', friendId);
+      },
+      onError: (error) => {
+        console.error('친구 요청 수락 실패:', error);
+      }
+    });
   };
 
   const handleRejectRequest = (friendId: number) => {
-    // TODO: 친구 요청 거절 API 호출
-    console.log('친구 요청 거절:', friendId);
+    rejectMutation.mutate(friendId, {
+      onSuccess: () => {
+        console.log('친구 요청 거절 성공:', friendId);
+      },
+      onError: (error) => {
+        console.error('친구 요청 거절 실패:', error);
+      }
+    });
   };
 
   const handleCancelSentRequest = (friendId: number) => {
-    // TODO: 보낸 친구 요청 취소 API 호출
-    console.log('보낸 친구 요청 취소:', friendId);
-    setShowNotification(true);
+    cancelMutation.mutate(friendId, {
+      onSuccess: () => {
+        console.log('보낸 친구 요청 취소 성공:', friendId);
+        setShowNotification(true);
+      },
+      onError: (error) => {
+        console.error('보낸 친구 요청 취소 실패:', error);
+      }
+    });
   };
 
   const handleConfirmNotification = () => {
@@ -260,17 +282,19 @@ const FriendRequest = () => {
                       css={css`
                         width: 24px;
                         height: 24px;
-                        cursor: pointer;
+                        cursor: ${acceptMutation.isPending ? 'not-allowed' : 'pointer'};
+                        opacity: ${acceptMutation.isPending ? 0.5 : 1};
                       `}
-                      onClick={() => handleAcceptRequest(friend.id)}
+                      onClick={() => !acceptMutation.isPending && handleAcceptRequest(friend.id)}
                     />
                     <RemoveIcon 
                       css={css`
                         width: 24px;
                         height: 24px;
-                        cursor: pointer;
+                        cursor: ${rejectMutation.isPending ? 'not-allowed' : 'pointer'};
+                        opacity: ${rejectMutation.isPending ? 0.5 : 1};
                       `}
-                      onClick={() => handleRejectRequest(friend.id)}
+                      onClick={() => !rejectMutation.isPending && handleRejectRequest(friend.id)}
                     />
                   </ActionButtons>
                 </FriendCard>
@@ -290,9 +314,10 @@ const FriendRequest = () => {
                     css={css`
                       width: 24px;
                       height: 24px;
-                      cursor: pointer;
+                      cursor: ${cancelMutation.isPending ? 'not-allowed' : 'pointer'};
+                      opacity: ${cancelMutation.isPending ? 0.5 : 1};
                     `}
-                    onClick={() => handleCancelSentRequest(friend.id)}
+                    onClick={() => !cancelMutation.isPending && handleCancelSentRequest(friend.id)}
                   />
                 </FriendCard>
               </FriendItem>
