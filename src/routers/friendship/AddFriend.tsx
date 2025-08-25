@@ -5,6 +5,7 @@ import { colors } from '@styles/theme';
 import { BackLightIcon, AddFriendIcon, SearchIcon, AlarmLightIcon } from '@assets/icons';
 import profileIcon from '../../assets/icons/home/profile.svg';
 import { css } from "@emotion/react";
+import { useSearchFriends } from '../../hooks/api/friendship/useSearchFriends';
 
 const AddFriendContainer = styled.div`
   width: 100%;
@@ -88,15 +89,27 @@ const SearchInput = styled.div`
   position: relative;
 `;
 
-const SearchPlaceholder = styled.span`
+const SearchInputField = styled.input`
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
   font-family: 'Noto Sans KR', sans-serif;
-  font-weight: 400;
   font-size: 16px;
-  color: #c8b0db;
+  color: #1d1d1d;
   text-align: center;
+  
+  &::placeholder {
+    color: #c8b0db;
+  }
+`;
+
+const SearchIconContainer = styled.div`
   position: absolute;
-  left: 50%;
+  left: 10%;
   transform: translateX(-50%);
+  z-index: 2;
 `;
 
 const FriendList = styled.div`
@@ -152,25 +165,26 @@ const FriendName = styled.span`
   flex: 1;
 `;
 
+const EmptyState = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: #bababa;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 16px;
+`;
+
 const AddFriend = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const { data: searchResults, isLoading, error } = useSearchFriends(searchQuery);
 
-  // 임시 친구 데이터
-  const friends = [
-    { id: 1, name: '강연주', profile: profileIcon },
-    { id: 2, name: '김수진', profile: profileIcon },
-    { id: 3, name: '정소민', profile: profileIcon },
-    { id: 4, name: '송채영', profile: profileIcon },
-    { id: 5, name: '김수진', profile: profileIcon },
-    { id: 6, name: '김수진', profile: profileIcon },
-    { id: 7, name: '김수진', profile: profileIcon },
-    { id: 8, name: '김수진', profile: profileIcon },
-    { id: 9, name: '김수진', profile: profileIcon },
-    { id: 10, name: '김수진', profile: profileIcon },
-    { id: 11, name: '김수진', profile: profileIcon },
-    { id: 12, name: '김수진', profile: profileIcon },
-  ];
+  // 검색 결과가 있으면 API 데이터 사용, 없으면 빈 배열
+  const friends = searchResults?.result.values ?? [];
+  const hasNext = searchResults?.result.hasNext ?? false;
+  const nextCursorId = searchResults?.result.nextCursorId;
 
   // 동적으로 친구 수 계산
   const totalFriends = friends.length;
@@ -191,6 +205,13 @@ const AddFriend = () => {
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      // Enter 키로 검색 실행
+      e.preventDefault();
+    }
   };
 
   return (
@@ -222,36 +243,57 @@ const AddFriend = () => {
       <Content>
         <SearchSection>
           <SearchInput>
-            <SearchIcon 
-              css={css`
-                width: 24px;
-                height: 24px;
-                position: absolute;
-                left: 10%;
-                transform: translateX(-50%);
-              `}
+            <SearchIconContainer>
+              <SearchIcon 
+                css={css`
+                  width: 24px;
+                  height: 24px;
+                `}
+              />
+            </SearchIconContainer>
+            <SearchInputField
+              type="text"
+              placeholder="친구 검색하기 💬"
+              value={searchQuery}
+              onChange={handleSearch}
+              onKeyDown={handleKeyDown}
             />
-            <SearchPlaceholder>친구 검색하기 💬</SearchPlaceholder>
           </SearchInput>
         </SearchSection>
 
         <FriendList>
-          {friends.map((friend) => (
-            <FriendItem key={friend.id}>
-              <FriendCard>
-                <ProfileImage src={friend.profile} alt={`${friend.name} 프로필`} />
-                <FriendName>{friend.name}</FriendName>
-                <AddFriendIcon 
-                  onClick={() => handleAddFriend(friend.id)}
-                  css={css`
-                    width: 24px;
-                    height: 24px;
-                    margin-top: 2px;
-                  `}
-                />
-              </FriendCard>
-            </FriendItem>
-          ))}
+          {isLoading ? (
+            <EmptyState>검색 중...</EmptyState>
+          ) : error ? (
+            <EmptyState>검색 중 오류가 발생했습니다.</EmptyState>
+          ) : friends.length === 0 ? (
+            searchQuery ? (
+              <EmptyState>검색 결과가 없습니다.</EmptyState>
+            ) : (
+              <EmptyState>친구를 검색해보세요!</EmptyState>
+            )
+          ) : (
+            friends.map((friend) => (
+              <FriendItem key={friend.id}>
+                <FriendCard>
+                  <ProfileImage 
+                    src={friend.image || profileIcon} 
+                    alt={`${friend.nickname} 프로필`} 
+                  />
+                  <FriendName>{friend.nickname}</FriendName>
+                  <AddFriendIcon 
+                    onClick={() => handleAddFriend(friend.id)}
+                    css={css`
+                      width: 24px;
+                      height: 24px;
+                      margin-top: 2px;
+                      cursor: pointer;
+                    `}
+                  />
+                </FriendCard>
+              </FriendItem>
+            ))
+          )}
         </FriendList>
       </Content>
     </AddFriendContainer>
