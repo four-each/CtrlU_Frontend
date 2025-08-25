@@ -268,6 +268,7 @@ const FriendRequest = () => {
     rejectMutation.mutate(friendId, {
       onSuccess: () => {
         console.log('친구 요청 거절 성공:', friendId);
+        setShowNotification(true);
       },
       onError: (error) => {
         console.error('친구 요청 거절 실패:', error);
@@ -279,7 +280,6 @@ const FriendRequest = () => {
     cancelMutation.mutate(friendId, {
       onSuccess: () => {
         console.log('보낸 친구 요청 취소 성공:', friendId);
-        setShowNotification(true);
       },
       onError: (error) => {
         console.error('보낸 친구 요청 취소 실패:', error);
