@@ -269,7 +269,7 @@ const AddFriend = () => {
 
       // 내가 요청을 거절한지 7일이 지나지 않은 경우
       if (code === "F006") {
-        setModalMessage('최근에 이 사용자의 요청을 거절했어요.\n7일 후 다시 시도해주세요.');
+        setModalMessage('최근에 이 사용자가 요청을 거절했어요.\n7일 뒤에 재요청해주세요.');
         setShowLimitModal(true);
         return;
       }

@@ -268,7 +268,6 @@ const FriendRequest = () => {
     rejectMutation.mutate(friendId, {
       onSuccess: () => {
         console.log('친구 요청 거절 성공:', friendId);
-        setShowNotification(true);
       },
       onError: (error) => {
         console.error('친구 요청 거절 실패:', error);
@@ -380,14 +379,6 @@ const FriendRequest = () => {
         </TabContent>
       </Content>
 
-      {showNotification && (
-        <NotificationBox>
-          <NotificationText>재요청은 7일 후에 가능합니다.</NotificationText>
-          <ConfirmButton onClick={handleConfirmNotification}>
-            확인
-          </ConfirmButton>
-        </NotificationBox>
-      )}
       {showLimitModal && (
         <LimitModal>
           <LimitModalText>{modalMessage}</LimitModalText>
