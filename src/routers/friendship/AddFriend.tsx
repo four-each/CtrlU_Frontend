@@ -221,7 +221,8 @@ const LimitModalButton = styled.button`
 const AddFriend = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const { data: searchResults, isLoading, error } = useSearchFriends(searchQuery);
+  const effectiveQuery = searchQuery.length >= 2 ? searchQuery : '';
+  const { data: searchResults, isLoading, error } = useSearchFriends(effectiveQuery);
   const addFriendMutation = useFriendRequest()
 
   const [showLimitModal, setShowLimitModal] = useState(false);
@@ -246,38 +247,42 @@ const AddFriend = () => {
   };
 
   const handleAddFriend = async (targetId: number) => {
-    const result = await addFriendMutation.mutateAsync({
-      targetId
-    });
-
-    console.log(result.code);
-
-    // 대기중인 요청이 존재하는 친구
-    if (result.code === "F004") {
-      setModalMessage('이미 보낸 친구 요청이 있어요.\n답변을 기다려주세요!');
+    try {
+      const result = await addFriendMutation.mutateAsync({
+        targetId
+      });
+  
+      // 대기중인 요청이 존재하는 친구
+      if (result.code === "F004") {
+        setModalMessage('이미 보낸 친구 요청이 있어요.\n답변을 기다려주세요!');
+        setShowLimitModal(true);
+        return;
+      }
+  
+      // 이미 친구인 경우
+      if (result.code === "F005") {
+        setModalMessage('이미 친구인 사용자예요.');
+        setShowLimitModal(true);
+        return;
+      }
+  
+      // 내가 요청을 거절한지 7일이 지나지 않은 경우
+      if (result.code === "F006") {
+        setModalMessage('최근에 이 사용자의 요청을 거절했어요.\n7일 후 다시 시도해주세요.');
+        setShowLimitModal(true);
+        return;
+      }
+  
+      // 최대 친구 수 초과
+      if (result.code === "F007") {
+        setModalMessage('최대 친구 수를 초과했습니다.\n더 이상 추가할 수 없어요.');
+        setShowLimitModal(true);
+        return;
+      } 
+    } catch (e) {
+      console.error('addFriend failed:', e);
+      setModalMessage('친구 요청에 실패했습니다.\n다시 시도해주세요.');
       setShowLimitModal(true);
-      return;
-    }
-
-    // 이미 친구인 경우
-    if (result.code === "F005") {
-      setModalMessage('이미 친구인 사용자예요.');
-      setShowLimitModal(true);
-      return;
-    }
-
-    // 내가 요청을 거절한지 7일이 지나지 않은 경우
-    if (result.code === "F006") {
-      setModalMessage('최근에 이 사용자의 요청을 거절했어요.\n7일 후 다시 시도해주세요.');
-      setShowLimitModal(true);
-      return;
-    }
-
-    // 최대 친구 수 초과
-    if (result.code === "F007") {
-      setModalMessage('최대 친구 수를 초과했습니다.\n더 이상 추가할 수 없어요.');
-      setShowLimitModal(true);
-      return;
     }
   };
 
@@ -340,7 +345,9 @@ const AddFriend = () => {
         </SearchSection>
 
         <FriendList>
-          {isLoading ? (
+          {searchQuery.length > 0 && searchQuery.length < 2 ? (
+            <EmptyState>2자 이상 입력해주세요! 😄</EmptyState>
+          ) : isLoading ? (
             <EmptyState>검색 중...</EmptyState>
           ) : error ? (
             <EmptyState>검색 중 오류가 발생했습니다.</EmptyState>
