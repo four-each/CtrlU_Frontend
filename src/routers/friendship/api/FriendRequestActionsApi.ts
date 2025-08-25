@@ -11,7 +11,7 @@ export interface friendRequestRequest {
 }
 
 export async function friendRequestApi(payload: friendRequestRequest): Promise<FriendRequestActionResponse> {
-    return http<FriendRequestActionResponse>(`/friendships}`, {
+    return http<FriendRequestActionResponse>(`/friendships`, {
         method: "POST",
         body: payload,
         skipAuth: false
