@@ -6,6 +6,8 @@ import { BackLightIcon, AddFriendIcon, SearchIcon, AlarmLightIcon } from '@asset
 import profileIcon from '../../assets/icons/home/profile.svg';
 import { css } from "@emotion/react";
 import { useSearchFriends } from '../../hooks/api/friendship/useSearchFriends';
+import { useFriendRequest } from '../../hooks/api/friendship/useFriendRequestActions';
+import { getUserId } from '../../utils/auth';
 
 const AddFriendContainer = styled.div`
   width: 100%;
@@ -176,10 +178,55 @@ const EmptyState = styled.div`
   font-size: 16px;
 `;
 
+const LimitModal = styled.div`
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 297px;
+  height: 148px;
+  background: #f1e7f9;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  z-index: 1000;
+`;
+
+const LimitModalText = styled.p`
+  font-family: 'Noto Sans KR', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  color: #1d1d1d;
+  margin: 0;
+  text-align: center;
+  white-space: pre-line;
+`;
+
+const LimitModalButton = styled.button`
+  width: 90px;
+  height: 36px;
+  background: #c8b0db;
+  border: none;
+  border-radius: 50px;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #ffffff;
+  cursor: pointer;
+`;
+
 const AddFriend = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const { data: searchResults, isLoading, error } = useSearchFriends(searchQuery);
+  const addFriendMutation = useFriendRequest()
+
+  const [showLimitModal, setShowLimitModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+  const [isMe, setIsMe] = useState(false);
 
   // 검색 결과가 있으면 API 데이터 사용, 없으면 빈 배열
   const friends = searchResults?.result.values ?? [];
@@ -198,9 +245,38 @@ const AddFriend = () => {
     navigate('/friendship/request');
   };
 
-  const handleAddFriend = (friendId: number) => {
-    // TODO: 친구 추가 API 호출
-    console.log('친구 추가:', friendId);
+  const handleAddFriend = async (targetId: number) => {
+    const result = await addFriendMutation.mutateAsync({
+      targetId
+    });
+
+    // 대기중인 요청이 존재하는 친구
+    if (result.code === "F004") {
+      setModalMessage('이미 보낸 친구 요청이 있어요.\n답변을 기다려주세요!');
+      setShowLimitModal(true);
+      return;
+    }
+
+    // 이미 친구인 경우
+    if (result.code === "F005") {
+      setModalMessage('이미 친구인 사용자예요.');
+      setShowLimitModal(true);
+      return;
+    }
+
+    // 내가 요청을 거절한지 7일이 지나지 않은 경우
+    if (result.code === "F006") {
+      setModalMessage('최근에 이 사용자의 요청을 거절했어요.\n7일 후 다시 시도해주세요.');
+      setShowLimitModal(true);
+      return;
+    }
+
+    // 최대 친구 수 초과
+    if (result.code === "F007") {
+      setModalMessage('최대 친구 수를 초과했습니다.\n더 이상 추가할 수 없어요.');
+      setShowLimitModal(true);
+      return;
+    }
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -253,7 +329,7 @@ const AddFriend = () => {
             </SearchIconContainer>
             <SearchInputField
               type="text"
-              placeholder="친구 검색하기 💬"
+              placeholder="이메일로 친구 검색하기 ⭐️"
               value={searchQuery}
               onChange={handleSearch}
               onKeyDown={handleKeyDown}
@@ -270,32 +346,38 @@ const AddFriend = () => {
             searchQuery ? (
               <EmptyState>검색 결과가 없습니다.</EmptyState>
             ) : (
-              <EmptyState>친구를 검색해보세요!</EmptyState>
+              <EmptyState>친구를 검색해보세요! 😄</EmptyState>
             )
           ) : (
             friends.map((friend) => (
               <FriendItem key={friend.id}>
                 <FriendCard>
-                  <ProfileImage 
-                    src={friend.image || profileIcon} 
-                    alt={`${friend.nickname} 프로필`} 
-                  />
+                  <ProfileImage src={friend.image || profileIcon} alt={`${friend.nickname} 프로필`} />
                   <FriendName>{friend.nickname}</FriendName>
-                  <AddFriendIcon 
-                    onClick={() => handleAddFriend(friend.id)}
-                    css={css`
-                      width: 24px;
-                      height: 24px;
-                      margin-top: 2px;
-                      cursor: pointer;
-                    `}
-                  />
+                  {!(friend.id === getUserId()) && (
+                    <AddFriendIcon 
+                      onClick={() => handleAddFriend(friend.id)}
+                      css={css`
+                        width: 24px;
+                        height: 24px;
+                        margin-top: 2px;
+                        cursor: pointer;
+                      `}
+                    />
+                  )}
                 </FriendCard>
               </FriendItem>
             ))
           )}
         </FriendList>
       </Content>
+
+      {showLimitModal && (
+        <LimitModal>
+          <LimitModalText>{modalMessage}</LimitModalText>
+          <LimitModalButton onClick={() => setShowLimitModal(false)}>확인</LimitModalButton>
+        </LimitModal>
+      )}
     </AddFriendContainer>
   );
 };

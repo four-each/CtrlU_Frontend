@@ -47,23 +47,22 @@ export const isLoggedIn = (): boolean => {
   return getValidToken() !== null;
 };
 
-// 토큰 갱신 (백엔드에서 refresh token을 지원하는 경우)
-export const refreshToken = async (): Promise<boolean> => {
+interface JwtPayload {
+  sub: string;
+}
+
+export const getUserId = (): number | undefined => {
   try {
-    // TODO: 백엔드에 refresh token 요청
-    // const response = await fetch('/auth/refresh', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Authorization': `Bearer ${getToken()}`
-    //   }
-    // });
-    // if (response.ok) {
-    //   const data = await response.json();
-    //   saveToken(data.accessToken, data.expiresIn);
-    //   return true;
-    // }
-    return false;
-  } catch (error) {
-    return false;
+    const token = getToken();
+    if (!token) return undefined;
+
+    const base64Payload = token.split('.')[1];
+    const jsonPayload = atob(base64Payload.replace(/-/g, '+').replace(/_/g, '/'));
+    const payload: JwtPayload = JSON.parse(jsonPayload);
+
+    return Number(payload.sub);
+  } catch (e) {
+    console.error("Invalid token", e);
+    return undefined;
   }
 };

@@ -6,6 +6,18 @@ export interface FriendRequestActionResponse {
     message: string;
 }
 
+export interface friendRequestRequest {
+    targetId: number;
+}
+
+export async function friendRequestApi(payload: friendRequestRequest): Promise<FriendRequestActionResponse> {
+    return http<FriendRequestActionResponse>(`/friendships}`, {
+        method: "POST",
+        body: payload,
+        skipAuth: false
+    });
+}
+
 export async function acceptFriendRequestApi(friendId: number): Promise<FriendRequestActionResponse> {
     return http<FriendRequestActionResponse>(`/friendships/${friendId}`, {
         method: "PATCH",

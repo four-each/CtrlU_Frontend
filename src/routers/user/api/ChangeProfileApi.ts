@@ -9,7 +9,7 @@ export interface BaseResponse {
 export interface ChangeProfileRequest {
     nickname: string;
     profileImageKey: string;
-  }
+}
 
 export async function changeProfileApi(payload: ChangeProfileRequest): Promise<BaseResponse> {
     return http<BaseResponse>(`/users/profile`, {

@@ -1,11 +1,18 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
+    friendRequestApi,
     acceptFriendRequestApi, 
     rejectFriendRequestApi, 
     cancelSentRequestApi,
     deleteFriendApi,
     FriendRequestActionResponse 
 } from "@routers/friendship/api/FriendRequestActionsApi";
+
+export function useFriendRequest() {
+    return useMutation({
+        mutationFn: friendRequestApi
+    });
+}
 
 export function useAcceptFriendRequest() {
     const queryClient = useQueryClient();
