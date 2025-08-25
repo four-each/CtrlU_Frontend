@@ -16,10 +16,10 @@ export interface SearchFriendsResponse {
     };
 }
 
-export async function searchFriendsApi(query: string, cursorId?: number): Promise<SearchFriendsResponse> {
+export async function searchFriendsApi(keyword: string, cursorId?: number): Promise<SearchFriendsResponse> {
     const params = new URLSearchParams();
-    if (query) {
-        params.append('query', query);
+    if (keyword) {
+        params.append('keyword', keyword);
     }
     if (cursorId) {
         params.append('cursorId', cursorId.toString());
