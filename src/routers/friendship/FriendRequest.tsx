@@ -252,8 +252,10 @@ const FriendRequest = () => {
         }
       });
     } catch (e) {
+      const code = e instanceof Error ? e.message : String(e);
+
       // 최대 친구 수 초과
-      if (e === "F007") {
+      if (code === "F007") {
         setModalMessage('최대 친구 수를 초과했습니다.\n더 이상 추가할 수 없어요.');
         setShowLimitModal(true);
         return;
