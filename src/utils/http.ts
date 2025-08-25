@@ -111,12 +111,12 @@ export async function http<TResponse = unknown, TBody = unknown>(
       } catch {}
     }
 
-    const message =
-      (typeof errorPayload === "object" && errorPayload !== null && "message" in errorPayload
-        ? (errorPayload as any).message
+    const code =
+      (typeof errorPayload === "object" && errorPayload !== null && "code" in errorPayload
+        ? (errorPayload as any).code
         : undefined) || response.statusText || "Request failed";
 
-    throw new Error(String(message));
+    throw new Error(String(code));
   }
 
   if (contentType.includes("application/json")) {

@@ -182,10 +182,52 @@ const ConfirmButton = styled.button`
   cursor: pointer;
 `;
 
+const LimitModal = styled.div`
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 297px;
+  height: 148px;
+  background: #f1e7f9;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  z-index: 1000;
+`;
+
+const LimitModalText = styled.p`
+  font-family: 'Noto Sans KR', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  color: #1d1d1d;
+  margin: 0;
+  text-align: center;
+  white-space: pre-line;
+`;
+
+const LimitModalButton = styled.button`
+  width: 90px;
+  height: 36px;
+  background: #c8b0db;
+  border: none;
+  border-radius: 50px;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #ffffff;
+  cursor: pointer;
+`;
+
 const FriendRequest = () => {
   const navigate = useNavigate();
   const [showNotification, setShowNotification] = useState(false);
   const [activeTab, setActiveTab] = useState<'received' | 'sent'>('received');
+  const [showLimitModal, setShowLimitModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
   const { data: receivedRequests } = useGetReceivedRequests();
   const { data: sentRequests } = useGetSentRequests();
   const acceptMutation = useAcceptFriendRequest();
@@ -200,14 +242,24 @@ const FriendRequest = () => {
   };
 
   const handleAcceptRequest = (friendId: number) => {
-    acceptMutation.mutate(friendId, {
-      onSuccess: () => {
-        console.log('친구 요청 수락 성공:', friendId);
-      },
-      onError: (error) => {
-        console.error('친구 요청 수락 실패:', error);
-      }
-    });
+    try {
+      acceptMutation.mutate(friendId, {
+        onSuccess: () => {
+          console.log('친구 요청 수락 성공:', friendId);
+        },
+        onError: (error) => {
+          console.error('친구 요청 수락 실패:', error);
+        }
+      });
+    } catch (e) {
+      // 최대 친구 수 초과
+      if (e === "F007") {
+        setModalMessage('최대 친구 수를 초과했습니다.\n더 이상 추가할 수 없어요.');
+        setShowLimitModal(true);
+        return;
+      } 
+    }
+    
   };
 
   const handleRejectRequest = (friendId: number) => {
@@ -333,6 +385,12 @@ const FriendRequest = () => {
             확인
           </ConfirmButton>
         </NotificationBox>
+      )}
+      {showLimitModal && (
+        <LimitModal>
+          <LimitModalText>{modalMessage}</LimitModalText>
+          <LimitModalButton onClick={() => setShowLimitModal(false)}>확인</LimitModalButton>
+        </LimitModal>
       )}
     </FriendRequestContainer>
   );
