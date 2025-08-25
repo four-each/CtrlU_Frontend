@@ -255,7 +255,7 @@ const AddFriend = () => {
 
       // 대기중인 요청이 존재하는 친구
       if (code === "F004") {
-        setModalMessage('이미 보낸 친구 요청이 있어요.\n답변을 기다려주세요!');
+        setModalMessage('이미 대기중인 친구 요청이 있어요.');
         setShowLimitModal(true);
         return;
       }
@@ -311,7 +311,6 @@ const AddFriend = () => {
         />
         <HeaderContainer>
           <HeaderTitle>친구 추가</HeaderTitle>
-          <HeaderCount>({totalFriends}/{maxFriends})</HeaderCount>
         </HeaderContainer>
         <AlarmLightIcon
           css={css`
