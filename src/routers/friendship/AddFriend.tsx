@@ -250,6 +250,8 @@ const AddFriend = () => {
       targetId
     });
 
+    console.log(result.code);
+
     // 대기중인 요청이 존재하는 친구
     if (result.code === "F004") {
       setModalMessage('이미 보낸 친구 요청이 있어요.\n답변을 기다려주세요!');
