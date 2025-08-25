@@ -47,15 +47,6 @@ const HeaderTitle = styled.h1`
   padding-top: 2px;
 `;
 
-const HeaderCount = styled.span`
-  font-family: 'Noto Sans', sans-serif;
-  font-weight: 400;
-  font-size: 16px;
-  color: #545656;
-  margin-left: 8px;
-  padding-top: 2px;
-`;
-
 const Content = styled.div`
   display: flex;
   flex-direction: column;
