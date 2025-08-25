@@ -241,9 +241,9 @@ const FriendRequest = () => {
     navigate(-1);
   };
 
-  const handleAcceptRequest = (friendId: number) => {
+  const handleAcceptRequest = async (friendId: number) => {
     try {
-      acceptMutation.mutate(friendId, {
+      await acceptMutation.mutateAsync(friendId, {
         onSuccess: () => {
           console.log('친구 요청 수락 성공:', friendId);
         },
