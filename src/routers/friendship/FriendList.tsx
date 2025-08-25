@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
@@ -88,15 +88,20 @@ const SearchInput = styled.div`
   position: relative;
 `;
 
-const SearchPlaceholder = styled.span`
+const SearchInputField = styled.input`
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
   font-family: 'Noto Sans KR', sans-serif;
-  font-weight: 400;
   font-size: 16px;
-  color: #c8b0db;
+  color: #1d1d1d;
   text-align: center;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+  
+  &::placeholder {
+    color: #c8b0db;
+  }
 `;
 
 const FriendList = styled.div`
@@ -152,6 +157,17 @@ const FriendName = styled.span`
   flex: 1;
 `;
 
+const EmptyState = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: #bababa;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 16px;
+`;
+
 const AddFriendButton = styled.button`
   width: 252px;
   height: 56px;
@@ -174,11 +190,19 @@ const FriendListPage = () => {
   const navigate = useNavigate();
   const { data: friendsData, isLoading, error } = useGetFriends();
   const deleteFriendMutation = useDeleteFriend();
+  const [searchQuery, setSearchQuery] = useState('');
 
   // 동적으로 친구 수 계산 (API 데이터 우선)
   const apiFriends = friendsData?.result.friends ?? [];
   const totalFriends = apiFriends.length;
   const maxFriends = 20; // 최대 친구 수
+
+  const effectiveQuery = searchQuery.length >= 2 ? searchQuery : '';
+  const filteredFriends = useMemo(() => {
+    if (!effectiveQuery) return apiFriends;
+    const q = effectiveQuery.toLowerCase();
+    return apiFriends.filter((f: any) => String(f.nickname || '').toLowerCase().includes(q));
+  }, [apiFriends, effectiveQuery]);
 
   const handleBack = () => {
     navigate(-1);
@@ -241,28 +265,43 @@ const FriendListPage = () => {
                 transform: translateX(-50%);
               `}
             />
-            <SearchPlaceholder>친구 검색하기 💬</SearchPlaceholder>
+            <SearchInputField
+              type="text"
+              placeholder="친구 이름으로 검색하기 💬"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </SearchInput>
         </SearchSection>
 
         <FriendList>
-          {apiFriends.map((friend) => (
-            <FriendItem key={friend.id}>
-              <FriendCard>
-                <ProfileImage src={friend.image || profileIcon} alt={`${friend.nickname} 프로필`} />
-                <FriendName>{friend.nickname}</FriendName>
-                <RemoveIcon 
-                  onClick={() => !deleteFriendMutation.isPending && handleRemoveFriend(friend.id)}
-                  css={css`
-                    width: 24px;
-                    height: 24px;
-                    cursor: ${deleteFriendMutation.isPending ? 'not-allowed' : 'pointer'};
-                    opacity: ${deleteFriendMutation.isPending ? 0.5 : 1};
-                  `}
-                />
-              </FriendCard>
-            </FriendItem>
-          ))}
+          {searchQuery.length > 0 && searchQuery.length < 2 ? (
+            <EmptyState>2자 이상 입력해주세요! 😄</EmptyState>
+          ) : isLoading ? (
+            <EmptyState>불러오는 중...</EmptyState>
+          ) : error ? (
+            <EmptyState>목록을 불러오지 못했어요.</EmptyState>
+          ) : filteredFriends.length === 0 ? (
+            <EmptyState>검색 결과가 없습니다.</EmptyState>
+          ) : (
+            filteredFriends.map((friend: any) => (
+              <FriendItem key={friend.id}>
+                <FriendCard>
+                  <ProfileImage src={friend.image || profileIcon} alt={`${friend.nickname} 프로필`} />
+                  <FriendName>{friend.nickname}</FriendName>
+                  <RemoveIcon 
+                    onClick={() => !deleteFriendMutation.isPending && handleRemoveFriend(friend.id)}
+                    css={css`
+                      width: 24px;
+                      height: 24px;
+                      cursor: ${deleteFriendMutation.isPending ? 'not-allowed' : 'pointer'};
+                      opacity: ${deleteFriendMutation.isPending ? 0.5 : 1};
+                    `}
+                  />
+                </FriendCard>
+              </FriendItem>
+            ))
+          )}
         </FriendList>
 
         <AddFriendButton onClick={handleAddFriend}>
