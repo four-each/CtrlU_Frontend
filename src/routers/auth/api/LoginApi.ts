@@ -21,5 +21,6 @@ export async function loginApi(payload: LoginRequest): Promise<LoginResponse> {
     return http<LoginResponse, LoginRequest>(`/auth/signin`, {
         method: "POST",
         body: payload,
+        skipAuth: true,
     });
 }

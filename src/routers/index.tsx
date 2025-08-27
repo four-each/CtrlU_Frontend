@@ -17,6 +17,9 @@ import AddFriend from "./friendship/AddFriend";
 import FriendList from "./friendship/FriendList";
 import FriendRequest from "./friendship/FriendRequest";
 import { Login, Signup, EmailVerification, VerificationComplete } from "./auth";
+import FindPassword from "./auth/FindPassword";
+import EmailResetPassword from "./auth/EmailResetPassword";
+import ResetPassword from "./auth/ResetPassword";
 
 const Router = () => {
   const router = createBrowserRouter(
@@ -44,6 +47,9 @@ const Router = () => {
         <Route path="/auth/signup" element={<Signup />} />
         <Route path="/auth/email-verification" element={<EmailVerification />} />
         <Route path="/auth/verification-complete" element={<VerificationComplete />} />
+        <Route path="/auth/find-password" element={<FindPassword />} />
+        <Route path="/auth/email-reset-password" element={<EmailResetPassword />} />
+        <Route path="/auth/reset-password" element={<ResetPassword />} />
       </>
     )
   );

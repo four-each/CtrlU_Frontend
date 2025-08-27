@@ -17,6 +17,7 @@ export async function signupApi(payload: SignupRequest): Promise<BaseResponse> {
   return http<BaseResponse, SignupRequest>(`/auth/signup`, {
     method: "POST",
     body: payload,
+    skipAuth: true,
   });
 }
 
@@ -37,6 +38,7 @@ export async function getPresignedUrl(payload: PresignRequest): Promise<PresignR
   return http<PresignResponse, PresignRequest>(`/auth/presigned-url`, {
     method: "POST",
     body: payload,
+    skipAuth: true,
   });
 }
 

@@ -199,8 +199,7 @@ const Login = () => {
   };
 
   const handleForgotPassword = () => {
-    // TODO: 비밀번호 찾기 페이지로 이동
-    console.log('비밀번호 찾기');
+    navigate('/auth/find-password');
   };
 
   return (
