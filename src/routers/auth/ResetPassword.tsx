@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
 import { BackLightIcon, ProfileIcon } from '@assets/icons';
@@ -145,8 +145,14 @@ const ResetPassword = () => {
   });
   const resetPasswordMutation = useResetPassword();
   const [resetError, setResetError] = useState('');
-  const [searchParams] = useSearchParams();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
   const verifyToken = searchParams.get('token') || '';
+  
+  // 디버깅용 로그
+  console.log('Current location:', location);
+  console.log('URL search params:', location.search);
+  console.log('Token from URL:', verifyToken);
 
   const handleBack = () => {
     navigate(-1);
@@ -220,7 +226,7 @@ const ResetPassword = () => {
         }
       } catch (error) {
         // http 유틸이 !ok에서 throw 하므로 여기서 401 처리
-        setResetError('기존 비밀번호가 유효하지 않습니다.');
+        setResetError('비밀번호 변경에 실패했습니다. 다시 시도해주세요.');
       }
     }
   };

@@ -4,6 +4,7 @@ import {
   Route,
   RouterProvider,
 } from "react-router-dom";
+import ProtectedRoute from "@components/ProtectedRoute";
 import Home from "./todo/Home";
 import Detail from "./todo/Detail";
 import OnBoarding from "./OnBoarding";
@@ -25,24 +26,8 @@ const Router = () => {
   const router = createBrowserRouter(
     createRoutesFromElements(
       <>
-        <Route path="/" element={<Home />} />
+        {/* Public Routes */}
         <Route path="/onboarding" element={<OnBoarding />} />
-        <Route path="/detail" element={<Detail />} />
-        <Route path="/camera/:mode?" element={<Camera />} />
-        <Route path="/create-task" element={<CreateTask />} />
-        <Route path="/success" element={<Success />} />
-
-        {/* User Routes */}
-        <Route path="/mypage" element={<MyPage />} />
-        <Route path="/mypage/edit" element={<MyPageEdit />} />
-        <Route path="/mypage/password-change" element={<PasswordChange />} />
-        
-        {/* Friendship Routes */}
-        <Route path="/friendship/add" element={<AddFriend />} />
-        <Route path="/friendship/list" element={<FriendList />} />
-        <Route path="/friendship/request" element={<FriendRequest />} />
-        
-        {/* Auth Routes */}
         <Route path="/auth/login" element={<Login />} />
         <Route path="/auth/signup" element={<Signup />} />
         <Route path="/auth/email-verification" element={<EmailVerification />} />
@@ -50,6 +35,67 @@ const Router = () => {
         <Route path="/auth/find-password" element={<FindPassword />} />
         <Route path="/auth/email-reset-password" element={<EmailResetPassword />} />
         <Route path="/auth/reset-password" element={<ResetPassword />} />
+        
+        {/* Protected Routes */}
+        <Route path="/" element={
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        } />
+        <Route path="/detail" element={
+          <ProtectedRoute>
+            <Detail />
+          </ProtectedRoute>
+        } />
+        <Route path="/camera/:mode?" element={
+          <ProtectedRoute>
+            <Camera />
+          </ProtectedRoute>
+        } />
+        <Route path="/create-task" element={
+          <ProtectedRoute>
+            <CreateTask />
+          </ProtectedRoute>
+        } />
+        <Route path="/success" element={
+          <ProtectedRoute>
+            <Success />
+          </ProtectedRoute>
+        } />
+
+        {/* User Routes */}
+        <Route path="/mypage" element={
+          <ProtectedRoute>
+            <MyPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/mypage/edit" element={
+          <ProtectedRoute>
+            <MyPageEdit />
+          </ProtectedRoute>
+        } />
+        <Route path="/mypage/password-change" element={
+          <ProtectedRoute>
+            <PasswordChange />
+          </ProtectedRoute>
+        } />
+        
+        {/* Friendship Routes */}
+        <Route path="/friendship/add" element={
+          <ProtectedRoute>
+            <AddFriend />
+          </ProtectedRoute>
+        } />
+        <Route path="/friendship/list" element={
+          <ProtectedRoute>
+            <FriendList />
+          </ProtectedRoute>
+        } />
+        <Route path="/friendship/request" element={
+          <ProtectedRoute>
+            <FriendRequest />
+          </ProtectedRoute>
+        } />
       </>
     )
   );
