@@ -6,6 +6,7 @@ import { BackLightIcon, ArchiveIcon, FriendListIcon, FriendRequestIcon, SettingI
 import { css } from "@emotion/react";
 import { useUserProfile } from '../../hooks/api/user/useUserProfile';
 import { useLogout } from '../../hooks/api/user/useLogout';
+import { useWithdraw } from '../../hooks/api/user/useWithdraw';
 
 const MyPageContainer = styled.div`
   width: 100%;
@@ -168,6 +169,7 @@ const MyPage = () => {
   const navigate = useNavigate();
   const { data: profileData, isLoading, error } = useUserProfile();
   const logoutMutation = useLogout();
+  const withdrawMutation = useWithdraw();
 
   const handleBack = () => {
     navigate(-1);
@@ -208,9 +210,11 @@ const MyPage = () => {
     }
   };
 
-  const handleWithdraw = () => {
-    // TODO: 계정 탈퇴 로직
-    console.log('계정 탈퇴');
+  const handleWithdraw = async () => {
+    const result = await withdrawMutation.mutateAsync();
+    if (result.status === 200) {
+      navigate('/onboarding');
+    }
   };
 
   // 로딩 상태 처리

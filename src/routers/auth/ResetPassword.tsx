@@ -148,17 +148,6 @@ const ResetPassword = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const verifyToken = searchParams.get('token') || '';
-  
-  // 디버깅용 로그
-  console.log('Current location:', location);
-  console.log('URL search params:', location.search);
-  console.log('Full URL:', window.location.href);
-  console.log('Token from URL:', verifyToken);
-  console.log('All search params:', Object.fromEntries(searchParams.entries()));
-
-  const handleBack = () => {
-    navigate(-1);
-  };
 
   const validatePassword = (password: string) => {
     // 비밀번호 유효성 검사: 8~12자, 영문/숫자 포함
