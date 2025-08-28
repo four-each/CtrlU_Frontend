@@ -15,6 +15,8 @@ import FriendListIcon from "./mypage/friend_list.svg?react";
 import FriendRequestIcon from "./mypage/friend_request.svg?react";
 import SettingIcon from "./mypage/setting.svg?react";
 import ProfileIcon from "./home/profile.svg?react";
+import ArchiveOwl from "./mypage/ddukddakowl.svg?react";
+import BrushIcon from "./mypage/brush.svg?react";
 
 export {
   BackIcon,
@@ -34,4 +36,6 @@ export {
   FriendRequestIcon,
   SettingIcon,
   ProfileIcon,
+  ArchiveOwl,
+  BrushIcon
 };

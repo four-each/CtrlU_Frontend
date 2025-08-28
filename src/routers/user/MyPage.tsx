@@ -277,18 +277,14 @@ const MyPage = () => {
   };
 
   const handleArchive = () => {
-    // TODO: 보관함 페이지로 이동
-    console.log('보관함');
+    navigate('/mypage/archive');
   };
 
   const handlePasswordChange = () => {
-    // TODO: 비밀번호 변경 페이지로 이동
-    console.log('비밀번호 변경');
     navigate('/mypage/password-change');
   };
 
   const handlePrivacy = () => {
-    // TODO: 개인정보 처리방침 페이지로 이동
     console.log('개인정보 처리방침');
   };
 

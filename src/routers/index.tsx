@@ -14,6 +14,7 @@ import Success from "./todo/Success";
 import MyPage from "./user/MyPage";
 import MyPageEdit from "./user/MyPageEdit";
 import PasswordChange from "./user/PasswordChange";
+import Archive from "./user/Archive";
 import AddFriend from "./friendship/AddFriend";
 import FriendList from "./friendship/FriendList";
 import FriendRequest from "./friendship/FriendRequest";
@@ -78,6 +79,11 @@ const Router = () => {
           <ProtectedRoute>
             <PasswordChange />
           </ProtectedRoute>
+        } />
+        <Route path="/mypage/archive" element={
+          // <ProtectedRoute>
+            <Archive />
+          // </ProtectedRoute>
         } />
         
         {/* Friendship Routes */}
