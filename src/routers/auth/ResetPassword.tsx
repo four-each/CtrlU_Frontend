@@ -221,7 +221,7 @@ const ResetPassword = () => {
           password
         });
         if (result.status === 200) {
-          navigate(-1);
+          navigate('/auth/login');
         } else {
           // 예상치 못한 형태의 응답 대비
           setResetError('비밀번호 변경에 실패했습니다. 다시 시도해주세요.');
@@ -243,14 +243,6 @@ const ResetPassword = () => {
   return (
     <ResetContainer>
       <Header>
-        <BackLightIcon 
-          css={css`
-            width: 24px;
-            height: 21px;
-            cursor: pointer;
-            margin-top: 2px;
-          `}
-          onClick={handleBack} />
         <HeaderTitle>비밀번호 재설정</HeaderTitle>
       </Header>
 
