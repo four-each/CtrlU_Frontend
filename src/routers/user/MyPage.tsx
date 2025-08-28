@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
@@ -165,11 +165,76 @@ const SettingsText = styled.span`
   margin: 0 20px;
 `;
 
+// 모달 스타일 컴포넌트들
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.div`
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 297px;
+  height: 148px;
+  background: #f1e7f9;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  z-index: 1000;
+`;
+
+const ModalTitle = styled.p`
+  font-family: 'Noto Sans KR', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  color: #1d1d1d;
+  margin: 0;
+  text-align: center;
+  white-space: pre-line;
+`;
+
+const ModalButtons = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+`;
+
+const ModalButton = styled.button<{ buttonType: "cancel" | "confirm" }>`
+  width: 90px;
+  height: 36px;
+  background: #c8b0db;
+  border: none;
+  border-radius: 50px;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #ffffff;
+  cursor: pointer;
+  
+  &:hover {
+    opacity: 0.8;
+  }
+`;
+
 const MyPage = () => {
   const navigate = useNavigate();
   const { data: profileData, isLoading, error } = useUserProfile();
   const logoutMutation = useLogout();
   const withdrawMutation = useWithdraw();
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
 
   const handleBack = () => {
     navigate(-1);
@@ -210,11 +275,25 @@ const MyPage = () => {
     }
   };
 
-  const handleWithdraw = async () => {
-    const result = await withdrawMutation.mutateAsync();
-    if (result.status === 200) {
-      navigate('/onboarding');
+  const handleWithdraw = () => {
+    setShowWithdrawModal(true);
+  };
+
+  const handleConfirmWithdraw = async () => {
+    try {
+      const result = await withdrawMutation.mutateAsync();
+      if (result.status === 200) {
+        setShowWithdrawModal(false);
+        navigate('/onboarding');
+      }
+    } catch (error) {
+      console.error('회원탈퇴 실패:', error);
+      setShowWithdrawModal(false);
     }
+  };
+
+  const handleCancelWithdraw = () => {
+    setShowWithdrawModal(false);
   };
 
   // 로딩 상태 처리
@@ -340,6 +419,31 @@ const MyPage = () => {
           </SettingsItem>
         </SettingsSection>
       </Content>
+
+      {/* 회원탈퇴 확인 모달 */}
+      {showWithdrawModal && (
+        <ModalOverlay onClick={handleCancelWithdraw}>
+          <ModalContent onClick={(e) => e.stopPropagation()}>
+            <ModalTitle>
+              진짜 탈퇴하시겠습니까?
+            </ModalTitle>
+            <ModalButtons>
+              <ModalButton 
+                buttonType="cancel"
+                onClick={handleCancelWithdraw}
+              >
+                아니오
+              </ModalButton>
+              <ModalButton 
+                buttonType="confirm"
+                onClick={handleConfirmWithdraw}
+              >
+                네
+              </ModalButton>
+            </ModalButtons>
+          </ModalContent>
+        </ModalOverlay>
+      )}
     </MyPageContainer>
   );
 };
