@@ -137,10 +137,10 @@ const ResetButton = styled.button`
 
 const ResetPassword = () => {
   const navigate = useNavigate();
-  const [newPassword, setNewPassword] = useState('');
+  const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState({
-    newPassword: '',
+    password: '',
     confirmPassword: ''
   });
   const resetPasswordMutation = useResetPassword();
@@ -152,7 +152,9 @@ const ResetPassword = () => {
   // 디버깅용 로그
   console.log('Current location:', location);
   console.log('URL search params:', location.search);
+  console.log('Full URL:', window.location.href);
   console.log('Token from URL:', verifyToken);
+  console.log('All search params:', Object.fromEntries(searchParams.entries()));
 
   const handleBack = () => {
     navigate(-1);
@@ -166,7 +168,7 @@ const ResetPassword = () => {
 
   const handleNewPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setNewPassword(value);
+    setPassword(value);
     
     if (value.length === 0) {
       setErrors(prev => ({ ...prev, newPassword: '새 비밀번호를 입력해주세요.' }));
@@ -192,7 +194,7 @@ const ResetPassword = () => {
     
     if (value.length === 0) {
       setErrors(prev => ({ ...prev, confirmPassword: '새 비밀번호 확인을 입력해주세요.' }));
-    } else if (value !== newPassword) {
+    } else if (value !== password) {
       setErrors(prev => ({ ...prev, confirmPassword: '비밀번호가 일치하지 않습니다.' }));
     } else {
       setErrors(prev => ({ ...prev, confirmPassword: '' }));
@@ -203,20 +205,20 @@ const ResetPassword = () => {
   const handleReset = async () => {
     // 모든 필드 검증
     const newErrors = {
-      newPassword: newPassword.length === 0 ? '새 비밀번호를 입력해주세요.' : 
-                   !validatePassword(newPassword) ? '비밀번호는 8~12자, 영문/숫자를 포함해야 합니다.' : '',
+      newPassword: password.length === 0 ? '새 비밀번호를 입력해주세요.' : 
+                   !validatePassword(password) ? '비밀번호는 8~12자, 영문/숫자를 포함해야 합니다.' : '',
       confirmPassword: confirmPassword.length === 0 ? '새 비밀번호 확인을 입력해주세요.' :
-                      confirmPassword !== newPassword ? '비밀번호가 일치하지 않습니다.' : ''
+                      confirmPassword !== password ? '비밀번호가 일치하지 않습니다.' : ''
     };
 
-    setErrors(newErrors);
+    setErrors(errors);
 
     // 모든 에러가 없으면 재설정 진행
     if (!Object.values(newErrors).some(error => error !== '')) {
       try {
         const result = await resetPasswordMutation.mutateAsync({
           verifyToken,
-          newPassword
+          password
         });
         if (result.status === 200) {
           navigate(-1);
@@ -232,10 +234,10 @@ const ResetPassword = () => {
   };
 
   const isFormValid = () => {
-    return newPassword.length > 0 && 
+    return password.length > 0 && 
            confirmPassword.length > 0 &&
-           validatePassword(newPassword) &&
-           newPassword === confirmPassword;
+           validatePassword(password) &&
+           password === confirmPassword;
   };
 
   return (
@@ -269,12 +271,12 @@ const ResetPassword = () => {
             <InputLabel>새 비밀번호</InputLabel>
             <Input
               type="password"
-              value={newPassword}
+              value={password}
               onChange={handleNewPasswordChange}
               placeholder="새 비밀번호를 입력하세요"
             />
-            {errors.newPassword && (
-              <ErrorText>{errors.newPassword}</ErrorText>
+            {errors.password && (
+              <ErrorText>{errors.password}</ErrorText>
             )}
           </InputGroup>
 

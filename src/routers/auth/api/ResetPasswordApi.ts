@@ -8,7 +8,7 @@ export interface BaseResponse {
 
 export interface ResetPasswordRequest {
   verifyToken: string;
-  newPassword: string;
+  password: string;
 }
 
 export async function resetPasswordApi(payload: ResetPasswordRequest): Promise<BaseResponse> {
