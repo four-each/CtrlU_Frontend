@@ -150,7 +150,7 @@ const EditButton = styled.button`
 
 const MyPageEdit = () => {
   const navigate = useNavigate();
-  const [nickname, setNickname] = useState('ㅇㅇㅇ');
+  const [nickname, setNickname] = useState('');
   const [isValid, setIsValid] = useState(true);
   const [profileImagePreview, setProfileImagePreview] = useState<string>('');
   const [profileFile, setProfileFile] = useState<File | null>(null);

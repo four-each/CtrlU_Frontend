@@ -6,9 +6,14 @@ export interface BaseResponse {
     status: number;
 }
 
-export async function withdrawApi(): Promise<BaseResponse> {
+export interface WithdrawRequest {
+    password: string;
+}
+
+export async function withdrawApi(payload: WithdrawRequest): Promise<BaseResponse> {
     return http<BaseResponse>(`/auth/withdraw`, {
         method: "DELETE",
+        body: payload,
         skipAuth: false,
     });
 }

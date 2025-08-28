@@ -185,7 +185,7 @@ const ModalContent = styled.div`
   left: 50%;
   transform: translate(-50%, -50%);
   width: 297px;
-  height: 148px;
+  height: 200px;
   background: #f1e7f9;
   border-radius: 14px;
   display: flex;
@@ -194,6 +194,7 @@ const ModalContent = styled.div`
   justify-content: center;
   gap: 18px;
   z-index: 1000;
+  padding: 20px;
 `;
 
 const ModalTitle = styled.p`
@@ -229,12 +230,35 @@ const ModalButton = styled.button<{ buttonType: "cancel" | "confirm" }>`
   }
 `;
 
+const PasswordInput = styled.input`
+  width: 200px;
+  height: 36px;
+  background: #ffffff;
+  border: 1px solid #c8b0db;
+  border-radius: 8px;
+  padding: 0 12px;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #1d1d1d;
+  outline: none;
+  
+  &::placeholder {
+    color: #999999;
+  }
+  
+  &:focus {
+    border-color: #ad8aca;
+  }
+`;
+
 const MyPage = () => {
   const navigate = useNavigate();
   const { data: profileData, isLoading, error } = useUserProfile();
   const logoutMutation = useLogout();
   const withdrawMutation = useWithdraw();
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [password, setPassword] = useState('');
 
   const handleBack = () => {
     navigate(-1);
@@ -280,20 +304,27 @@ const MyPage = () => {
   };
 
   const handleConfirmWithdraw = async () => {
+    if (!password.trim()) {
+      return;
+    }
+    
     try {
-      const result = await withdrawMutation.mutateAsync();
+      const result = await withdrawMutation.mutateAsync({password});
       if (result.status === 200) {
         setShowWithdrawModal(false);
+        setPassword('');
         navigate('/onboarding');
       }
     } catch (error) {
       console.error('회원탈퇴 실패:', error);
       setShowWithdrawModal(false);
+      setPassword('');
     }
   };
 
   const handleCancelWithdraw = () => {
     setShowWithdrawModal(false);
+    setPassword('');
   };
 
   // 로딩 상태 처리
@@ -427,6 +458,17 @@ const MyPage = () => {
             <ModalTitle>
               진짜 탈퇴하시겠습니까?
             </ModalTitle>
+            <PasswordInput
+              type="password"
+              placeholder="비밀번호를 입력하세요"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && password.trim()) {
+                  handleConfirmWithdraw();
+                }
+              }}
+            />
             <ModalButtons>
               <ModalButton 
                 buttonType="cancel"
@@ -437,6 +479,7 @@ const MyPage = () => {
               <ModalButton 
                 buttonType="confirm"
                 onClick={handleConfirmWithdraw}
+                disabled={!password.trim()}
               >
                 네
               </ModalButton>
