@@ -6,8 +6,5 @@ export const useGetTodoDetail = (id: string) => {
     queryKey: ['todoDetail', id],
     queryFn: () => getTodoDetail(id),
     enabled: !!id,
-    onError: (error) => {
-      console.error('[useGetTodoDetail] 에러 발생', { id, error });
-    },
   });
 };

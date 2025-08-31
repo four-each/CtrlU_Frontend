@@ -5,8 +5,9 @@ import { colors } from '@styles/theme';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import backArrowWhiteIcon from '../../assets/icons/detail/backArrow_white.svg';
 import shootIcon from '../../assets/icons/detail/shoot.svg';
-import { usePresignUpload } from '../../hooks/api/auth/useSignup';
+import { useAuthenticatedPresignUpload } from '../../hooks/api/common/useAuthenticatedPresignUpload';
 import { useCompleteTodo } from '../../hooks/api/todo/useCompleteTodo';
+import { useGetTodoDetail } from '../../hooks/api/todo/useGetTodoDetail';
 import { postUploadToS3 } from '../../utils/s3';
 
 interface CameraScreenProps {
@@ -21,8 +22,9 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
   const location = useLocation();
   const { todoId, durationTime } = location.state || {};
 
-  const presignMutation = usePresignUpload();
+  const presignMutation = useAuthenticatedPresignUpload();
   const completeTodoMutation = useCompleteTodo();
+  const { data: todoDetailData } = useGetTodoDetail(todoId);
   
   const mode = params.mode as 'start' | 'complete' || propMode || 'start';
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
@@ -198,7 +200,7 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
 
         // Get presigned URL
         const presignResponse = await presignMutation.mutateAsync({
-            imageType: "END_IMAGE",
+            imageType: "END_IMAGe",
             fileExtension: '.jpg',
             contentType: file.type
         });
@@ -220,9 +222,7 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
 
         // Navigate to success
         navigate('/success', {
-            state: {
-                capturedImage: capturedImage
-            }
+            state: { todoId: todoId }
         });
 
       } catch (error) {

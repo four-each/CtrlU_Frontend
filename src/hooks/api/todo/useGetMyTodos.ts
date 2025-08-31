@@ -6,8 +6,5 @@ export const useGetMyTodos = (status: string, target: string) => {
     queryKey: ['myTodos', status, target],
     queryFn: () => getMyTodos(status, target),
     enabled: !!status && !!target,
-    onError: (error) => {
-      console.error('[useGetMyTodos] 에러 발생', { status, target, error });
-    },
   });
 };

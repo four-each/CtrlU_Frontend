@@ -15,7 +15,7 @@ export interface CompleteTodoResponse {
 export const completeTodo = async (payload: CompleteTodoRequest): Promise<CompleteTodoResponse> => {
   const { id, ...body } = payload;
   try {
-    const response = await http.post<CompleteTodoResponse>(`/todos/${id}/complete`, body);
+    const response = await http<CompleteTodoResponse>(`/todos/${id}/complete`, { method: 'POST', body });
     console.log('[CompleteTodoApi] 요청 성공', response);
     return response;
   } catch (error) {

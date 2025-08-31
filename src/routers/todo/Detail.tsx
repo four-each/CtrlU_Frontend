@@ -161,6 +161,7 @@ const Detail = () => {
         durationTime={result.durationTime}
         challengeTime={result.challengeTime}
         timerRef={finishHandler}
+        centerImageSrc={result.startImage}
       />
       {!actualIsMe && (
         <div style={{ marginBottom: '40px' }}></div>

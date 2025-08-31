@@ -10,7 +10,7 @@ import { CircularProgressbarWithChildren } from 'react-circular-progressbar';
 import backArrowWhiteIcon from '../../assets/icons/detail/backArrow_white.svg';
 import profileIcon from '../../assets/icons/home/profile.svg';
 import { useCreateTodo } from '../../hooks/api/todo/useCreateTodo';
-import { usePresignUpload } from '../../hooks/api/auth/useSignup';
+import { useAuthenticatedPresignUpload } from '../../hooks/api/common/useAuthenticatedPresignUpload';
 import { postUploadToS3 } from '../../utils/s3';
 
 interface CreateTaskScreenProps {
@@ -23,15 +23,13 @@ const CreateTaskScreen: React.FC<CreateTaskScreenProps> = ({
   const location = useLocation();
   const navigate = useNavigate();
   
-  // location.state에서 전달받은 데이터 사용
   const startImage = location.state?.startImage || propStartImage;
   const [description, setDescription] = useState(location.state?.description || '');
   const [selectedHours, setSelectedHours] = useState(location.state?.selectedHours || 0);
   const [selectedMinutes, setSelectedMinutes] = useState(location.state?.selectedMinutes || 0);
 
-  // API 훅들
   const createTodoMutation = useCreateTodo();
-  const presignMutation = usePresignUpload();
+  const presignMutation = useAuthenticatedPresignUpload();
 
   const handleTimeChange = (hours: number, minutes: number) => {
     setSelectedHours(hours);
@@ -53,9 +51,7 @@ const CreateTaskScreen: React.FC<CreateTaskScreenProps> = ({
     try {
       let startImageKey: string | undefined = undefined;
 
-      // 시작 이미지가 있고 기본 이미지가 아닌 경우 S3 업로드
       if (startImage && !startImage.includes('default.png') && startImage.startsWith('data:image')) {
-        // Base64 데이터를 Blob 객체로 변환
         const byteCharacters = atob(startImage.split(',')[1]);
         const byteNumbers = new Array(byteCharacters.length);
         for (let i = 0; i < byteCharacters.length; i++) {
@@ -85,7 +81,6 @@ const CreateTaskScreen: React.FC<CreateTaskScreenProps> = ({
         startImageKey = imageKey;
       }
 
-      // LocalTime 형식으로 변환 (HH:MM:SS)
       const challengeTime = `${selectedHours.toString().padStart(2, '0')}:${selectedMinutes.toString().padStart(2, '0')}:00`;
 
       const payload = {
@@ -115,7 +110,6 @@ const CreateTaskScreen: React.FC<CreateTaskScreenProps> = ({
   return (
     <Container>
 
-      {/* Header */}
       <HeaderSection>
         <BackButton onClick={() => window.history.back()}>
           <BackIcon src={backArrowWhiteIcon} alt="뒤로가기" />
@@ -123,13 +117,11 @@ const CreateTaskScreen: React.FC<CreateTaskScreenProps> = ({
         <HeaderTitle>시작</HeaderTitle>
       </HeaderSection>
 
-      {/* Activity Card */}
       <ActivityCard>
         <ActivityIcon src={profileIcon} alt="Activity" />
         <ActivityName>{description}</ActivityName>
       </ActivityCard>
 
-      {/* Circular Progress with Image */}
       <CircularProgressSection>
         <Col
           css={css`
@@ -166,7 +158,6 @@ const CreateTaskScreen: React.FC<CreateTaskScreenProps> = ({
             />
             <Percent>0%</Percent>
           </CircularProgressbarWithChildren>
-          {/* 그라데이션 정의 */}
           <svg width="0" height="0">
             <defs>
               <linearGradient id="gradient" x1="0%" y1="0%" x2="10%" y2="100%">
@@ -178,13 +169,11 @@ const CreateTaskScreen: React.FC<CreateTaskScreenProps> = ({
         </Col>
       </CircularProgressSection>
 
-      {/* Goal Time Display */}
       <GoalTimeSection>
         <GoalTimeLabel>목표 시간</GoalTimeLabel>
         <GoalTime>{formatGoalTime()}</GoalTime>
       </GoalTimeSection>
 
-      {/* Start Button */}
       <StartButtonSection>
         <StartButton 
           onClick={handleSubmit}
@@ -296,8 +285,6 @@ const CircularProgressSection = styled.div`
   width: 100%;
 `;
 
-
-
 const Percent = styled.div`
   display: flex;
   justify-content: center;
@@ -312,7 +299,6 @@ const Percent = styled.div`
   border-radius: 50%;
   z-index: 1;
   
-  /* 원형 진행바의 시작점(12시 방향)에 위치 */
   top: 0;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -331,8 +317,6 @@ const GoalTimeLabel = styled.p`
   color: #AD8ACA;
   margin: 0;
 `;
-
-
 
 const TimePickerContainer = styled.div`
   display: flex;
@@ -419,8 +403,6 @@ const GoalTime = styled.time`
   font-weight: 500;
   color: #292524;
 `;
-
-
 
 const StartButtonSection = styled.div`
   display: flex;

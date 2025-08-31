@@ -179,7 +179,7 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
         <TimerContainer>
           <Timer
             durationTime={currentStory.task.targetTime * 60 * 1000}
-            endTime={formatTime(currentStory.task.targetTime)}
+            challengeTime={formatTime(currentStory.task.targetTime)}
             timerRef={finishHandler}
           />
 
