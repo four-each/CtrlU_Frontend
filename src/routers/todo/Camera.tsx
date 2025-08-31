@@ -2,26 +2,32 @@ import React, { useState, useRef, useEffect } from 'react';
 import Txt from '@components/common/Txt';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import backArrowWhiteIcon from '../../assets/icons/detail/backArrow_white.svg';
 import shootIcon from '../../assets/icons/detail/shoot.svg';
+import { usePresignUpload } from '../../hooks/api/auth/useSignup';
+import { useCompleteTodo } from '../../hooks/api/todo/useCompleteTodo';
+import { postUploadToS3 } from '../../utils/s3';
 
 interface CameraScreenProps {
   mode?: 'start' | 'complete';
-  taskId?: string;
 }
 
 const CameraScreen: React.FC<CameraScreenProps> = ({ 
-  mode: propMode, 
-  taskId = '1' 
+  mode: propMode,
 }) => {
   const navigate = useNavigate();
   const params = useParams();
+  const location = useLocation();
+  const { todoId, durationTime } = location.state || {};
+
+  const presignMutation = usePresignUpload();
+  const completeTodoMutation = useCompleteTodo();
   
-  // URL 파라미터에서 mode를 가져오고, 없으면 prop을 사용하고, 그것도 없으면 'start'를 기본값으로 사용
   const mode = params.mode as 'start' | 'complete' || propMode || 'start';
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
@@ -67,12 +73,10 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
       setCameraError(null);
       console.log('카메라 시작 시도...');
       
-      // 카메라 지원 여부 확인
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         throw new Error('이 브라우저는 카메라를 지원하지 않습니다.');
       }
       
-      // 후면 카메라 우선 시도
       const constraints = {
         video: {
           facingMode: currentCamera === 'back' ? 'environment' : 'user'
@@ -83,59 +87,27 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       
       console.log('카메라 스트림 획득 성공:', stream);
-      console.log('videoRef.current:', videoRef.current);
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         streamRef.current = stream;
-        
-        // 즉시 활성화 시도
         setIsCameraActive(true);
         
-        // 비디오 로드 완료 이벤트 추가
         videoRef.current.onloadedmetadata = () => {
           console.log('비디오 메타데이터 로드 완료');
-          console.log('비디오 크기:', videoRef.current?.videoWidth, 'x', videoRef.current?.videoHeight);
           setIsCameraActive(true);
         };
-        
-        videoRef.current.oncanplay = () => {
-          console.log('비디오 재생 가능');
-          setIsCameraActive(true);
-        };
-        
-        videoRef.current.onplay = () => {
-          console.log('비디오 재생 시작');
-        };
-        
-        videoRef.current.onerror = (e) => {
-          console.error('비디오 로드 오류:', e);
-          setCameraError('비디오 스트림을 로드할 수 없습니다.');
-          setIsCameraActive(false);
-        };
-        
-        console.log('비디오 요소에 스트림 설정 완료');
-        console.log('비디오 요소:', videoRef.current);
       }
     } catch (error) {
       console.error('카메라 접근 오류:', error);
-      
       let errorMessage = '카메라에 접근할 수 없습니다.';
       if (error instanceof Error) {
         if (error.name === 'NotAllowedError') {
           errorMessage = '카메라 권한이 거부되었습니다. 브라우저 설정에서 카메라 권한을 허용해주세요.';
-        } else if (error.name === 'NotFoundError') {
-          errorMessage = '카메라를 찾을 수 없습니다.';
-        } else if (error.name === 'NotSupportedError') {
-          errorMessage = '이 브라우저는 카메라를 지원하지 않습니다.';
-        } else {
-          errorMessage = `카메라 오류: ${error.message}`;
         }
       }
-      
       setCameraError(errorMessage);
       setIsCameraActive(false);
-      console.log('파일 선택으로 폴백');
     }
   };
 
@@ -150,7 +122,6 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
   const handleCapture = () => {
     if (isCameraActive && videoRef.current && canvasRef.current) {
       setIsCapturing(true);
-      
       const video = videoRef.current;
       const canvas = canvasRef.current;
       const context = canvas.getContext('2d');
@@ -159,15 +130,12 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         context.drawImage(video, 0, 0);
-        
         const imageData = canvas.toDataURL('image/jpeg', 0.8);
         setCapturedImage(imageData);
         stopCamera();
       }
-      
       setIsCapturing(false);
     } else {
-      // 카메라가 활성화되지 않은 경우 파일 선택
       if (fileInputRef.current) {
         fileInputRef.current.click();
       }
@@ -191,7 +159,6 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-    // 카메라 다시 시작
     startCamera();
   };
 
@@ -199,30 +166,101 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
     setCurrentCamera(currentCamera === 'back' ? 'front' : 'back');
   };
 
-  const handleSubmit = () => {
-    console.log('이미지 제출:', capturedImage);
+  const handleSubmit = async () => {
+    console.log('이미지 제출:', capturedImage ? '있음' : '없음');
     console.log('모드:', mode);
-    console.log('태스크 ID:', taskId);
     
     if (mode === 'start') {
-      // 시작 모드일 때는 모달을 띄움
       setShowModal(true);
-    } else {
-      // 완료 모드일 때는 Success.tsx로 이동하면서 사진 데이터 전달
-      navigate('/success', { 
-        state: { 
-          capturedImage: capturedImage 
-        } 
-      });
+    } else { // 'complete' 모드
+      if (!capturedImage) {
+        alert('이미지를 먼저 촬영해주세요.');
+        return;
+      }
+      if (!todoId || durationTime === undefined) {
+        alert('잘못된 접근입니다. 할일 상세 정보가 없습니다.');
+        navigate('/');
+        return;
+      }
+
+      setIsSubmitting(true);
+
+      try {
+        // Base64 to File
+        const byteCharacters = atob(capturedImage.split(',')[1]);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'image/jpeg' });
+        const file = new File([blob], 'end-image.jpg', { type: 'image/jpeg' });
+
+        // Get presigned URL
+        const presignResponse = await presignMutation.mutateAsync({
+            imageType: "END_IMAGE",
+            fileExtension: '.jpg',
+            contentType: file.type
+        });
+
+        if (!presignResponse?.result?.presignedUrl) {
+            throw new Error('Failed to get presigned URL.');
+        }
+        const { presignedUrl, imageKey } = presignResponse.result;
+
+        // Upload to S3
+        await postUploadToS3(presignedUrl, imageKey, file, file.type);
+
+        // Complete Todo
+        await completeTodoMutation.mutateAsync({
+            id: todoId,
+            durationTime,
+            endImageKey: imageKey,
+        });
+
+        // Navigate to success
+        navigate('/success', {
+            state: {
+                capturedImage: capturedImage
+            }
+        });
+
+      } catch (error) {
+        console.error('할일 완료 처리 실패:', error);
+        alert('할일 완료 처리에 실패했습니다.');
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
-  const handleTimeChange = (hours: number, minutes: number) => {
-    setSelectedHours(hours);
-    setSelectedMinutes(minutes);
+  const handleModalComplete = () => {
+    if (!description.trim()) {
+      setWarningMessage('목표를 입력해주세요.');
+      setShowWarningModal(true);
+      return;
+    }
+    if (description.trim().length > 10) {
+      setWarningMessage('목표는 10자 이내로 작성해주세요.');
+      setShowWarningModal(true);
+      return;
+    }
+    const targetTime = selectedHours * 60 + selectedMinutes;
+    if (targetTime === 0) {
+      setWarningMessage('목표 시간을 설정해주세요.');
+      setShowWarningModal(true);
+      return;
+    }
+    navigate('/create-task', { 
+      state: { 
+        startImage: capturedImage,
+        description: description.trim(),
+        selectedHours,
+        selectedMinutes
+      } 
+    });
   };
 
-  // 스크롤 위치를 선택된 값으로 초기화
   useEffect(() => {
     if (showModal && hoursScrollRef.current && minutesScrollRef.current) {
       const itemHeight = 36; // 각 아이템의 높이
@@ -287,38 +325,6 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
       }
     };
   }, [showModal]);
-
-  const handleModalComplete = () => {
-    if (!description.trim()) {
-      setWarningMessage('목표를 입력해주세요.');
-      setShowWarningModal(true);
-      return;
-    }
-
-    // 활동명 10자 제한 확인
-    if (description.trim().length > 10) {
-      setWarningMessage('목표는 10자 이내로 작성해주세요.');
-      setShowWarningModal(true);
-      return;
-    }
-
-    const targetTime = selectedHours * 60 + selectedMinutes;
-    if (targetTime === 0) {
-      setWarningMessage('목표 시간을 설정해주세요.');
-      setShowWarningModal(true);
-      return;
-    }
-
-    // CreateTask.tsx로 이동하면서 입력받은 데이터 전달
-    navigate('/create-task', { 
-      state: { 
-        startImage: capturedImage,
-        description: description.trim(),
-        selectedHours,
-        selectedMinutes
-      } 
-    });
-  };
 
   return (
     <Container>
@@ -406,8 +412,8 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
             <RetakeButton onClick={handleRetake}>
               다시 촬영
             </RetakeButton>
-            <SubmitButton onClick={handleSubmit}>
-              제출하기
+            <SubmitButton onClick={handleSubmit} disabled={isSubmitting}>
+              {isSubmitting ? '처리중...' : '제출하기'}
             </SubmitButton>
           </ActionButtons>
         )}

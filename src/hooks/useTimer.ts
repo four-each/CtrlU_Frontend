@@ -1,17 +1,18 @@
 import { useState, useEffect, useRef } from "react";
 
 interface UseTimerProps {
-  durationTime: number;
-  endTime: string;
+  durationTime: number; // 이미 경과한 시간 (밀리초)
+  challengeTime: string; // 목표 시간 (HH:MM:SS 형식)
 }
-const useTimer = ({ durationTime, endTime }: UseTimerProps) => {
+
+const useTimer = ({ durationTime, challengeTime }: UseTimerProps) => {
   const INTERVAL = 1000;
-  const [duration, setDuration] = useState<number>(durationTime);
+  const [elapsedTime, setElapsedTime] = useState<number>(durationTime); // 이미 경과한 시간부터 시작
   const [isFinished, setIsFinished] = useState(false);
   const [isOver, setIsOver] = useState(false);
 
   const formatTimeToString = (time: number) => {
-    const hours = String(Math.floor((time / (1000 * 60 * 60)) % 24)).padStart(
+    const hours = String(Math.floor(time / (1000 * 60 * 60))).padStart(
       2,
       "0"
     );
@@ -23,40 +24,52 @@ const useTimer = ({ durationTime, endTime }: UseTimerProps) => {
     return `${hours}:${minutes}:${seconds}`;
   };
 
-  const formetStringToTime = (time: string) => {
+  const formatStringToTime = (time: string) => {
     const [hours, minutes, seconds] = time.split(":").map(Number);
     return hours * 60 * 60 * 1000 + minutes * 60 * 1000 + seconds * 1000;
   };
 
-  const allMilliSeconds = formetStringToTime(endTime);
-
-  const displayTime = formatTimeToString(duration);
+  const targetTime = formatStringToTime(challengeTime);
+  const displayTime = formatTimeToString(elapsedTime);
 
   const [percentage, setPercentage] = useState<number>(
-    Math.floor((duration / allMilliSeconds) * 100)
+    Math.floor((elapsedTime / targetTime) * 100)
   );
 
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
     timerRef.current = setInterval(() => {
-      setDuration((prevTime) => prevTime + INTERVAL);
-      setPercentage(Math.floor((duration / allMilliSeconds) * 100));
+      setElapsedTime((prevTime) => {
+        const newElapsedTime = prevTime + INTERVAL;
+        const newPercentage = Math.floor((newElapsedTime / targetTime) * 100);
+        
+        setPercentage(newPercentage);
+        
+        if (newElapsedTime >= targetTime) {
+          setIsOver(true);
+        } else {
+          setIsOver(false);
+        }
+        
+        return newElapsedTime;
+      });
     }, INTERVAL);
 
-    if (duration >= allMilliSeconds) {
-      setIsOver(true);
-    } else {
-      setIsOver(false);
-    }
-
     return () => {
-      clearInterval(timerRef.current);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
     };
-  }, [duration, endTime, allMilliSeconds]);
+  }, [targetTime]);
 
   const reset = () => {
-    clearInterval(timerRef.current);
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+    setElapsedTime(durationTime);
+    setPercentage(Math.floor((durationTime / targetTime) * 100));
+    setIsOver(false);
   };
 
   return {

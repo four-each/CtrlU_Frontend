@@ -9,6 +9,9 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { CircularProgressbarWithChildren } from 'react-circular-progressbar';
 import backArrowWhiteIcon from '../../assets/icons/detail/backArrow_white.svg';
 import profileIcon from '../../assets/icons/home/profile.svg';
+import { useCreateTodo } from '../../hooks/api/todo/useCreateTodo';
+import { usePresignUpload } from '../../hooks/api/auth/useSignup';
+import { postUploadToS3 } from '../../utils/s3';
 
 interface CreateTaskScreenProps {
   startImage?: string;
@@ -26,12 +29,16 @@ const CreateTaskScreen: React.FC<CreateTaskScreenProps> = ({
   const [selectedHours, setSelectedHours] = useState(location.state?.selectedHours || 0);
   const [selectedMinutes, setSelectedMinutes] = useState(location.state?.selectedMinutes || 0);
 
+  // API 훅들
+  const createTodoMutation = useCreateTodo();
+  const presignMutation = usePresignUpload();
+
   const handleTimeChange = (hours: number, minutes: number) => {
     setSelectedHours(hours);
     setSelectedMinutes(minutes);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!description.trim()) {
       alert('내용을 입력해주세요.');
       return;
@@ -43,22 +50,62 @@ const CreateTaskScreen: React.FC<CreateTaskScreenProps> = ({
       return;
     }
 
-    const newTask = {
-      id: Date.now().toString(),
-      userId: 'user1',
-      title: description.trim(),
-      description: description.trim(),
-      targetTime,
-      startTime: new Date(),
-      startImage,
-      isCompleted: false,
-      isAbandoned: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    try {
+      let startImageKey: string | undefined = undefined;
 
-    console.log('새 할 일 생성:', newTask);
-    navigate('/');
+      // 시작 이미지가 있고 기본 이미지가 아닌 경우 S3 업로드
+      if (startImage && !startImage.includes('default.png') && startImage.startsWith('data:image')) {
+        // Base64 데이터를 Blob 객체로 변환
+        const byteCharacters = atob(startImage.split(',')[1]);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'image/jpeg' });
+        const file = new File([blob], 'start-image.jpg', { type: 'image/jpeg' });
+
+        const fileExtension = 'jpg';
+        const imageType = "START_IMAGE";
+        const contentType = file.type;
+        
+        const presignResponse = await presignMutation.mutateAsync({ 
+          imageType, 
+          fileExtension: `.${fileExtension}`, 
+          contentType 
+        });
+
+        if (!presignResponse?.result?.presignedUrl) {
+          console.log('Failed to get presigned URL from server.');
+          return;
+        }
+
+        const { presignedUrl, imageKey } = presignResponse.result;
+        await postUploadToS3(presignedUrl, imageKey, file, contentType);
+        startImageKey = imageKey;
+      }
+
+      // LocalTime 형식으로 변환 (HH:MM:SS)
+      const challengeTime = `${selectedHours.toString().padStart(2, '0')}:${selectedMinutes.toString().padStart(2, '0')}:00`;
+
+      const payload = {
+        title: description.trim(),
+        challengeTime,
+        startImageKey: startImageKey || '',
+      };
+
+      console.log('[CreateTask] 할일 생성 요청 페이로드:', payload);
+
+      const result = await createTodoMutation.mutateAsync(payload);
+
+      if (result.status === 200) {
+        console.log('할일 생성 성공');
+        navigate('/');
+      }
+    } catch (error) {
+      console.error('할일 생성 실패:', error);
+      alert('할일 생성에 실패했습니다.');
+    }
   };
 
   const formatGoalTime = () => {
@@ -139,8 +186,11 @@ const CreateTaskScreen: React.FC<CreateTaskScreenProps> = ({
 
       {/* Start Button */}
       <StartButtonSection>
-        <StartButton onClick={handleSubmit}>
-          시작
+        <StartButton 
+          onClick={handleSubmit}
+          disabled={createTodoMutation.isPending || presignMutation.isPending}
+        >
+          {createTodoMutation.isPending || presignMutation.isPending ? '처리중...' : '시작'}
         </StartButton>
       </StartButtonSection>
     </Container>

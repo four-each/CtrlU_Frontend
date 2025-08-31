@@ -14,15 +14,15 @@ export type FinishHandler = {
 
 type TimerProps = {
   durationTime: number; // 타이머의 총 시간 (밀리초 단위)
-  endTime: string; // 타이머 종료 시간 (HH:MM:SS 형식)
+  challengeTime: string; // 목표 시간 (HH:MM:SS 형식)
   timerRef?: ForwardedRef<FinishHandler>;
 };
 
-export default function Timer({ durationTime, endTime, timerRef }: TimerProps) {
+export default function Timer({ durationTime, challengeTime, timerRef }: TimerProps) {
   const { displayTime, percentage, isFinished, setIsFinished, isOver, reset } =
     useTimer({
       durationTime: durationTime,
-      endTime: endTime,
+      challengeTime: challengeTime,
     });
 
   const finishHandler = {
@@ -96,7 +96,7 @@ export default function Timer({ durationTime, endTime, timerRef }: TimerProps) {
             letterSpacing="0.1%"
             textAlign="center"
           >
-            목표 시간: {endTime}
+            목표 시간: {challengeTime}
           </Txt>
         </ChallengeTimeBox>
         <Txt

@@ -74,10 +74,30 @@ export async function http<TResponse = unknown, TBody = unknown>(
       ? url
       : `${API_BASE}${url}`;
 
-  let response = await fetch(requestUrl, init);
+  const startedAtMs = Date.now();
+  let response: Response;
+  try {
+    response = await fetch(requestUrl, init);
+  } catch (networkError) {
+    console.error('[HTTP] Network error', {
+      method,
+      url: requestUrl,
+      skipAuth,
+      retryOn401,
+      error: networkError,
+    });
+    throw networkError;
+  }
 
-  // 401 처리 디버깅을 위한 로그 추가
-  console.log(`[HTTP] Status: ${response.status}, SkipAuth: ${skipAuth}, RetryOn401: ${retryOn401}`);
+  // 기본 응답 로그
+  console.log('[HTTP] Response', {
+    method,
+    url: requestUrl,
+    status: response.status,
+    skipAuth,
+    retryOn401,
+    elapsedMs: Date.now() - startedAtMs,
+  });
 
   // 401 처리: 토큰 만료 시 refresh 후 1회 재시도
   if (response.status === 401 && !skipAuth && retryOn401) {
