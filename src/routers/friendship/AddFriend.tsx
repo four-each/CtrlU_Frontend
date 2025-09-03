@@ -224,10 +224,6 @@ const AddFriend = () => {
   const hasNext = searchResults?.result.hasNext ?? false;
   const nextCursorId = searchResults?.result.nextCursorId;
 
-  // 동적으로 친구 수 계산
-  const totalFriends = friends.length;
-  const maxFriends = 20; // 최대 친구 수
-
   const handleBack = () => {
     navigate(-1);
   };
@@ -236,11 +232,15 @@ const AddFriend = () => {
     navigate('/friendship/request');
   };
 
-  const handleAddFriend = async (targetId: number) => {
+  const handleAddFriend = async (targetId: number, nickname: string) => {
     try {
-      await addFriendMutation.mutateAsync({
+      const result = await addFriendMutation.mutateAsync({
         targetId
       });
+      if (result.status === 200) {
+        setModalMessage(`${nickname}님에게 친구 요청을 보냈습니다.`);
+        setShowLimitModal(true);
+      } 
     } catch (e) {
       const code = e instanceof Error ? e.message : String(e);
 
@@ -355,7 +355,7 @@ const AddFriend = () => {
                   <FriendName>{friend.nickname}</FriendName>
                   {!(friend.id === getUserId()) && (
                     <AddFriendIcon 
-                      onClick={() => handleAddFriend(friend.id)}
+                      onClick={() => handleAddFriend(friend.id, friend.nickname)}
                       css={css`
                         width: 24px;
                         height: 24px;
