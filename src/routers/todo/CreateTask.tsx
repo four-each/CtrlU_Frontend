@@ -9,6 +9,9 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { CircularProgressbarWithChildren } from 'react-circular-progressbar';
 import backArrowWhiteIcon from '../../assets/icons/detail/backArrow_white.svg';
 import profileIcon from '../../assets/icons/home/profile.svg';
+import { useCreateTodo } from '../../hooks/api/todo/useCreateTodo';
+import { useAuthenticatedPresignUpload } from '../../hooks/api/common/useAuthenticatedPresignUpload';
+import { postUploadToS3 } from '../../utils/s3';
 
 interface CreateTaskScreenProps {
   startImage?: string;
@@ -20,18 +23,20 @@ const CreateTaskScreen: React.FC<CreateTaskScreenProps> = ({
   const location = useLocation();
   const navigate = useNavigate();
   
-  // location.state에서 전달받은 데이터 사용
   const startImage = location.state?.startImage || propStartImage;
   const [description, setDescription] = useState(location.state?.description || '');
   const [selectedHours, setSelectedHours] = useState(location.state?.selectedHours || 0);
   const [selectedMinutes, setSelectedMinutes] = useState(location.state?.selectedMinutes || 0);
+
+  const createTodoMutation = useCreateTodo();
+  const presignMutation = useAuthenticatedPresignUpload();
 
   const handleTimeChange = (hours: number, minutes: number) => {
     setSelectedHours(hours);
     setSelectedMinutes(minutes);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!description.trim()) {
       alert('내용을 입력해주세요.');
       return;
@@ -43,22 +48,59 @@ const CreateTaskScreen: React.FC<CreateTaskScreenProps> = ({
       return;
     }
 
-    const newTask = {
-      id: Date.now().toString(),
-      userId: 'user1',
-      title: description.trim(),
-      description: description.trim(),
-      targetTime,
-      startTime: new Date(),
-      startImage,
-      isCompleted: false,
-      isAbandoned: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    try {
+      let startImageKey: string | undefined = undefined;
 
-    console.log('새 할 일 생성:', newTask);
-    navigate('/');
+      if (startImage && !startImage.includes('default.png') && startImage.startsWith('data:image')) {
+        const byteCharacters = atob(startImage.split(',')[1]);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'image/jpeg' });
+        const file = new File([blob], 'start-image.jpg', { type: 'image/jpeg' });
+
+        const fileExtension = 'jpg';
+        const imageType = "START_IMAGE";
+        const contentType = file.type;
+        
+        const presignResponse = await presignMutation.mutateAsync({ 
+          imageType, 
+          fileExtension: `.${fileExtension}`, 
+          contentType 
+        });
+
+        if (!presignResponse?.result?.presignedUrl) {
+          console.log('Failed to get presigned URL from server.');
+          return;
+        }
+
+        const { presignedUrl, imageKey } = presignResponse.result;
+        await postUploadToS3(presignedUrl, imageKey, file, contentType);
+        startImageKey = imageKey;
+      }
+
+      const challengeTime = `${selectedHours.toString().padStart(2, '0')}:${selectedMinutes.toString().padStart(2, '0')}:00`;
+
+      const payload = {
+        title: description.trim(),
+        challengeTime,
+        startImageKey: startImageKey || '',
+      };
+
+      console.log('[CreateTask] 할일 생성 요청 페이로드:', payload);
+
+      const result = await createTodoMutation.mutateAsync(payload);
+
+      if (result.status === 200) {
+        console.log('할일 생성 성공');
+        navigate('/');
+      }
+    } catch (error) {
+      console.error('할일 생성 실패:', error);
+      alert('할일 생성에 실패했습니다.');
+    }
   };
 
   const formatGoalTime = () => {
@@ -68,7 +110,6 @@ const CreateTaskScreen: React.FC<CreateTaskScreenProps> = ({
   return (
     <Container>
 
-      {/* Header */}
       <HeaderSection>
         <BackButton onClick={() => window.history.back()}>
           <BackIcon src={backArrowWhiteIcon} alt="뒤로가기" />
@@ -76,13 +117,11 @@ const CreateTaskScreen: React.FC<CreateTaskScreenProps> = ({
         <HeaderTitle>시작</HeaderTitle>
       </HeaderSection>
 
-      {/* Activity Card */}
       <ActivityCard>
         <ActivityIcon src={profileIcon} alt="Activity" />
         <ActivityName>{description}</ActivityName>
       </ActivityCard>
 
-      {/* Circular Progress with Image */}
       <CircularProgressSection>
         <Col
           css={css`
@@ -119,7 +158,6 @@ const CreateTaskScreen: React.FC<CreateTaskScreenProps> = ({
             />
             <Percent>0%</Percent>
           </CircularProgressbarWithChildren>
-          {/* 그라데이션 정의 */}
           <svg width="0" height="0">
             <defs>
               <linearGradient id="gradient" x1="0%" y1="0%" x2="10%" y2="100%">
@@ -131,16 +169,17 @@ const CreateTaskScreen: React.FC<CreateTaskScreenProps> = ({
         </Col>
       </CircularProgressSection>
 
-      {/* Goal Time Display */}
       <GoalTimeSection>
         <GoalTimeLabel>목표 시간</GoalTimeLabel>
         <GoalTime>{formatGoalTime()}</GoalTime>
       </GoalTimeSection>
 
-      {/* Start Button */}
       <StartButtonSection>
-        <StartButton onClick={handleSubmit}>
-          시작
+        <StartButton 
+          onClick={handleSubmit}
+          disabled={createTodoMutation.isPending || presignMutation.isPending}
+        >
+          {createTodoMutation.isPending || presignMutation.isPending ? '처리중...' : '시작'}
         </StartButton>
       </StartButtonSection>
     </Container>
@@ -246,8 +285,6 @@ const CircularProgressSection = styled.div`
   width: 100%;
 `;
 
-
-
 const Percent = styled.div`
   display: flex;
   justify-content: center;
@@ -262,7 +299,6 @@ const Percent = styled.div`
   border-radius: 50%;
   z-index: 1;
   
-  /* 원형 진행바의 시작점(12시 방향)에 위치 */
   top: 0;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -281,8 +317,6 @@ const GoalTimeLabel = styled.p`
   color: #AD8ACA;
   margin: 0;
 `;
-
-
 
 const TimePickerContainer = styled.div`
   display: flex;
@@ -369,8 +403,6 @@ const GoalTime = styled.time`
   font-weight: 500;
   color: #292524;
 `;
-
-
 
 const StartButtonSection = styled.div`
   display: flex;

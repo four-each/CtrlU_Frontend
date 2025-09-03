@@ -14,15 +14,16 @@ export type FinishHandler = {
 
 type TimerProps = {
   durationTime: number; // 타이머의 총 시간 (밀리초 단위)
-  endTime: string; // 타이머 종료 시간 (HH:MM:SS 형식)
+  challengeTime: string; // 목표 시간 (HH:MM:SS 형식)
   timerRef?: ForwardedRef<FinishHandler>;
+  centerImageSrc?: string; // 중앙에 표시될 이미지 URL
 };
 
-export default function Timer({ durationTime, endTime, timerRef }: TimerProps) {
+export default function Timer({ durationTime, challengeTime, timerRef, centerImageSrc }: TimerProps) {
   const { displayTime, percentage, isFinished, setIsFinished, isOver, reset } =
     useTimer({
       durationTime: durationTime,
-      endTime: endTime,
+      challengeTime: challengeTime,
     });
 
   const finishHandler = {
@@ -45,12 +46,11 @@ export default function Timer({ durationTime, endTime, timerRef }: TimerProps) {
           strokeWidth={7}
           styles={{
             path: {
-              // 원형 진행 표시바에 그라데이션을 적용
-              stroke: "url(#gradient)", // 정의한 그라데이션을 사용
-              strokeLinecap: "round", // 라운드 끝 모양
+              stroke: "url(#gradient)",
+              strokeLinecap: "round",
             },
             trail: {
-              stroke: colors.gray, // 진행되지 않은 부분의 색
+              stroke: colors.gray,
             },
           }}
           css={css`
@@ -62,9 +62,12 @@ export default function Timer({ durationTime, endTime, timerRef }: TimerProps) {
           <img
             css={css`
               width: 84%;
+              height: 84%; /* Add height to maintain aspect ratio for object-fit */
               margin-top: -9px;
+              border-radius: 50%; /* Make it circular */
+              object-fit: cover; /* Ensure image covers the area */
             `}
-            src={ganadiIcon}
+            src={centerImageSrc || ganadiIcon}
             alt="mainImage"
           />
           <Percent 
@@ -74,7 +77,6 @@ export default function Timer({ durationTime, endTime, timerRef }: TimerProps) {
             {isOver ? `🚨` : `${percentage}%`}
           </Percent>
         </CircularProgressbarWithChildren>
-        {/* 그라데이션 정의 */}
         <svg width="0" height="0">
           <defs>
             <linearGradient id="gradient" x1="0%" y1="0%" x2="10%" y2="100%">
@@ -96,7 +98,7 @@ export default function Timer({ durationTime, endTime, timerRef }: TimerProps) {
             letterSpacing="0.1%"
             textAlign="center"
           >
-            목표 시간: {endTime}
+            목표 시간: {challengeTime}
           </Txt>
         </ChallengeTimeBox>
         <Txt
@@ -129,9 +131,7 @@ const Percent = styled.div<{ isOver: boolean; percentage: number }>`
   border-radius: 50%;
   z-index: 1;
   
-  /* 원형 진행바를 따라 움직이도록 위치 계산 */
   ${({ isOver, percentage }) => {
-    // 시간 초과 시에는 시작 위치(12시 방향)에 고정
     if (isOver) {
       return `
         left: 50%;
@@ -140,9 +140,8 @@ const Percent = styled.div<{ isOver: boolean; percentage: number }>`
       `;
     }
     
-    // 정상 진행 시에는 원형 진행바를 따라 움직임
-    const angle = (percentage / 100) * 360 - 90; // -90도로 시작점을 12시 방향으로
-    const radius = 136; // 원형 진행바의 반지름 (272px / 2)
+    const angle = (percentage / 100) * 360 - 90;
+    const radius = 136;
     const x = Math.cos((angle * Math.PI) / 180) * radius;
     const y = Math.sin((angle * Math.PI) / 180) * radius;
     

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Col, Row } from '@components/common/flex/Flex';
+import { Col } from '@components/common/flex/Flex';
 import Txt from '@components/common/Txt';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
@@ -10,89 +10,89 @@ import ganadiIcon from '../../assets/icons/detail/ganadi.svg';
 import ringIcon from '../../assets/icons/detail/ring.svg';
 import whiteCircleIcon from '../../assets/icons/detail/whiteCircle.svg';
 import arrowIcon from '../../assets/icons/detail/arrow.svg';
+import { useGetTodoDetail } from '../../hooks/api/todo/useGetTodoDetail';
+import { useQueryClient } from '@tanstack/react-query';
 
-interface SuccessProps {
-  taskName?: string;
-  targetTime?: string;
-  actualTime?: string;
-  onClose?: () => void;
-}
-
-const Success: React.FC<SuccessProps> = ({ 
-  taskName = "미션", 
-  targetTime = "02:30:00",
-  actualTime = "02:10:10",
-  onClose 
-}) => {
+const Success: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [showCapturedImage, setShowCapturedImage] = useState(false);
+  const queryClient = useQueryClient();
+  const { todoId } = location.state || {};
+
+  const { data: todoDetailData, isLoading, isError } = useGetTodoDetail(todoId);
+
+  const [isStartImageVisible, setIsStartImageVisible] = useState(true);
   const [isRotating, setIsRotating] = useState(false);
   const [showPurpleOverlay, setShowPurpleOverlay] = useState(false);
   const overlayTimerRef = useRef<number | null>(null);
-  
-  // location.state에서 사진 데이터 가져오기
-  const capturedImage = location.state?.capturedImage || null;
-  const startImage = location.state?.startImage || null;
 
-  // 컴포넌트 마운트 시 ganadi 아이콘에 보라색 오버레이 적용
+  const todoInfo = todoDetailData?.result;
+  const imageToShow = isStartImageVisible ? todoInfo?.startImage : todoInfo?.endImage;
+
   useEffect(() => {
-    overlayTimerRef.current = setTimeout(() => {
-      setShowPurpleOverlay(true);
-    }, 1000);
-  }, []);
-
-  const handleBack = () => {
-    if (onClose) {
-      onClose();
-    } else {
-      navigate('/');
-    }
-  };
-
-  const handleImageClick = () => {
-    // 기존 타이머가 있으면 클리어
-    if (overlayTimerRef.current) {
-      clearTimeout(overlayTimerRef.current);
-    }
-    
-    // 오버레이 숨기기
-    setShowPurpleOverlay(false);
-    
-    setIsRotating(true);
-    setTimeout(() => {
-      setShowCapturedImage(!showCapturedImage);
-      setIsRotating(false);
-      
-      // 1초 후에 보라색 오버레이 표시 (사진이든 아이콘이든)
+    if (imageToShow) {
       overlayTimerRef.current = setTimeout(() => {
         setShowPurpleOverlay(true);
       }, 1000);
-    }, 300); // 애니메이션 중간에 이미지 변경
+    }
+    return () => {
+      if (overlayTimerRef.current) {
+        clearTimeout(overlayTimerRef.current);
+      }
+    };
+  }, [imageToShow]);
+
+  const handleBack = () => {
+    queryClient.invalidateQueries({ queryKey: ['myTodos'] });
+    navigate('/');
   };
+
+  const handleImageClick = () => {
+    if (!todoInfo?.startImage || !todoInfo?.endImage) return;
+
+    if (overlayTimerRef.current) {
+      clearTimeout(overlayTimerRef.current);
+    }
+
+    setShowPurpleOverlay(false);
+    setIsRotating(true);
+
+    setTimeout(() => {
+      setIsStartImageVisible(prevState => !prevState);
+      setIsRotating(false);
+      
+      overlayTimerRef.current = setTimeout(() => {
+        setShowPurpleOverlay(true);
+      }, 1000);
+    }, 300);
+  };
+
+  if (isLoading) {
+    return <Txt>로딩 중...</Txt>;
+  }
+
+  if (isError || !todoInfo) {
+    return <Txt>데이터를 불러오는 데 실패했습니다.</Txt>;
+  }
 
   return (
     <SuccessContainer>
-      {/* 헤더 */}
       <Header>
-            <BackButton onClick={handleBack}>
-            <img src={backArrow} alt="뒤로가기" />
-          </BackButton>
+        <BackButton onClick={handleBack}>
+          <img src={backArrow} alt="뒤로가기" />
+        </BackButton>
       </Header>
 
-      {/* 메인 콘텐츠 */}
       <MainContent>
-        {/* 프로필 섹션 */}
         <ProfileSection>
           <ProfileImage>
-            <img src={profileIcon} alt="프로필" />
+            <img src={todoInfo.profileImage || profileIcon} alt="프로필" />
           </ProfileImage>
           <Txt fontSize="22px" fontWeight={500} color="#1d1d1d">
-            졸업하기
+            {todoInfo.title}
           </Txt>
         </ProfileSection>
 
-        {/* 원형 프로그레스 바 */}
         <ProgressSection>
           <ProgressCircle>
             <RingImage src={ringIcon} alt="프로그레스 링" />
@@ -103,14 +103,14 @@ const Success: React.FC<SuccessProps> = ({
               isRotating={isRotating}
             >
               <img 
-                src={showCapturedImage && (capturedImage || startImage) ? (capturedImage || startImage) : ganadiIcon} 
-                alt={showCapturedImage && (capturedImage || startImage) ? "사진" : "완료 이미지"} 
+                src={imageToShow || ganadiIcon} 
+                alt={imageToShow ? "미션 사진" : "기본 이미지"} 
               />
               {showPurpleOverlay && (
                 <PurpleOverlay />
               )}
             </ProgressImage>
-            {showPurpleOverlay && (
+            {showPurpleOverlay && (todoInfo.startImage && todoInfo.endImage) && (
               <ArrowIcon 
                 src={arrowIcon} 
                 alt="화살표" 
@@ -121,26 +121,23 @@ const Success: React.FC<SuccessProps> = ({
           </ProgressCircle>
         </ProgressSection>
 
-        {/* 목표 시간 */}
         <TargetTimeSection>
           <TargetTimeBox>
             <Txt fontSize="14px" fontWeight={400} color="#1d1d1d">
-              목표 시간: {targetTime}
+              목표 시간: {todoInfo.challengeTime}
             </Txt>
           </TargetTimeBox>
         </TargetTimeSection>
 
-        {/* 실제 완료 시간 */}
         <ActualTimeSection>
           <Txt fontSize="60px" fontWeight={500} color="#832cc5">
-            {actualTime}
+            {new Date(todoInfo.durationTime).toISOString().substr(11, 8)}
           </Txt>
         </ActualTimeSection>
 
-        {/* 축하 메시지 */}
         <CelebrationSection>
           <CelebrationText>
-            우와, 목표를 이루셨군요{'\n'}
+            우와, 목표를 이루셨군요\n
             정말 대단해요!☺️
           </CelebrationText>
         </CelebrationSection>
@@ -150,6 +147,8 @@ const Success: React.FC<SuccessProps> = ({
 };
 
 export default Success;
+
+// Styled Components remain the same...
 
 const SuccessContainer = styled.div`
   width: 100%;
@@ -165,13 +164,11 @@ const SuccessContainer = styled.div`
   position: relative;
   
   @media (max-aspect-ratio: 9/16) {
-    /* 세로가 긴 화면 (대부분의 모바일) */
     background: linear-gradient(180deg, #f1e7f9 0%, #ffffff 25%, #f1e7f9 100%);
     background-attachment: fixed;
   }
   
   @media (min-aspect-ratio: 9/16) and (max-aspect-ratio: 1/1) {
-    /* 가로가 긴 화면 */
     background: linear-gradient(180deg, #f1e7f9 0%, #ffffff 35%, #f1e7f9 100%);
     background-attachment: fixed;
   }
@@ -215,12 +212,10 @@ const ProfileSection = styled.div`
   margin-top: 8vh;
   
   @media (max-aspect-ratio: 9/16) {
-    /* 세로가 긴 화면 (대부분의 모바일) */
     margin-top: 6vh;
   }
   
   @media (min-aspect-ratio: 9/16) and (max-aspect-ratio: 1/1) {
-    /* 가로가 긴 화면 */
     margin-top: 10vh;
   }
 `;
@@ -245,12 +240,10 @@ const ProgressSection = styled.div`
   position: relative;
   
   @media (max-aspect-ratio: 9/16) {
-    /* 세로가 긴 화면 (대부분의 모바일) */
     margin-top: 6vh;
   }
   
   @media (min-aspect-ratio: 9/16) and (max-aspect-ratio: 1/1) {
-    /* 가로가 긴 화면 */
     margin-top: 10vh;
   }
 `;
@@ -377,12 +370,10 @@ const TargetTimeSection = styled.div`
   margin-top: 4vh;
   
   @media (max-aspect-ratio: 9/16) {
-    /* 세로가 긴 화면 (대부분의 모바일) */
     margin-top: 3vh;
   }
   
   @media (min-aspect-ratio: 9/16) and (max-aspect-ratio: 1/1) {
-    /* 가로가 긴 화면 */
     margin-top: 5vh;
   }
 `;
@@ -400,12 +391,10 @@ const ActualTimeSection = styled.div`
   text-align: center;
   
   @media (max-aspect-ratio: 9/16) {
-    /* 세로가 긴 화면 (대부분의 모바일) */
     margin-top: 1.5vh;
   }
   
   @media (min-aspect-ratio: 9/16) and (max-aspect-ratio: 1/1) {
-    /* 가로가 긴 화면 */
     margin-top: 3vh;
   }
 `;
@@ -417,13 +406,11 @@ const CelebrationSection = styled.div`
   padding: 0 20px;
   
   @media (max-aspect-ratio: 9/16) {
-    /* 세로가 긴 화면 (대부분의 모바일) */
     margin-top: 3vh;
     margin-bottom: 6vh;
   }
   
   @media (min-aspect-ratio: 9/16) and (max-aspect-ratio: 1/1) {
-    /* 가로가 긴 화면 */
     margin-top: 5vh;
     margin-bottom: 3vh;
   }
@@ -448,4 +435,4 @@ const CelebrationText = styled.div`
       transform: translateY(0);
     }
   }
-`; 
+`;

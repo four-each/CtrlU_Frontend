@@ -8,20 +8,112 @@ import { colors } from "@styles/theme";
 import { useRef, useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import profileIcon from "../../assets/icons/home/profile.svg";
-import ganadiIcon from "../../assets/icons/detail/ganadi.svg";
+import { useGetTodoDetail } from "../../hooks/api/todo/useGetTodoDetail";
+import { useGiveUpTodo } from "../../hooks/api/todo/useGiveUpTodo";
+import { useDeleteTodo } from "../../hooks/api/todo/useDeleteTodo";
 
 const Detail = () => {
   const [searchParams] = useSearchParams();
-  const isMe = searchParams.get('isMe') === 'true';
+  const id = searchParams.get('id');
   const finishHandler = useRef<FinishHandler>(null);
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<'complete' | 'quit' | 'delete'>('complete');
   const navigate = useNavigate();
 
+  // API 데이터 조회
+  const { data: todoDetail, isLoading, isError, error } = useGetTodoDetail(id || '');
+  
+  // 미션 포기 훅
+  const giveUpMutation = useGiveUpTodo();
+  
+  // 미션 삭제 훅
+  const deleteMutation = useDeleteTodo();
+
+  useEffect(() => {
+    if (isError) {
+      console.error('[Detail] 할일 상세 조회 에러', error);
+    }
+  }, [isError, error]);
+
   // 페이지 마운트 시 스크롤을 맨 위로 초기화
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  // 미션 포기 처리
+  const handleGiveUp = async () => {
+    if (!id) return;
+    
+    try {
+      const result = await giveUpMutation.mutateAsync(id);
+      if (result.status === 200) {
+        console.log("미션 포기 성공");
+        navigate('/');
+      }
+    } catch (error) {
+      console.error("미션 포기 실패:", error);
+    }
+    setShowModal(false);
+  };
+
+  // 미션 삭제 처리
+  const handleDelete = async () => {
+    if (!id) return;
+    
+    try {
+      const result = await deleteMutation.mutateAsync(id);
+      if (result.status === 200) {
+        console.log("미션 삭제 성공");
+        navigate('/');
+      }
+    } catch (error) {
+      console.error("미션 삭제 실패:", error);
+    }
+    setShowModal(false);
+  };
+
+  // 로딩 상태
+  if (isLoading) {
+    return (
+      <Container>
+        <FixedHeaderContainer>
+          <Header
+            isBack={true}
+            isRight={false}
+            title=""
+            userName=""
+          />
+        </FixedHeaderContainer>
+        <ContentContainer>
+          <div style={{ textAlign: 'center', padding: '50px' }}>로딩 중...</div>
+        </ContentContainer>
+      </Container>
+    );
+  }
+
+  // 에러 상태
+  if (isError || !todoDetail) {
+    return (
+      <Container>
+        <FixedHeaderContainer>
+          <Header
+            isBack={true}
+            isRight={false}
+            title=""
+            userName=""
+          />
+        </FixedHeaderContainer>
+        <ContentContainer>
+          <div style={{ textAlign: 'center', padding: '50px', color: '#bf6a6a' }}>
+            할일 정보를 불러오는데 실패했습니다.
+          </div>
+        </ContentContainer>
+      </Container>
+    );
+  }
+
+  const actualIsMe = (todoDetail as any).result.isMine;
+  const { result } = todoDetail as any;
 
   return (
     <Container>
@@ -30,12 +122,12 @@ const Detail = () => {
         <Header
           isBack={true}
           isRight={true}
-          rightIcon={isMe ? <TrashIcon onClick={() => {
+          rightIcon={actualIsMe ? <TrashIcon onClick={() => {
             setModalType('delete');
             setShowModal(true);
           }} /> : null}
-          title={isMe ? "" : "친구이름"}
-          userName={isMe ? "나" : "친구이름"}
+          title={actualIsMe ? "" : "친구이름"}
+          userName={actualIsMe ? "나" : "친구이름"}
         />
       </FixedHeaderContainer>
 
@@ -49,25 +141,32 @@ const Detail = () => {
         padding={"50px 0 40px"}
         gap={15}
       >
-        <SmallImage src={profileIcon} alt="smallImage" />
+        <SmallImage 
+          src={result.profileImage || profileIcon} 
+          alt="프로필 이미지"
+          onError={(e) => {
+            e.currentTarget.src = profileIcon;
+          }}
+        />
         <Txt
           fontSize="24px"
           fontWeight={500}
           color={colors.textBlack}
           letterSpacing="0.0024rem"
         >
-          졸업하기
+          {result.title}
         </Txt>
       </Col>
       <Timer
-        durationTime={600000}
-        endTime="00:20:05"
+        durationTime={result.durationTime}
+        challengeTime={result.challengeTime}
         timerRef={finishHandler}
+        centerImageSrc={result.startImage}
       />
-      {!isMe && (
+      {!actualIsMe && (
         <div style={{ marginBottom: '40px' }}></div>
       )}
-      {isMe && (
+      {actualIsMe && (
         <Row
           justify="center"
           align="center"
@@ -118,13 +217,11 @@ const Detail = () => {
                   if (modalType === 'complete') {
                     finishHandler.current?.setFinished();
                     console.log("미션 완료");
-                    navigate('/camera/complete');
+                    navigate('/camera/complete', { state: { todoId: id, durationTime: result.durationTime } });
                   } else if (modalType === 'quit') {
-                    console.log("미션 포기");
-                    navigate('/');
+                    handleGiveUp();
                   } else {
-                    console.log("미션 삭제");
-                    navigate('/');
+                    handleDelete();
                   }
                   setShowModal(false);
                 }}
