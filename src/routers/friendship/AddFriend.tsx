@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
 import { BackLightIcon, AddFriendIcon, SearchIcon } from '@assets/icons';
@@ -45,6 +45,15 @@ const HeaderTitle = styled.h1`
   font-size: 18px;
   color: #1d1d1d;
   margin: 0;
+  padding-top: 2px;
+`;
+
+const HeaderCount = styled.span`
+  font-family: 'Noto Sans', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  color: #545656;
+  margin-left: 8px;
   padding-top: 2px;
 `;
 
@@ -212,6 +221,8 @@ const LimitModalButton = styled.button`
 
 const AddFriend = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { totalFriends = 0, maxFriends = 20 } = (location && (location as any).state) || {};
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
   const effectiveQuery = searchQuery.length >= 2 ? searchQuery : '';
@@ -303,6 +314,7 @@ const AddFriend = () => {
         />
         <HeaderContainer>
           <HeaderTitle>친구 추가</HeaderTitle>
+          <HeaderCount>({totalFriends}/{maxFriends})</HeaderCount>
         </HeaderContainer>
       </Header>
 

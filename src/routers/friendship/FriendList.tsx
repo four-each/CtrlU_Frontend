@@ -224,7 +224,7 @@ const FriendListPage = () => {
   };
 
   const handleAddFriend = () => {
-    navigate('/friendship/add');
+    navigate('/friendship/add', { state: { totalFriends, maxFriends } });
   };
 
   return (
@@ -236,11 +236,11 @@ const FriendListPage = () => {
             height: 21px;
             cursor: pointer;
             margin-top: 2px;
-          `}
+          `} 
           onClick={handleBack}
         />
         <HeaderContainer>
-          <HeaderTitle>친구 추가</HeaderTitle>
+          <HeaderTitle>친구 목록</HeaderTitle>
           <HeaderCount>({totalFriends}/{maxFriends})</HeaderCount>
         </HeaderContainer>
         <AlarmLightIcon
