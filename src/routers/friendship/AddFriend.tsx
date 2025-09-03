@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
@@ -211,6 +212,7 @@ const LimitModalButton = styled.button`
 
 const AddFriend = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
   const effectiveQuery = searchQuery.length >= 2 ? searchQuery : '';
   const { data: searchResults, isLoading, error } = useSearchFriends(effectiveQuery);
@@ -240,6 +242,9 @@ const AddFriend = () => {
       if (result.status === 200) {
         setModalMessage(`${nickname}님에게 친구 요청을 보냈습니다.`);
         setShowLimitModal(true);
+        // 보낸 요청 목록을 최신화하여 요청 화면 진입 시 바로 반영되도록 처리
+        queryClient.invalidateQueries({ queryKey: ["friendship", "sent-requests"] });
+        queryClient.refetchQueries({ queryKey: ["friendship", "sent-requests"] });
       } 
     } catch (e) {
       const code = e instanceof Error ? e.message : String(e);
