@@ -72,7 +72,6 @@ const Edit = styled.div`
 
 const FormSection = styled.div`
   width: 100%;
-  max-width: 335px;
   display: flex;
   flex-direction: column;
   gap: 60px;
@@ -89,7 +88,7 @@ const InputLabel = styled.label`
   font-weight: 400;
   color: #1d1d1d;
   display: block;
-  margin-left: 5px;
+  margin-left: 16px;
   margin-bottom: 6px;
 `;
 
@@ -99,7 +98,7 @@ const Input = styled.input`
   background: #f6f6f6;
   border: none;
   border-radius: 50px;
-  padding: 0 26px;
+  padding: 0 16px;
   font-family: 'Noto Sans KR', sans-serif;
   font-size: 16px;
   font-weight: 400;
@@ -121,8 +120,8 @@ const HelperText = styled.div`
   font-size: 12px;
   font-weight: 400;
   color: #832cc5;
-  margin-top: 4px;
-  margin-left: 5px;
+  margin-top: 10px;
+  margin-left: 16px;
 `;
 
 const EditButton = styled.button`

@@ -14,7 +14,7 @@ const SignupContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0 24px;
+  padding: 0 18px;
   position: relative;
 `;
 
@@ -42,7 +42,6 @@ const Upload = styled.div`
 
 const FormContainer = styled.div`
   width: 100%;
-  max-width: 335px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -60,7 +59,7 @@ const InputLabel = styled.label`
   font-weight: 400;
   color: #1d1d1d;
   margin-bottom: 6px;
-  margin-left: 5px;
+  margin-left: 16px;
   display: block;
 `;
 
@@ -70,7 +69,7 @@ const Input = styled.input`
   background: #f6f6f6;
   border: none;
   border-radius: 50px;
-  padding: 0 26px;
+  padding: 0 16px;
   font-family: 'Noto Sans KR', sans-serif;
   font-size: 16px;
   font-weight: 400;
@@ -93,13 +92,12 @@ const ErrorMessage = styled.div`
   font-weight: 400;
   color: #bf6a6a;
   margin-top: 4px;
-  margin-left: 5px;
+  margin-left: 16px;
   text-align: left;
 `;
 
 const SignupButton = styled.button`
   width: 100%;
-  max-width: 335px;
   height: 56px;
   background: #832cc5;
   border: none;
@@ -319,7 +317,7 @@ const Signup = () => {
           <Input
             type="email"
             name="email"
-            placeholder="이메일 주소"
+            placeholder="*이메일 주소"
             value={formData.email}
             onChange={handleInputChange}
           />
@@ -331,7 +329,7 @@ const Signup = () => {
           <Input
             type="password"
             name="password"
-            placeholder="비밀번호(영문+숫자 8~12자)"
+            placeholder="*영문+숫자+특수기호 8~12자"
             value={formData.password}
             onChange={handleInputChange}
           />
@@ -343,7 +341,7 @@ const Signup = () => {
           <Input
             type="password"
             name="confirmPassword"
-            placeholder="비밀번호(영문+숫자 8~12자)"
+            placeholder="*영문+숫자+특수기호 8~12자"
             value={formData.confirmPassword}
             onChange={handleInputChange}
           />
@@ -355,7 +353,7 @@ const Signup = () => {
           <Input
             type="text"
             name="nickname"
-            placeholder="한글, 영어, 숫자만 가능"
+            placeholder="*2자리 수 이상 가능"
             value={formData.nickname}
             onChange={handleInputChange}
           />
