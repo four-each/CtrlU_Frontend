@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
-import { BackLightIcon, AddFriendIcon, SearchIcon, AlarmLightIcon } from '@assets/icons';
+import { BackLightIcon, AddFriendIcon, SearchIcon } from '@assets/icons';
 import profileIcon from '../../assets/icons/home/profile.svg';
 import { css } from "@emotion/react";
 import { useSearchFriends } from '../../hooks/api/friendship/useSearchFriends';
@@ -230,10 +230,6 @@ const AddFriend = () => {
     navigate(-1);
   };
 
-  const handleAlarm = () => {
-    navigate('/friendship/request');
-  };
-
   const handleAddFriend = async (targetId: number, nickname: string) => {
     try {
       const result = await addFriendMutation.mutateAsync({
@@ -308,14 +304,6 @@ const AddFriend = () => {
         <HeaderContainer>
           <HeaderTitle>친구 추가</HeaderTitle>
         </HeaderContainer>
-        <AlarmLightIcon
-          css={css`
-            width: 24px;
-            height: 24px;
-            cursor: pointer;
-          `}
-          onClick={handleAlarm}
-        />
       </Header>
 
       <Content>

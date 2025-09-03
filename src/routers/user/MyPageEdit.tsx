@@ -228,7 +228,7 @@ const MyPageEdit = () => {
             margin-top: 2px;
           `}
           onClick={handleBack} />
-        <HeaderTitle>마이페이지 수정</HeaderTitle>
+        <HeaderTitle>프로필 수정</HeaderTitle>
       </Header>
 
       <Content>
