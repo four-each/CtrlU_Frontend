@@ -81,9 +81,9 @@ const Router = () => {
           </ProtectedRoute>
         } />
         <Route path="/mypage/archive" element={
-          // <ProtectedRoute>
+          <ProtectedRoute>
             <Archive />
-          // </ProtectedRoute>
+          </ProtectedRoute>
         } />
         
         {/* Friendship Routes */}

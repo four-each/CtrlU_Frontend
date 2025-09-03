@@ -18,7 +18,7 @@ const ResetContainer = styled.div`
 const Header = styled.div`
   width: 100%;
   height: 61px;
-  background: linear-gradient(180deg, #f1e7f9 0%, #f1e7f9 100%);
+  background: linear-gradient(180deg, #FFFFFF 0%, #FFFFFF 100%);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -40,24 +40,15 @@ const HeaderTitle = styled.h1`
 `;
 
 const Content = styled.div`
-  padding: 20px;
+  padding: 60px 20px 20px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 40px;
 `;
 
-const ProfileSection = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-  margin-top: 20px;
-`;
-
 const FormSection = styled.div`
   width: 100%;
-  max-width: 335px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -74,30 +65,34 @@ const InputLabel = styled.label`
   font-weight: 400;
   color: #1d1d1d;
   display: block;
-  margin-left: 5px;
+  margin-left: 16px;
   margin-bottom: 6px;
 `;
 
-const Input = styled.input`
+const Input = styled('input', {
+  shouldForwardProp: (prop) => prop !== 'hasError'
+})<{ hasError?: boolean }>`
   width: 100%;
   height: 56px;
-  background: #f6f6f6;
+  background: #FFFFFF;
   border: none;
   border-radius: 50px;
-  padding: 0 26px;
+  padding: 0 16px;
   font-family: 'Noto Sans KR', sans-serif;
   font-size: 16px;
   font-weight: 400;
   color: #000000;
   outline: none;
+  border-radius: 50px;
+  border: 1px solid ${props => props.hasError ? '#bf6a6a' : '#BABABA'};
   
   &::placeholder {
     color: #bababa;
   }
   
   &:focus {
-    background: #ffffff;
-    border: 1px solid #832cc5;
+    border-radius: 50px;
+    border: 1px solid ${props => props.hasError ? '#bf6a6a' : '#AD8ACA'};
   }
 `;
 
@@ -107,12 +102,11 @@ const ErrorText = styled.div`
   font-weight: 400;
   color: #bf6a6a;
   margin-top: 4px;
-  margin-left: 5px;
+  margin-left: 16px;
 `;
 
 const ResetButton = styled.button`
   width: 100%;
-  max-width: 335px;
   height: 56px;
   background: #832cc5;
   border: none;
@@ -260,17 +254,6 @@ const PasswordReset = () => {
       </Header>
 
       <Content>
-        <ProfileSection>
-          <ProfileIcon 
-            css={css`
-              width: 102px;
-              height: 102px;
-              border-radius: 50%;
-              border: 2px solid #c8b0db;
-              object-fit: cover;
-            `} />
-        </ProfileSection>
-
         <FormSection>
           <InputGroup>
             <InputLabel>기존 비밀번호</InputLabel>
@@ -278,6 +261,7 @@ const PasswordReset = () => {
               type="password"
               value={currentPassword}
               onChange={handleCurrentPasswordChange}
+              hasError={!!errors.currentPassword}
               placeholder="기존 비밀번호를 입력하세요"
             />
             {errors.currentPassword && (
@@ -291,6 +275,7 @@ const PasswordReset = () => {
               type="password"
               value={newPassword}
               onChange={handleNewPasswordChange}
+              hasError={!!errors.newPassword}
               placeholder="새 비밀번호를 입력하세요"
             />
             {errors.newPassword && (
@@ -304,6 +289,7 @@ const PasswordReset = () => {
               type="password"
               value={confirmPassword}
               onChange={handleConfirmPasswordChange}
+              hasError={!!errors.confirmPassword}
               placeholder="새 비밀번호를 다시 입력하세요"
             />
             {errors.confirmPassword && (

@@ -47,20 +47,13 @@ const Content = styled.div`
   gap: 40px;
 `;
 
-const ProfileSection = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-  margin-top: 20px;
-`;
-
 const FormSection = styled.div`
   width: 100%;
   max-width: 335px;
   display: flex;
   flex-direction: column;
   gap: 20px;
+  margin-top: 60px;
 `;
 
 const InputGroup = styled.div`
@@ -78,26 +71,30 @@ const InputLabel = styled.label`
   margin-bottom: 6px;
 `;
 
-const Input = styled.input`
+const Input = styled('input', {
+  shouldForwardProp: (prop) => prop !== 'hasError'
+})<{ hasError?: boolean }>`
   width: 100%;
   height: 56px;
-  background: #f6f6f6;
+  background: #FFFFFF;
   border: none;
   border-radius: 50px;
-  padding: 0 26px;
+  padding: 0 16px;
   font-family: 'Noto Sans KR', sans-serif;
   font-size: 16px;
   font-weight: 400;
   color: #000000;
   outline: none;
+  border-radius: 50px;
+  border: 1px solid ${props => props.hasError ? '#bf6a6a' : '#BABABA'};
   
   &::placeholder {
     color: #bababa;
   }
   
   &:focus {
-    background: #ffffff;
-    border: 1px solid #832cc5;
+    border-radius: 50px;
+    border: 1px solid ${props => props.hasError ? '#bf6a6a' : '#AD8ACA'};
   }
 `;
 
@@ -236,17 +233,6 @@ const ResetPassword = () => {
       </Header>
 
       <Content>
-        <ProfileSection>
-          <ProfileIcon 
-            css={css`
-              width: 102px;
-              height: 102px;
-              border-radius: 50%;
-              border: 2px solid #c8b0db;
-              object-fit: cover;
-            `} />
-        </ProfileSection>
-
         <FormSection>
           <InputGroup>
             <InputLabel>새 비밀번호</InputLabel>
