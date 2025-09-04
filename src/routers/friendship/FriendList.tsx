@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
-import { BackLightIcon, SearchIcon, AlarmLightIcon, RemoveIcon } from '@assets/icons';
+import { BackLightIcon, SearchIcon, AlarmLightIcon, RemoveIcon, ArchiveOwl, BrushIcon } from '@assets/icons';
 import profileIcon from '../../assets/icons/home/profile.svg';
 import { css } from "@emotion/react";
 import { useGetFriends } from '../../hooks/api/friendship/useGetFriends';
@@ -186,6 +186,27 @@ const AddFriendButton = styled.button`
   transform: translateX(-50%);
 `;
 
+const EmptyContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 80px;
+  gap: 50px;
+`;
+
+const AddFriendMent = styled.div`
+  width: 263px;
+  height: 57px;
+  border-radius: 20px;
+  border: 1px dashed #C8B0DB; 
+  color: #C8B0DB;
+  font-family: "Noto Sans KR";
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
 const FriendListPage = () => {
   const navigate = useNavigate();
   const { data: friendsData, isLoading, error } = useGetFriends();
@@ -276,13 +297,31 @@ const FriendListPage = () => {
 
         <FriendList>
           {searchQuery.length > 0 && searchQuery.length < 2 ? (
-            <EmptyState>2자 이상 입력해주세요! 😄</EmptyState>
+            <EmptyState>2자 이상 입력해주세요!</EmptyState>
           ) : isLoading ? (
             <EmptyState>불러오는 중...</EmptyState>
           ) : error ? (
-            <EmptyState>목록을 불러오지 못했어요.</EmptyState>
+            <EmptyState>검색 중 오류가 발생했습니다.</EmptyState>
           ) : filteredFriends.length === 0 ? (
-            <EmptyState>검색 결과가 없습니다.</EmptyState>
+            effectiveQuery
+              ? (
+                <EmptyState>검색 결과가 없습니다.</EmptyState>
+              )
+              : (
+                apiFriends.length === 0
+                  ? <EmptyContainer>
+                      <AddFriendMent>
+                        친구를 추가해보세요.
+                      </AddFriendMent>
+                      <ArchiveOwl 
+                        css={css`
+                          width: 183px;
+                          height: 169px;
+                        `}
+                      />
+                  </EmptyContainer>
+                  : <EmptyState>검색 결과가 없습니다.</EmptyState>
+              )
           ) : (
             filteredFriends.map((friend: any) => (
               <FriendItem key={friend.id}>

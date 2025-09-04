@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
-import { BackLightIcon, AddFriendIcon, SearchIcon } from '@assets/icons';
+import { BackLightIcon, AddFriendIcon, SearchIcon, ArchiveOwl } from '@assets/icons';
 import profileIcon from '../../assets/icons/home/profile.svg';
 import { css } from "@emotion/react";
 import { useSearchFriends } from '../../hooks/api/friendship/useSearchFriends';
@@ -219,6 +219,27 @@ const LimitModalButton = styled.button`
   cursor: pointer;
 `;
 
+const EmptyContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 80px;
+  gap: 50px;
+`;
+
+const SearchFriendMent = styled.div`
+  width: 263px;
+  height: 57px;
+  border-radius: 20px;
+  border: 1px dashed #C8B0DB; 
+  color: #C8B0DB;
+  font-family: "Noto Sans KR";
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
 const AddFriend = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -331,7 +352,7 @@ const AddFriend = () => {
             </SearchIconContainer>
             <SearchInputField
               type="text"
-              placeholder="이메일로 검색하기 ⭐️"
+              placeholder="이메일로 검색하기 💬"
               value={searchQuery}
               onChange={handleSearch}
               onKeyDown={handleKeyDown}
@@ -341,7 +362,7 @@ const AddFriend = () => {
 
         <FriendList>
           {searchQuery.length > 0 && searchQuery.length < 2 ? (
-            <EmptyState>2자 이상 입력해주세요! 😄</EmptyState>
+            <EmptyState>2자 이상 입력해주세요!</EmptyState>
           ) : isLoading ? (
             <EmptyState>검색 중...</EmptyState>
           ) : error ? (
@@ -350,7 +371,17 @@ const AddFriend = () => {
             searchQuery ? (
               <EmptyState>검색 결과가 없습니다.</EmptyState>
             ) : (
-              <EmptyState>친구를 검색해보세요! 😄</EmptyState>
+              <EmptyContainer>
+                <SearchFriendMent>
+                  가까운 친구를 검색해보세요!
+                </SearchFriendMent>
+                <ArchiveOwl 
+                  css={css`
+                    width: 183px;
+                    height: 169px;
+                  `}
+                />
+              </EmptyContainer>
             )
           ) : (
             friends.map((friend) => (

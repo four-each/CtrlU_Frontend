@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
-import { BackLightIcon, RemoveIcon, AcceptIcon } from '@assets/icons';
+import { BackLightIcon, RemoveIcon, AcceptIcon, ArchiveOwl } from '@assets/icons';
 import { css } from "@emotion/react";
 import { useGetReceivedRequests, useGetSentRequests } from '../../hooks/api/friendship/useGetRequests';
 import { useAcceptFriendRequest, useRejectFriendRequest, useCancelSentRequest } from '../../hooks/api/friendship/useFriendRequestActions';
@@ -222,14 +222,36 @@ const LimitModalButton = styled.button`
   cursor: pointer;
 `;
 
+
+const EmptyContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 80px;
+  gap: 50px;
+`;
+
+const AddFriendMent = styled.div`
+  width: 263px;
+  height: 57px;
+  border-radius: 20px;
+  border: 1px dashed #C8B0DB; 
+  color: #C8B0DB;
+  font-family: "Noto Sans KR";
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
 const FriendRequest = () => {
   const navigate = useNavigate();
   const [showNotification, setShowNotification] = useState(false);
   const [activeTab, setActiveTab] = useState<'received' | 'sent'>('received');
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
-  const { data: receivedRequests } = useGetReceivedRequests();
-  const { data: sentRequests } = useGetSentRequests();
+  const { data: receivedRequests, isLoading: isLoadingReceived, error: errorReceived } = useGetReceivedRequests();
+  const { data: sentRequests, isLoading: isLoadingSent, error: errorSent } = useGetSentRequests();
   const acceptMutation = useAcceptFriendRequest();
   const rejectMutation = useRejectFriendRequest();
   const cancelMutation = useCancelSentRequest();
@@ -286,10 +308,6 @@ const FriendRequest = () => {
     });
   };
 
-  const handleConfirmNotification = () => {
-    setShowNotification(false);
-  };
-
   return (
     <FriendRequestContainer>
       <Header>
@@ -325,56 +343,90 @@ const FriendRequest = () => {
 
         <TabContent isVisible={activeTab === 'received'}>
           <FriendList>
-            {apiReceivedRequests.map((friend) => (
-              <FriendItem key={friend.id}>
-                <FriendCard>
-                  <ProfileImage src={friend.image || profileIcon} alt={`${friend.nickname} 프로필`} />
-                  <FriendName>{friend.nickname}</FriendName>
-                  <ActionButtons>
-                    <AcceptIcon 
-                      css={css`
-                        width: 24px;
-                        height: 24px;
-                        cursor: ${acceptMutation.isPending ? 'not-allowed' : 'pointer'};
-                        opacity: ${acceptMutation.isPending ? 0.5 : 1};
-                      `}
-                      onClick={() => !acceptMutation.isPending && handleAcceptRequest(friend.id)}
-                    />
-                    <RemoveIcon 
-                      css={css`
-                        width: 24px;
-                        height: 24px;
-                        cursor: ${rejectMutation.isPending ? 'not-allowed' : 'pointer'};
-                        opacity: ${rejectMutation.isPending ? 0.5 : 1};
-                      `}
-                      onClick={() => !rejectMutation.isPending && handleRejectRequest(friend.id)}
-                    />
-                  </ActionButtons>
-                </FriendCard>
-              </FriendItem>
-            ))}
+            {isLoadingReceived ? (
+              <EmptyContainer>
+                <AddFriendMent>불러오는 중...</AddFriendMent>
+              </EmptyContainer>
+            ) : errorReceived ? (
+              <EmptyContainer>
+                <AddFriendMent>목록을 불러오지 못했어요.</AddFriendMent>
+              </EmptyContainer>
+            ) : apiReceivedRequests.length === 0 ? (
+              <EmptyContainer>
+                <AddFriendMent>
+                  현재 요청사항이 없습니다.
+                </AddFriendMent>
+                <ArchiveOwl width={183} height={169} />
+              </EmptyContainer>
+            ) : (
+              apiReceivedRequests.map((friend) => (
+                <FriendItem key={friend.id}>
+                  <FriendCard>
+                    <ProfileImage src={friend.image || profileIcon} alt={`${friend.nickname} 프로필`} />
+                    <FriendName>{friend.nickname}</FriendName>
+                    <ActionButtons>
+                      <AcceptIcon 
+                        css={css`
+                          width: 24px;
+                          height: 24px;
+                          cursor: ${acceptMutation.isPending ? 'not-allowed' : 'pointer'};
+                          opacity: ${acceptMutation.isPending ? 0.5 : 1};
+                        `}
+                        onClick={() => !acceptMutation.isPending && handleAcceptRequest(friend.id)}
+                      />
+                      <RemoveIcon 
+                        css={css`
+                          width: 24px;
+                          height: 24px;
+                          cursor: ${rejectMutation.isPending ? 'not-allowed' : 'pointer'};
+                          opacity: ${rejectMutation.isPending ? 0.5 : 1};
+                        `}
+                        onClick={() => !rejectMutation.isPending && handleRejectRequest(friend.id)}
+                      />
+                    </ActionButtons>
+                  </FriendCard>
+                </FriendItem>
+              ))
+            )}
           </FriendList>
         </TabContent>
 
         <TabContent isVisible={activeTab === 'sent'}>
           <FriendList>
-            {apiSentRequests.map((friend) => (
-              <FriendItem key={friend.id}>
-                <FriendCard>
-                  <ProfileImage src={friend.image || profileIcon} alt={`${friend.nickname} 프로필`} />
-                  <FriendName>{friend.nickname}</FriendName>
-                  <RemoveIcon 
-                    css={css`
-                      width: 24px;
-                      height: 24px;
-                      cursor: ${cancelMutation.isPending ? 'not-allowed' : 'pointer'};
-                      opacity: ${cancelMutation.isPending ? 0.5 : 1};
-                    `}
-                    onClick={() => !cancelMutation.isPending && handleCancelSentRequest(friend.id)}
-                  />
-                </FriendCard>
-              </FriendItem>
-            ))}
+            {isLoadingSent ? (
+              <EmptyContainer>
+                <AddFriendMent>불러오는 중...</AddFriendMent>
+              </EmptyContainer>
+            ) : errorSent ? (
+              <EmptyContainer>
+                <AddFriendMent>목록을 불러오지 못했어요.</AddFriendMent>
+              </EmptyContainer>
+            ) : apiSentRequests.length === 0 ? (
+              <EmptyContainer>
+                <AddFriendMent>
+                  현재 보낸 요청이 없습니다.
+                </AddFriendMent>
+                <ArchiveOwl width={183} height={169} />
+              </EmptyContainer>
+            ) : (
+              apiSentRequests.map((friend) => (
+                <FriendItem key={friend.id}>
+                  <FriendCard>
+                    <ProfileImage src={friend.image || profileIcon} alt={`${friend.nickname} 프로필`} />
+                    <FriendName>{friend.nickname}</FriendName>
+                    <RemoveIcon 
+                      css={css`
+                        width: 24px;
+                        height: 24px;
+                        cursor: ${cancelMutation.isPending ? 'not-allowed' : 'pointer'};
+                        opacity: ${cancelMutation.isPending ? 0.5 : 1};
+                      `}
+                      onClick={() => !cancelMutation.isPending && handleCancelSentRequest(friend.id)}
+                    />
+                  </FriendCard>
+                </FriendItem>
+              ))
+            )}
           </FriendList>
         </TabContent>
       </Content>
