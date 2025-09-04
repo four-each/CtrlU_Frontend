@@ -8,6 +8,7 @@ import ImageUploadIcon from "./image_upload.svg?react";
 import AddFriendIcon from "./friendship/add_friend.svg?react";
 import SearchIcon from "./friendship/search.svg?react";
 import AlarmLightIcon from "./friendship/alarm_light.svg?react";
+import AlarmActiveLightIcon from "./friendship/alarm_active_light.svg?react";
 import AcceptIcon from "./friendship/accept.svg?react";
 import RemoveIcon from "./friendship/remove.svg?react";
 import ArchiveIcon from "./mypage/archive.svg?react";
@@ -28,6 +29,7 @@ export {
   AddFriendIcon,
   SearchIcon,
   AlarmLightIcon,
+  AlarmActiveLightIcon,
   BackLightIcon,
   AcceptIcon,
   RemoveIcon,

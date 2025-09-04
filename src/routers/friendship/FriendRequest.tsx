@@ -341,7 +341,7 @@ const FriendRequest = () => {
           </Tab>
         </TabContainer>
 
-        <TabContent isVisible={activeTab === 'received'}>
+        <TabContent key="received" isVisible={activeTab === 'received'}>
           <FriendList>
             {isLoadingReceived ? (
               <EmptyContainer>
@@ -391,7 +391,7 @@ const FriendRequest = () => {
           </FriendList>
         </TabContent>
 
-        <TabContent isVisible={activeTab === 'sent'}>
+        <TabContent key="sent" isVisible={activeTab === 'sent'}>
           <FriendList>
             {isLoadingSent ? (
               <EmptyContainer>

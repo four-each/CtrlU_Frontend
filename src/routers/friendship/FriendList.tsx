@@ -2,10 +2,11 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
-import { BackLightIcon, SearchIcon, AlarmLightIcon, RemoveIcon, ArchiveOwl, BrushIcon } from '@assets/icons';
+import { BackLightIcon, SearchIcon, AlarmLightIcon, AlarmActiveLightIcon, RemoveIcon, ArchiveOwl, BrushIcon } from '@assets/icons';
 import profileIcon from '../../assets/icons/home/profile.svg';
 import { css } from "@emotion/react";
 import { useGetFriends } from '../../hooks/api/friendship/useGetFriends';
+import { useGetReceivedRequests } from '../../hooks/api/friendship/useGetRequests';
 import { useDeleteFriend } from '../../hooks/api/friendship/useFriendRequestActions';
 
 const FriendListContainer = styled.div`
@@ -210,6 +211,7 @@ const AddFriendMent = styled.div`
 const FriendListPage = () => {
   const navigate = useNavigate();
   const { data: friendsData, isLoading, error } = useGetFriends();
+  const { data: receivedRequests } = useGetReceivedRequests();
   const deleteFriendMutation = useDeleteFriend();
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -217,6 +219,7 @@ const FriendListPage = () => {
   const apiFriends = friendsData?.result.friends ?? [];
   const totalFriends = apiFriends.length;
   const maxFriends = 20; // 최대 친구 수
+  const hasPendingRequests = (receivedRequests?.result.friends ?? []).length > 0;
 
   const effectiveQuery = searchQuery.length >= 2 ? searchQuery : '';
   const filteredFriends = useMemo(() => {
@@ -264,14 +267,25 @@ const FriendListPage = () => {
           <HeaderTitle>친구 목록</HeaderTitle>
           <HeaderCount>({totalFriends}/{maxFriends})</HeaderCount>
         </HeaderContainer>
-        <AlarmLightIcon
-          css={css`
-            width: 24px;
-            height: 24px;
-            cursor: pointer;
-          `}  
-          onClick={handleAlarm}
-        />
+        {hasPendingRequests ? (
+          <AlarmActiveLightIcon
+            css={css`
+              width: 24px;
+              height: 24px;
+              cursor: pointer;
+            `}
+            onClick={handleAlarm}
+          />
+        ) : (
+          <AlarmLightIcon
+            css={css`
+              width: 24px;
+              height: 24px;
+              cursor: pointer;
+            `}  
+            onClick={handleAlarm}
+          />
+        )}
       </Header>
 
       <Content>
