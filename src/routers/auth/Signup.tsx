@@ -196,7 +196,7 @@ const Signup = () => {
 
     if (!formData.nickname) {
       newErrors.nickname = '닉네임을 입력해주세요';
-    } else if (!/^[가-힣a-zA-Z0-9]+$/.test(formData.nickname)) {
+    } else if (!/^[가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9]+$/.test(formData.nickname)) {
       newErrors.nickname = '한글, 영어, 숫자만 가능합니다';
     } else if (formData.nickname.length < 2 || formData.nickname.length > 4) {
       newErrors.nickname = '닉네임은 2~4자로 입력해주세요';
