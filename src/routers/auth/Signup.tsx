@@ -184,8 +184,8 @@ const Signup = () => {
       newErrors.password = '비밀번호를 입력해주세요';
     } else if (formData.password.length < 8 || formData.password.length > 12) {
       newErrors.password = '비밀번호는 8~12자로 입력해주세요';
-    } else if (!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,12}$/.test(formData.password)) {
-      newErrors.password = '영문, 숫자를 포함하여 입력해주세요';
+    } else if (!/^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,12}$/.test(formData.password)) {
+      newErrors.password = '영문, 숫자, 특수문자를 포함하여 입력해주세요';
     }
 
     if (!formData.confirmPassword) {

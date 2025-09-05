@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
-import { BackLightIcon, ProfileIcon } from '@assets/icons';
-import { css } from "@emotion/react";
 import { useResetPassword } from '@hooks/api/auth/useResetPassword';
 
 const ResetContainer = styled.div`
@@ -147,8 +145,8 @@ const ResetPassword = () => {
   const verifyToken = searchParams.get('token') || '';
 
   const validatePassword = (password: string) => {
-    // 비밀번호 유효성 검사: 8~12자, 영문/숫자 포함
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,12}$/;
+    // 비밀번호 유효성 검사: 8~12자, 영문/숫자/특수문자 포함
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,12}$/;
     return passwordRegex.test(password);
   };
 
@@ -157,19 +155,19 @@ const ResetPassword = () => {
     setPassword(value);
     
     if (value.length === 0) {
-      setErrors(prev => ({ ...prev, newPassword: '새 비밀번호를 입력해주세요.' }));
+      setErrors(prev => ({ ...prev, password: '새 비밀번호를 입력해주세요.' }));
     } else if (value.length < 8 || value.length > 12) {
       setErrors(prev => ({ 
         ...prev, 
-        newPassword: '비밀번호는 8~12자로 입력해주세요' 
+        password: '비밀번호는 8~12자로 입력해주세요' 
       }));
-    } else if (!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,12}$/.test(value)) {
+    } else if (!/^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,12}$/.test(value)) {
       setErrors(prev => ({ 
         ...prev, 
-        newPassword: '영문, 숫자를 포함하여 입력해주세요' 
+        password: '영문, 숫자, 특수문자를 포함하여 입력해주세요' 
       }));
     } else {
-      setErrors(prev => ({ ...prev, newPassword: '' }));
+      setErrors(prev => ({ ...prev, password: '' }));
     }
     if (resetError) setResetError('');
   };
@@ -191,13 +189,13 @@ const ResetPassword = () => {
   const handleReset = async () => {
     // 모든 필드 검증
     const newErrors = {
-      newPassword: password.length === 0 ? '새 비밀번호를 입력해주세요.' : 
-                   !validatePassword(password) ? '비밀번호는 8~12자, 영문/숫자를 포함해야 합니다.' : '',
+      password: password.length === 0 ? '새 비밀번호를 입력해주세요.' : 
+                !validatePassword(password) ? '비밀번호는 8~12자, 영문/숫자/특수문자를 포함해야 합니다.' : '',
       confirmPassword: confirmPassword.length === 0 ? '새 비밀번호 확인을 입력해주세요.' :
                       confirmPassword !== password ? '비밀번호가 일치하지 않습니다.' : ''
     };
 
-    setErrors(errors);
+    setErrors(newErrors);
 
     // 모든 에러가 없으면 재설정 진행
     if (!Object.values(newErrors).some(error => error !== '')) {

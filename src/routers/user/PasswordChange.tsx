@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
-import { BackLightIcon, ProfileIcon } from '@assets/icons';
+import { BackLightIcon } from '@assets/icons';
 import { css } from "@emotion/react";
 import { useChangePassword } from '@hooks/api/user/useChangePassword';
 
@@ -147,8 +147,8 @@ const PasswordReset = () => {
   };
 
   const validatePassword = (password: string) => {
-    // 비밀번호 유효성 검사: 8~12자, 영문/숫자 포함
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,12}$/;
+    // 비밀번호 유효성 검사: 8~12자, 영문/숫자/특수문자 포함
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,12}$/;
     return passwordRegex.test(password);
   };
 
@@ -174,10 +174,10 @@ const PasswordReset = () => {
         ...prev, 
         newPassword: '비밀번호는 8~12자로 입력해주세요' 
       }));
-    } else if (!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,12}$/.test(value)) {
+    } else if (!/^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,12}$/.test(value)) {
       setErrors(prev => ({ 
         ...prev, 
-        newPassword: '영문, 숫자를 포함하여 입력해주세요' 
+        newPassword: '영문, 숫자, 특수문자를 포함하여 입력해주세요' 
       }));
     } else {
       setErrors(prev => ({ ...prev, newPassword: '' }));
