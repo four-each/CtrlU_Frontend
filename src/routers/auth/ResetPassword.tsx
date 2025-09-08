@@ -155,16 +155,16 @@ const ResetPassword = () => {
     setPassword(value);
     
     if (value.length === 0) {
-      setErrors(prev => ({ ...prev, password: '새 비밀번호를 입력해주세요.' }));
+      setErrors(prev => ({ ...prev, password: '*새 비밀번호를 입력해주세요.' }));
     } else if (value.length < 8 || value.length > 12) {
       setErrors(prev => ({ 
         ...prev, 
-        password: '비밀번호는 8~12자로 입력해주세요' 
+        password: '*비밀번호는 8~12자로 입력해주세요' 
       }));
     } else if (!/^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,12}$/.test(value)) {
       setErrors(prev => ({ 
         ...prev, 
-        password: '영문, 숫자, 특수문자를 포함하여 입력해주세요' 
+        password: '*영문, 숫자, 특수문자를 포함하여 입력해주세요' 
       }));
     } else {
       setErrors(prev => ({ ...prev, password: '' }));
@@ -177,9 +177,9 @@ const ResetPassword = () => {
     setConfirmPassword(value);
     
     if (value.length === 0) {
-      setErrors(prev => ({ ...prev, confirmPassword: '새 비밀번호 확인을 입력해주세요.' }));
+      setErrors(prev => ({ ...prev, confirmPassword: '*새 비밀번호 확인을 입력해주세요.' }));
     } else if (value !== password) {
-      setErrors(prev => ({ ...prev, confirmPassword: '비밀번호가 일치하지 않습니다.' }));
+      setErrors(prev => ({ ...prev, confirmPassword: '*비밀번호가 일치하지 않습니다.' }));
     } else {
       setErrors(prev => ({ ...prev, confirmPassword: '' }));
     }
@@ -189,10 +189,10 @@ const ResetPassword = () => {
   const handleReset = async () => {
     // 모든 필드 검증
     const newErrors = {
-      password: password.length === 0 ? '새 비밀번호를 입력해주세요.' : 
-                !validatePassword(password) ? '비밀번호는 8~12자, 영문/숫자/특수문자를 포함해야 합니다.' : '',
-      confirmPassword: confirmPassword.length === 0 ? '새 비밀번호 확인을 입력해주세요.' :
-                      confirmPassword !== password ? '비밀번호가 일치하지 않습니다.' : ''
+      password: password.length === 0 ? '*새 비밀번호를 입력해주세요.' : 
+                !validatePassword(password) ? '*비밀번호는 8~12자, 영문/숫자/특수문자를 포함해야 합니다.' : '',
+      confirmPassword: confirmPassword.length === 0 ? '*새 비밀번호 확인을 입력해주세요.' :
+                      confirmPassword !== password ? '*비밀번호가 일치하지 않습니다.' : ''
     };
 
     setErrors(newErrors);
@@ -238,7 +238,6 @@ const ResetPassword = () => {
               type="password"
               value={password}
               onChange={handleNewPasswordChange}
-              placeholder="새 비밀번호를 입력하세요"
             />
             {errors.password && (
               <ErrorText>{errors.password}</ErrorText>
@@ -251,7 +250,6 @@ const ResetPassword = () => {
               type="password"
               value={confirmPassword}
               onChange={handleConfirmPasswordChange}
-              placeholder="새 비밀번호를 다시 입력하세요"
             />
             {errors.confirmPassword && (
               <ErrorText>{errors.confirmPassword}</ErrorText>

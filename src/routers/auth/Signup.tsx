@@ -175,31 +175,31 @@ const Signup = () => {
     };
 
     if (!formData.email) {
-      newErrors.email = '이메일 주소를 입력해주세요';
+      newErrors.email = '*이메일 주소를 입력해주세요';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = '올바른 이메일 주소를 입력해주세요';
+      newErrors.email = '*올바른 이메일 주소를 입력해주세요';
     }
 
     if (!formData.password) {
-      newErrors.password = '비밀번호를 입력해주세요';
+      newErrors.password = '*비밀번호를 입력해주세요';
     } else if (formData.password.length < 8 || formData.password.length > 12) {
-      newErrors.password = '비밀번호는 8~12자로 입력해주세요';
+      newErrors.password = '*비밀번호는 8~12자로 입력해주세요';
     } else if (!/^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,12}$/.test(formData.password)) {
-      newErrors.password = '영문, 숫자, 특수문자를 포함하여 입력해주세요';
+      newErrors.password = '*영문, 숫자, 특수문자를 포함하여 입력해주세요';
     }
 
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = '비밀번호 확인을 입력해주세요';
+      newErrors.confirmPassword = '*비밀번호 확인을 입력해주세요';
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = '비밀번호가 일치하지 않습니다';
+      newErrors.confirmPassword = '*비밀번호가 일치하지 않습니다';
     }
 
     if (!formData.nickname) {
-      newErrors.nickname = '닉네임을 입력해주세요';
+      newErrors.nickname = '*닉네임을 입력해주세요';
     } else if (!/^[가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9]+$/.test(formData.nickname)) {
-      newErrors.nickname = '한글, 영어, 숫자만 가능합니다';
+      newErrors.nickname = '*한글, 영어, 숫자만 가능합니다';
     } else if (formData.nickname.length < 2 || formData.nickname.length > 4) {
-      newErrors.nickname = '닉네임은 2~4자로 입력해주세요';
+      newErrors.nickname = '*닉네임은 2~4자로 입력해주세요';
     }
 
     setErrors(newErrors);

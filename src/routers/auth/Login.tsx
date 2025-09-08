@@ -63,6 +63,16 @@ const Input = styled.input`
   }
 `;
 
+const ErrorMessage = styled.div`
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: #bf6a6a;
+  margin-top: 4px;
+  margin-left: 16px;
+  text-align: left;
+`;
+
 const ErrorText = styled(Txt)`
   color: #bf6a6a;
   font-size: 12px;
@@ -169,12 +179,8 @@ const Login = () => {
 
     if (!formData.password) {
       newErrors.password = '비밀번호를 입력해주세요';
-    } else if (formData.password.length < 8 || formData.password.length > 12) {
-      newErrors.password = '비밀번호는 8~12자로 입력해주세요';
-    } else if (!/^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,12}$/.test(formData.password)) {
-      newErrors.password = '영문, 숫자, 특수문자를 포함하여 입력해주세요';
-    }
-
+    } 
+    
     setErrors(newErrors);
     return !Object.values(newErrors).some(error => error);
   };
@@ -222,7 +228,7 @@ const Login = () => {
             value={formData.email}
             onChange={handleInputChange}
           />
-          {errors.email && <Txt color="#bf6a6a" fontSize="12px">{errors.email}</Txt>}
+          {errors.email && <ErrorMessage>{errors.email}</ErrorMessage>}
         </InputGroup>
 
         <InputGroup>
@@ -233,7 +239,7 @@ const Login = () => {
             value={formData.password}
             onChange={handleInputChange}
           />
-          {errors.password && <Txt color="#bf6a6a" fontSize="12px">{errors.password}</Txt>}
+          {errors.password && <ErrorMessage>{errors.password}</ErrorMessage>}
         </InputGroup>
 
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'baseline', gap: '10px' }}>

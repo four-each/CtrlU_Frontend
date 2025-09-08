@@ -157,7 +157,7 @@ const PasswordReset = () => {
     setCurrentPassword(value);
     setErrors(prev => ({
       ...prev,
-      currentPassword: value.length === 0 ? '기존 비밀번호를 입력해주세요.' : ''
+      currentPassword: value.length === 0 ? '*기존 비밀번호를 입력해주세요.' : ''
     }));
     // 서버 에러 메시지 초기화
     if (resetError) setResetError('');
@@ -168,16 +168,16 @@ const PasswordReset = () => {
     setNewPassword(value);
     
     if (value.length === 0) {
-      setErrors(prev => ({ ...prev, newPassword: '새 비밀번호를 입력해주세요.' }));
+      setErrors(prev => ({ ...prev, newPassword: '*새 비밀번호를 입력해주세요.' }));
     } else if (value.length < 8 || value.length > 12) {
       setErrors(prev => ({ 
         ...prev, 
-        newPassword: '비밀번호는 8~12자로 입력해주세요' 
+        newPassword: '*비밀번호는 8~12자로 입력해주세요' 
       }));
     } else if (!/^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,12}$/.test(value)) {
       setErrors(prev => ({ 
         ...prev, 
-        newPassword: '영문, 숫자, 특수문자를 포함하여 입력해주세요' 
+        newPassword: '*영문, 숫자, 특수문자를 포함하여 입력해주세요' 
       }));
     } else {
       setErrors(prev => ({ ...prev, newPassword: '' }));
@@ -190,9 +190,9 @@ const PasswordReset = () => {
     setConfirmPassword(value);
     
     if (value.length === 0) {
-      setErrors(prev => ({ ...prev, confirmPassword: '새 비밀번호 확인을 입력해주세요.' }));
+      setErrors(prev => ({ ...prev, confirmPassword: '*새 비밀번호 확인을 입력해주세요.' }));
     } else if (value !== newPassword) {
-      setErrors(prev => ({ ...prev, confirmPassword: '비밀번호가 일치하지 않습니다.' }));
+      setErrors(prev => ({ ...prev, confirmPassword: '*비밀번호가 일치하지 않습니다.' }));
     } else {
       setErrors(prev => ({ ...prev, confirmPassword: '' }));
     }
@@ -202,11 +202,11 @@ const PasswordReset = () => {
   const handleReset = async () => {
     // 모든 필드 검증
     const newErrors = {
-      currentPassword: currentPassword.length === 0 ? '기존 비밀번호를 입력해주세요.' : '',
-      newPassword: newPassword.length === 0 ? '새 비밀번호를 입력해주세요.' : 
-                   !validatePassword(newPassword) ? '비밀번호는 8~12자, 영문/숫자를 포함해야 합니다.' : '',
-      confirmPassword: confirmPassword.length === 0 ? '새 비밀번호 확인을 입력해주세요.' :
-                      confirmPassword !== newPassword ? '비밀번호가 일치하지 않습니다.' : ''
+      currentPassword: currentPassword.length === 0 ? '*기존 비밀번호를 입력해주세요.' : '',
+      newPassword: newPassword.length === 0 ? '*새 비밀번호를 입력해주세요.' : 
+                   !validatePassword(newPassword) ? '*비밀번호는 8~12자, 영문/숫자를 포함해야 합니다.' : '',
+      confirmPassword: confirmPassword.length === 0 ? '*새 비밀번호 확인을 입력해주세요.' :
+                      confirmPassword !== newPassword ? '*비밀번호가 일치하지 않습니다.' : ''
     };
 
     setErrors(newErrors);
@@ -262,7 +262,6 @@ const PasswordReset = () => {
               value={currentPassword}
               onChange={handleCurrentPasswordChange}
               hasError={!!errors.currentPassword}
-              placeholder="기존 비밀번호를 입력하세요"
             />
             {errors.currentPassword && (
               <ErrorText>{errors.currentPassword}</ErrorText>
@@ -276,7 +275,6 @@ const PasswordReset = () => {
               value={newPassword}
               onChange={handleNewPasswordChange}
               hasError={!!errors.newPassword}
-              placeholder="새 비밀번호를 입력하세요"
             />
             {errors.newPassword && (
               <ErrorText>{errors.newPassword}</ErrorText>
@@ -290,7 +288,6 @@ const PasswordReset = () => {
               value={confirmPassword}
               onChange={handleConfirmPasswordChange}
               hasError={!!errors.confirmPassword}
-              placeholder="새 비밀번호를 다시 입력하세요"
             />
             {errors.confirmPassword && (
               <ErrorText>{errors.confirmPassword}</ErrorText>
