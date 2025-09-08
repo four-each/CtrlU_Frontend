@@ -42,6 +42,7 @@ const Upload = styled.div`
 
 const FormContainer = styled.div`
   width: 100%;
+  max-width: 335px;
   display: flex;
   flex-direction: column;
   gap: 20px;
