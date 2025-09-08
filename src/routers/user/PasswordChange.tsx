@@ -49,7 +49,7 @@ const Content = styled.div`
 
 const FormSection = styled.div`
   width: 100%;
-  max-width: 335px
+  max-width: 335px;
   display: flex;
   flex-direction: column;
   gap: 20px;

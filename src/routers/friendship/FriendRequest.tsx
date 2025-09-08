@@ -246,7 +246,6 @@ const AddFriendMent = styled.div`
 
 const FriendRequest = () => {
   const navigate = useNavigate();
-  const [showNotification, setShowNotification] = useState(false);
   const [activeTab, setActiveTab] = useState<'received' | 'sent'>('received');
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
@@ -356,7 +355,13 @@ const FriendRequest = () => {
                 <AddFriendMent>
                   현재 요청사항이 없습니다.
                 </AddFriendMent>
-                <ArchiveOwl width={183} height={169} />
+                <ArchiveOwl 
+                  css={css`
+                    width: 183px;
+                    height: 169px;
+                    display: block;
+                  `}
+                />
               </EmptyContainer>
             ) : (
               apiReceivedRequests.map((friend) => (
@@ -406,7 +411,13 @@ const FriendRequest = () => {
                 <AddFriendMent>
                   현재 보낸 요청이 없습니다.
                 </AddFriendMent>
-                <ArchiveOwl width={183} height={169} />
+                <ArchiveOwl 
+                  css={css`
+                    width: 183px;
+                    height: 169px;
+                    display: block;
+                  `}
+                />
               </EmptyContainer>
             ) : (
               apiSentRequests.map((friend) => (
