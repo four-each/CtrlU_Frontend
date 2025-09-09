@@ -220,7 +220,7 @@ const PasswordReset = () => {
           newPassword
         });
         if (result.status === 200) {
-          navigate(-1);
+          navigate('/auth/login');
         } else {
           // 예상치 못한 형태의 응답 대비
           setResetError('비밀번호 변경에 실패했습니다. 다시 시도해주세요.');

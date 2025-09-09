@@ -143,45 +143,6 @@ const ActionButtons = styled.div`
   align-items: center;
 `;
 
-const NotificationBox = styled.div`
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 297px;
-  height: 148px;
-  background: #f1e7f9;
-  border-radius: 14px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  z-index: 1000;
-`;
-
-const NotificationText = styled.p`
-  font-family: 'Noto Sans KR', sans-serif;
-  font-weight: 400;
-  font-size: 16px;
-  color: #1d1d1d;
-  margin: 0;
-  text-align: center;
-`;
-
-const ConfirmButton = styled.button`
-  width: 90px;
-  height: 36px;
-  background: #c8b0db;
-  border: none;
-  border-radius: 50px;
-  font-family: 'Noto Sans KR', sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-  color: #ffffff;
-  cursor: pointer;
-`;
-
 const LimitModal = styled.div`
   position: fixed;
   top: 50%;
