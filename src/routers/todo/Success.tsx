@@ -137,7 +137,7 @@ const Success: React.FC = () => {
 
         <CelebrationSection>
           <CelebrationText>
-            우와, 목표를 이루셨군요\n
+            우와, 목표를 이루셨군요 
             정말 대단해요!☺️
           </CelebrationText>
         </CelebrationSection>

@@ -45,6 +45,7 @@ export interface UserWithStories {
   user: User;
   stories: Story[];
   isMyStories: boolean;
+  status?: StoryStatus;
 }
 
 export interface StoryItem {
@@ -53,3 +54,25 @@ export interface StoryItem {
   isMyTask: boolean;
   timestamp: Date;
 } 
+
+export type StoryStatus = "NONE" | "GREEN" | "GRAY"; 
+
+export interface StoryUserStatus {
+  id: number;
+  profileImage: string;
+  status: StoryStatus;
+}
+
+export interface StoryApiResponseResult {
+  me: StoryUserStatus;
+  friends: StoryUserStatus[];
+  totalPageCount: number;
+  totalElementCount: number;
+}
+
+export interface StoryApiResponse {
+  status: number;
+  code: string;
+  message: string;
+  result: StoryApiResponseResult;
+}
