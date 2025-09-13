@@ -21,6 +21,11 @@ interface StoryViewerProps {
   onClose: () => void;
 }
 
+const fadeIn = keyframes`
+  from { opacity: 0; }
+  to { opacity: 1; }
+`;
+
 const progressBarAnimation = keyframes`
   from { width: 0%; }
   to { width: 100%; }
@@ -50,6 +55,13 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
   );
 
   const storyDetail = storyDetailData?.result;
+
+  useEffect(() => {
+    const currentUser = users[currentUserIndex];
+    if (currentUser && currentUser.id === myUserId && currentUser.status === 'NONE') {
+      onClose();
+    }
+  }, [currentUserIndex, users, onClose, myUserId]);
 
   // When the user changes, reset the story progress
   useEffect(() => {
@@ -95,6 +107,20 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
     }
   };
 
+  const handleNextUser = useCallback(() => {
+    if (currentUserIndex < users.length - 1) {
+      setCurrentUserIndex(prev => prev + 1);
+    } else {
+      onClose();
+    }
+  }, [currentUserIndex, users.length, onClose]);
+
+  const handlePreviousUser = useCallback(() => {
+    if (currentUserIndex > 0) {
+      setCurrentUserIndex(prev => prev - 1);
+    }
+  }, [currentUserIndex]);
+
   const handleImageClick = () => {
     if (!storyDetail?.startImage || !storyDetail?.endImage) return;
 
@@ -116,8 +142,8 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
   };
 
   const swipeHandlers = useSwipeable({
-    onSwipedLeft: handleNext,
-    onSwipedRight: handlePrevious,
+    onSwipedLeft: handleNextUser,
+    onSwipedRight: handlePreviousUser,
     preventScrollOnSwipe: true,
     trackMouse: true,
   });
@@ -152,95 +178,97 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
 
   return (
     <Container {...swipeHandlers}>
-      <Header>
-        <BackButton onClick={onClose}>
-          <img src={backArrow} alt="뒤로가기" />
-        </BackButton>
-        <UserName>{currentUser.id === myUserId ? '나' : storyDetail.userName || `친구 ${currentUser.id}`}</UserName>
-        <div style={{ width: '24px' }} />
-      </Header>
+      <AnimatedContent key={currentUserIndex}>
+        <Header>
+          <BackButton onClick={onClose}>
+            <img src={backArrow} alt="뒤로가기" />
+          </BackButton>
+          <UserName>{currentUser.id === myUserId ? '나' : storyDetail.userName || `친구 ${currentUser.id}`}</UserName>
+          <div style={{ width: '24px' }} />
+        </Header>
 
-      <ProgressBarContainer>
-        {Array.from({ length: storyDetail.totalCount }).map((_, index) => (
-          <ProgressBarItem key={index}>
-            <ProgressBar
-              key={`${currentUserIndex}-${nowId}`}
-              isViewed={index < storyIndex}
-              isActive={index === storyIndex}
-              onAnimationEnd={index === storyIndex ? handleNext : undefined}
-            />
-          </ProgressBarItem>
-        ))}
-      </ProgressBarContainer>
+        <ProgressBarContainer>
+          {Array.from({ length: storyDetail.totalCount }).map((_, index) => (
+            <ProgressBarItem key={index}>
+              <ProgressBar
+                key={`${currentUserIndex}-${nowId}`}
+                isViewed={index < storyIndex}
+                isActive={index === storyIndex}
+                onAnimationEnd={index === storyIndex ? handleNext : undefined}
+              />
+            </ProgressBarItem>
+          ))}
+        </ProgressBarContainer>
 
-      <MainContent>
-        <ProfileSection>
-          <ProfileImage>
-            <img src={storyDetail.profileImage || profileIcon} alt="프로필" />
-          </ProfileImage>
-          <Txt fontSize="22px" fontWeight={500} color="#1d1d1d">
-            {storyDetail.title}
-          </Txt>
-        </ProfileSection>
+        <MainContent>
+          <ProfileSection>
+            <ProfileImage>
+              <img src={storyDetail.profileImage || profileIcon} alt="프로필" />
+            </ProfileImage>
+            <Txt fontSize="22px" fontWeight={500} color="#1d1d1d">
+              {storyDetail.title}
+            </Txt>
+          </ProfileSection>
 
-        {storyDetail.status !== 'IN_PROGRESS' && (
-          <ProgressSection>
-            <ProgressCircle>
-              <RingImage src={ringIcon} alt="프로그레스 링" />
-              <WhiteCircleImage src={whiteCircleIcon} alt="흰색 원 배경" />
-              <ProgressImage 
-                onClick={hasBothImages ? handleImageClick : undefined}
-                style={{ cursor: hasBothImages ? 'pointer' : 'default' }}
-                isRotating={isRotating}
-              >
-                <img 
-                  src={imageToShow || ganadiIcon} 
-                  alt={imageToShow ? "미션 사진" : "기본 이미지"} 
-                />
+          {storyDetail.status !== 'IN_PROGRESS' && (
+            <ProgressSection>
+              <ProgressCircle>
+                <RingImage src={ringIcon} alt="프로그레스 링" />
+                <WhiteCircleImage src={whiteCircleIcon} alt="흰색 원 배경" />
+                <ProgressImage 
+                  onClick={hasBothImages ? handleImageClick : undefined}
+                  style={{ cursor: hasBothImages ? 'pointer' : 'default' }}
+                  isRotating={isRotating}
+                >
+                  <img 
+                    src={imageToShow || ganadiIcon} 
+                    alt={imageToShow ? "미션 사진" : "기본 이미지"} 
+                  />
+                  {showPurpleOverlay && hasBothImages && (
+                    <PurpleOverlay />
+                  )}
+                </ProgressImage>
                 {showPurpleOverlay && hasBothImages && (
-                  <PurpleOverlay />
+                  <ArrowIcon 
+                    src={arrowIcon} 
+                    alt="화살표" 
+                    onClick={handleImageClick}
+                    style={{ cursor: 'pointer' }}
+                  />
                 )}
-              </ProgressImage>
-              {showPurpleOverlay && hasBothImages && (
-                <ArrowIcon 
-                  src={arrowIcon} 
-                  alt="화살표" 
-                  onClick={handleImageClick}
-                  style={{ cursor: 'pointer' }}
-                />
-              )}
-            </ProgressCircle>
-          </ProgressSection>
-        )}
+              </ProgressCircle>
+            </ProgressSection>
+          )}
 
-        {storyDetail.status === 'IN_PROGRESS' ? (
-          <TimerSection>
-            <Timer 
-              durationTime={storyDetail.durationTime}
-              challengeTime={storyDetail.challengeTime}
-              centerImageSrc={storyDetail.startImage}
-              textColor="#832CC5"
-            />
-          </TimerSection>
-        ) : (
-          <>
-            <TargetTimeSection>
-              <TargetTimeBox>
-                <Txt fontSize="14px" fontWeight={400} color="#1d1d1d">
-                  목표 시간: {storyDetail.challengeTime}
-                </Txt>
-              </TargetTimeBox>
-            </TargetTimeSection>
+          {storyDetail.status === 'IN_PROGRESS' ? (
+            <TimerSection>
+              <Timer 
+                durationTime={storyDetail.durationTime}
+                challengeTime={storyDetail.challengeTime}
+                centerImageSrc={storyDetail.startImage}
+                textColor="#832CC5"
+              />
+            </TimerSection>
+          ) : (
+            <>
+              <TargetTimeSection>
+                <TargetTimeBox>
+                  <Txt fontSize="14px" fontWeight={400} color="#1d1d1d">
+                    목표 시간: {storyDetail.challengeTime}
+                  </Txt>
+                </TargetTimeBox>
+              </TargetTimeSection>
 
-            <ActualTimeSection>
-              <ActualTimeText>
-                {new Date(storyDetail.durationTime).toISOString().substr(11, 8)}
-              </ActualTimeText>
-            </ActualTimeSection>
-          </>
-        )}
+              <ActualTimeSection>
+                <ActualTimeText>
+                  {new Date(storyDetail.durationTime).toISOString().substr(11, 8)}
+                </ActualTimeText>
+              </ActualTimeSection>
+            </>
+          )}
 
-      </MainContent>
+        </MainContent>
+      </AnimatedContent>
 
       {storyDetail.prevId !== null && (
         <NavButton position="left" onClick={handlePrevious}>
@@ -259,6 +287,14 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
 export default StoryViewer;
 
 // Styled Components
+
+const AnimatedContent = styled.div`
+  animation: ${fadeIn} 0.4s ease-in-out;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+`;
+
 const Container = styled.div`
   width: 100%;
   max-width: 480px;

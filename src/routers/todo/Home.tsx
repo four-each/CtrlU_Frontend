@@ -98,9 +98,9 @@ const Home = () => {
   const getStatusBorderColor = (status: StoryStatusType): string => {
     switch (status) {
       case "NONE": return colors.gray;
-      case "GREEN": return "#71d596";
+      case "GREEN": return colors.purple3;
       case "GRAY":
-        return "#FFD700";
+        return colors.gray;
       case "RED": return colors.red;
       default: return colors.gray;
     }
