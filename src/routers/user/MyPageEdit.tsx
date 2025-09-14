@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
@@ -124,6 +124,52 @@ const HelperText = styled.div`
   margin-left: 16px;
 `;
 
+// 이미지 옵션 드롭다운 스타일
+const DropdownContainer = styled.div`
+  position: relative;
+  display: inline-block;
+`;
+
+const DropdownMenu = styled.div<{ isOpen: boolean }>`
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #c8b0db;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 8px 0;
+  min-width: 160px;
+  z-index: 1000;
+  display: ${props => props.isOpen ? 'block' : 'none'};
+`;
+
+const DropdownItem = styled.button`
+  width: 100%;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #1d1d1d;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background: #f6f6f6;
+  }
+  
+  &:first-child {
+    border-radius: 12px 12px 0 0;
+  }
+  
+  &:last-child {
+    border-radius: 0 0 12px 12px;
+  }
+`;
+
 const EditButton = styled.button`
   width: 100%;
   height: 56px;
@@ -156,9 +202,29 @@ const MyPageEdit = () => {
   const [isValid, setIsValid] = useState(currentNickname ? true : false);
   const [profileImagePreview, setProfileImagePreview] = useState<string>(currentProfileImage || '');
   const [profileFile, setProfileFile] = useState<File | null>(null);
+  const [isDefaultImage, setIsDefaultImage] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
   const galleryInputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const changeProfileMutation = useChangeProfile()
   const presignMutation = usePresignUpload();
+
+  // 드롭다운 외부 클릭 시 닫기
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showDropdown]);
 
   const handleBack = () => {
     navigate(-1);
@@ -196,6 +262,9 @@ const MyPageEdit = () => {
         await postUploadToS3(presignedUrl, imageKey, profileFile, contentType);
 
         profileImageKey = imageKey;
+      } else if (isDefaultImage) {
+        // 기본 이미지로 설정하는 경우 빈 문자열 전송
+        profileImageKey = '';
       }
 
       const result = await changeProfileMutation.mutateAsync({
@@ -214,10 +283,27 @@ const MyPageEdit = () => {
     const previewUrl = URL.createObjectURL(file);
     setProfileImagePreview(previewUrl);
     setProfileFile(file);
+    setIsDefaultImage(false);
   };
 
   const handleChooseFromGallery = () => {
     galleryInputRef.current?.click();
+    setShowDropdown(false);
+  };
+
+  const handleSetDefaultImage = () => {
+    setProfileImagePreview('');
+    setProfileFile(null);
+    setIsDefaultImage(true);
+    setShowDropdown(false);
+  };
+
+  const handleImageClick = () => {
+    setShowDropdown(!showDropdown);
+  };
+
+  const handleCloseDropdown = () => {
+    setShowDropdown(false);
   };
 
   return (
@@ -236,42 +322,54 @@ const MyPageEdit = () => {
 
       <Content>
         <ProfileSection>
-          <div style={{ position: 'relative' }}>
-            {profileImagePreview ? (
-              <img 
-                src={profileImagePreview} 
-                alt="Profile Preview" 
-                css={css`
-                  width: 102px;
-                  height: 102px;
-                  border-radius: 50%;
-                  border: 2px solid #c8b0db;
-                  object-fit: cover;
-                  cursor: pointer;
-                `}
-                onClick={handleChooseFromGallery}
-              />
-            ) : (
-              <ProfileIcon
-                css={css`
-                  width: 102px;
-                  height: 102px;
-                  border-radius: 50%;
-                  border: 2px solid #c8b0db;
-                  background: #f6f6f6;
-                  cursor: pointer;
-                `}
-                onClick={handleChooseFromGallery}
-              />
-            )}
-            <Edit onClick={handleChooseFromGallery}>
-              <ImageUploadIcon 
-                css={css`
-                  width: 14px;
-                  height: 14px;
-                `}
-              />
-            </Edit>
+          <DropdownContainer ref={dropdownRef}>
+            <div style={{ position: 'relative' }}>
+              {profileImagePreview ? (
+                <img 
+                  src={profileImagePreview} 
+                  alt="Profile Preview" 
+                  css={css`
+                    width: 102px;
+                    height: 102px;
+                    border-radius: 50%;
+                    border: 2px solid #c8b0db;
+                    object-fit: cover;
+                    cursor: pointer;
+                  `}
+                  onClick={handleImageClick}
+                />
+              ) : (
+                <ProfileIcon
+                  css={css`
+                    width: 102px;
+                    height: 102px;
+                    border-radius: 50%;
+                    border: 2px solid #c8b0db;
+                    background: #f6f6f6;
+                    cursor: pointer;
+                  `}
+                  onClick={handleImageClick}
+                />
+              )}
+              <Edit onClick={handleImageClick}>
+                <ImageUploadIcon 
+                  css={css`
+                    width: 14px;
+                    height: 14px;
+                  `}
+                />
+              </Edit>
+            </div>
+            
+            <DropdownMenu isOpen={showDropdown}>
+              <DropdownItem onClick={handleChooseFromGallery}>
+                갤러리에서 선택
+              </DropdownItem>
+              <DropdownItem onClick={handleSetDefaultImage}>
+                기본 이미지로 설정
+              </DropdownItem>
+            </DropdownMenu>
+            
             <input
               ref={galleryInputRef}
               type="file"
@@ -279,7 +377,7 @@ const MyPageEdit = () => {
               style={{ display: 'none' }}
               onChange={handleFileChange}
             />
-          </div>
+          </DropdownContainer>
         </ProfileSection>
 
         <FormSection>
