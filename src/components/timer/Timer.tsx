@@ -61,17 +61,27 @@ export default function Timer({ durationTime, challengeTime, timerRef, centerIma
             border-radius: 50%;
           `}
         >
-          <img
+          <div
             css={css`
-              width: 84%;
-              height: 84%; /* Add height to maintain aspect ratio for object-fit */
+              width: 87%;
+              height: 87%;
               margin-top: -9px;
-              border-radius: 50%; /* Make it circular */
-              object-fit: cover; /* Ensure image covers the area */
+              border-radius: 50%;
+              overflow: hidden;
+              border: 2px solid #ffffff;
+              background-color: #ffffff;
             `}
-            src={centerImageSrc || ganadiIcon}
-            alt="mainImage"
-          />
+          >
+            <img
+              css={css`
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+              `}
+              src={centerImageSrc || ganadiIcon}
+              alt="mainImage"
+            />
+          </div>
           <Percent 
             isOver={isOver} 
             percentage={percentage}
@@ -137,13 +147,13 @@ const Percent = styled.div<{ isOver: boolean; percentage: number }>`
     if (isOver) {
       return `
         left: 50%;
-        top: calc(50% - 136px - 4px);
+        top: calc(50% - 132px);
         transform: translate(-50%, -50%);
       `;
     }
     
     const angle = (percentage / 100) * 360 - 90;
-    const radius = 120;
+    const radius = 130;
     const x = Math.cos((angle * Math.PI) / 180) * radius;
     const y = Math.sin((angle * Math.PI) / 180) * radius;
     

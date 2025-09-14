@@ -14,6 +14,8 @@ import whiteCircleIcon from '../../assets/icons/detail/whiteCircle.svg';
 import arrowIcon from '../../assets/icons/detail/arrow.svg';
 import ganadiIcon from '../../assets/icons/detail/ganadi.svg';
 import profileIcon from '../../assets/icons/home/profile.svg';
+import nextIcon from '../../assets/icons/detail/next.svg';
+import prevIcon from '../../assets/icons/detail/prev.svg';
 
 interface StoryViewerProps {
   users: StoryUser[];
@@ -272,12 +274,12 @@ const StoryViewer: React.FC<StoryViewerProps> = ({
 
       {storyDetail.prevId !== null && (
         <NavButton position="left" onClick={handlePrevious}>
-          ←
+          <img src={prevIcon} alt="이전" />
         </NavButton>
       )}
       {storyDetail.nextId !== null && (
         <NavButton position="right" onClick={handleNext}>
-          →
+          <img src={nextIcon} alt="다음" />
         </NavButton>
       )}
     </Container>
@@ -547,22 +549,21 @@ const NavButton = styled.button<{ position: 'left' | 'right' }>`
   top: 50%;
   ${({ position }) => position}: 20px;
   transform: translateY(-50%);
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background-color: rgba(0, 0, 0, 0.5);
-  color: white;
+  width: 40px;
+  height: 40px;
   border: none;
-  font-size: 24px;
-  font-weight: bold;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 100;
-  transition: background-color 0.2s ease;
+  background: none;
+  padding: 0;
   
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.7);
+  img {
+    width: 32px;
+    height: 32px;
+    display: block;
+    filter: brightness(1.5) contrast(1.2);
   }
 `;

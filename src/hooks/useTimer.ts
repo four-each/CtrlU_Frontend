@@ -9,7 +9,6 @@ const useTimer = ({ durationTime, challengeTime }: UseTimerProps) => {
   const INTERVAL = 1000;
   const [elapsedTime, setElapsedTime] = useState<number>(durationTime); // 이미 경과한 시간부터 시작
   const [isFinished, setIsFinished] = useState(false);
-  const [isOver, setIsOver] = useState(false);
 
   const formatTimeToString = (time: number) => {
     const hours = String(Math.floor(time / (1000 * 60 * 60))).padStart(
@@ -31,6 +30,7 @@ const useTimer = ({ durationTime, challengeTime }: UseTimerProps) => {
 
   const targetTime = formatStringToTime(challengeTime);
   const displayTime = formatTimeToString(elapsedTime);
+  const isOver = elapsedTime >= targetTime;
 
   const [percentage, setPercentage] = useState<number>(
     Math.floor((elapsedTime / targetTime) * 100)
@@ -45,12 +45,6 @@ const useTimer = ({ durationTime, challengeTime }: UseTimerProps) => {
         const newPercentage = Math.floor((newElapsedTime / targetTime) * 100);
         
         setPercentage(newPercentage);
-        
-        if (newElapsedTime >= targetTime) {
-          setIsOver(true);
-        } else {
-          setIsOver(false);
-        }
         
         return newElapsedTime;
       });
@@ -69,7 +63,6 @@ const useTimer = ({ durationTime, challengeTime }: UseTimerProps) => {
     }
     setElapsedTime(durationTime);
     setPercentage(Math.floor((durationTime / targetTime) * 100));
-    setIsOver(false);
   };
 
   return {

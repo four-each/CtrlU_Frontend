@@ -5,6 +5,8 @@ import { colors } from '@styles/theme';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import backArrowWhiteIcon from '../../assets/icons/detail/backArrow_white.svg';
 import shootIcon from '../../assets/icons/detail/shoot.svg';
+import flipOverIcon from '../../assets/icons/detail/flipOver.svg';
+import homeIcon from '../../assets/icons/home/home.svg';
 import { useAuthenticatedPresignUpload } from '../../hooks/api/common/useAuthenticatedPresignUpload';
 import { useCompleteTodo } from '../../hooks/api/todo/useCompleteTodo';
 import { useGetTodoDetail } from '../../hooks/api/todo/useGetTodoDetail';
@@ -332,9 +334,9 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
       <HeaderSection>
         <HeaderContent>
           <BackButton onClick={() => window.history.back()}>
-            <BackIcon src={backArrowWhiteIcon} alt="뒤로가기" />
+            <BackIcon src={mode === 'start' ? homeIcon : backArrowWhiteIcon} alt={mode === 'start' ? "홈" : "뒤로가기"} />
           </BackButton>
-          <Title>{mode === 'start' ? '시작' : '완료'}</Title>
+          <Title></Title>
         </HeaderContent>
       </HeaderSection>
 
@@ -356,11 +358,6 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
                   display: isCameraActive ? 'block' : 'none'
                 }}
               />
-              {isCameraActive && (
-                <CameraSwitchButton onClick={handleCameraSwitch}>
-                  <CameraSwitchIcon>🔄</CameraSwitchIcon>
-                </CameraSwitchButton>
-              )}
               {!isCameraActive && cameraError && (
                 <CameraPlaceholder>
                   <CameraIcon>⚠️</CameraIcon>
@@ -392,30 +389,42 @@ const CameraScreen: React.FC<CameraScreenProps> = ({
       {/* 하단 버튼 영역 */}
       <BottomSection>
         {!capturedImage ? (
-          <CaptureButtonContainer>
-            <CaptureButton onClick={handleCapture} disabled={isCapturing || !isCameraActive}>
-              <ShootIcon src={shootIcon} alt="촬영" />
-            </CaptureButton>
-            {cameraError && (
-              <ErrorButtons>
-                <RetakeButton onClick={startCamera}>
-                  카메라 재시도
-                </RetakeButton>
-                <RetakeButton onClick={() => fileInputRef.current?.click()}>
-                  파일 선택
-                </RetakeButton>
-              </ErrorButtons>
+          <BottomButtonRow>
+            <CaptureButtonContainer>
+              <CaptureButton onClick={handleCapture} disabled={isCapturing || !isCameraActive}>
+                <ShootIcon src={shootIcon} alt="촬영" />
+              </CaptureButton>
+              {cameraError && (
+                <ErrorButtons>
+                  <RetakeButton onClick={startCamera}>
+                    카메라 재시도
+                  </RetakeButton>
+                  <RetakeButton onClick={() => fileInputRef.current?.click()}>
+                    파일 선택
+                  </RetakeButton>
+                </ErrorButtons>
+              )}
+            </CaptureButtonContainer>
+            {isCameraActive && (
+              <CameraSwitchButton onClick={handleCameraSwitch}>
+                <FlipOverIcon src={flipOverIcon} alt="화면 전환" />
+              </CameraSwitchButton>
             )}
-          </CaptureButtonContainer>
+          </BottomButtonRow>
         ) : (
-          <ActionButtons>
-            <RetakeButton onClick={handleRetake}>
-              다시 촬영
-            </RetakeButton>
-            <SubmitButton onClick={handleSubmit} disabled={isSubmitting}>
-              {isSubmitting ? '처리중...' : '제출하기'}
-            </SubmitButton>
-          </ActionButtons>
+          <BottomButtonRow>
+            <ActionButtons>
+              <RetakeButton onClick={handleRetake}>
+                다시 촬영
+              </RetakeButton>
+              <SubmitButton onClick={handleSubmit} disabled={isSubmitting}>
+                {isSubmitting ? '처리중...' : '제출하기'}
+              </SubmitButton>
+            </ActionButtons>
+            <CameraSwitchButton onClick={handleCameraSwitch}>
+              <FlipOverIcon src={flipOverIcon} alt="화면 전환" />
+            </CameraSwitchButton>
+          </BottomButtonRow>
         )}
       </BottomSection>
 
@@ -622,30 +631,6 @@ const CameraIcon = styled.div`
   font-size: 48px;
 `;
 
-const CameraSwitchButton = styled.button`
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  width: 40px;
-  height: 40px;
-  background-color: rgba(0, 0, 0, 0.5);
-  border: none;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 10;
-  
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.7);
-  }
-`;
-
-const CameraSwitchIcon = styled.div`
-  font-size: 20px;
-  color: white;
-`;
 
 const CapturedImageContainer = styled.div`
   flex: 1;
@@ -667,6 +652,15 @@ const BottomSection = styled.div`
   align-items: center;
   justify-content: center;
   padding: 20px;
+`;
+
+const BottomButtonRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0 20px;
+  position: relative;
 `;
 
 const CaptureButtonContainer = styled.div`
@@ -695,6 +689,23 @@ const ErrorButtons = styled.div`
 const ActionButtons = styled.div`
   display: flex;
   gap: 15px;
+`;
+
+const CameraSwitchButton = styled.button`
+  position: absolute;
+  right: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const FlipOverIcon = styled.img`
+  width: 24px;
+  height: 24px;
 `;
 
 const RetakeButton = styled.button`

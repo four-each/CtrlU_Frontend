@@ -50,7 +50,9 @@ const Home = () => {
   };
 
   const renderMyTodoItem = (todo: { id: number; todoName: string; userName: string; durationTime: number; }) => (
-    <TaskItem key={todo.id} onClick={() => navigate(`/detail?isMe=true&id=${todo.id}`)}>
+    <TaskItem key={todo.id} onClick={() => navigate(`/detail?isMe=true&id=${todo.id}`, { 
+      state: { userName: todo.userName, profileImage: null } 
+    })}>
       <TaskUserName>{todo.userName}</TaskUserName>
       <TaskContent>
         <TaskTitle>{todo.todoName}</TaskTitle>
@@ -72,7 +74,9 @@ const Home = () => {
   const flatFriendTodos: FriendTodo[] = friendPages?.pages.flatMap(p => p.result.todos) || [];
 
   const renderFriendTodoItem = (todo: FriendTodo) => (
-    <TaskItem key={todo.id} onClick={() => navigate(`/detail?isMe=false&id=${todo.id}`)}>
+    <TaskItem key={todo.id} onClick={() => navigate(`/detail?isMe=false&id=${todo.id}`, { 
+      state: { userName: todo.userName, profileImage: todo.profileImage } 
+    })}>
       <TaskUserName>{todo.userName}</TaskUserName>
       <TaskContent>
         <TaskTitle>{todo.todoName}</TaskTitle>
@@ -392,7 +396,7 @@ const StoryImage = styled.img<{ statusColor: string }>`
   height: 50px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid ${({ statusColor }) => statusColor};
+  border: 2px solid ${({ statusColor }) => statusColor};
 `;
 
 const PlusButton = styled.div`
@@ -476,7 +480,6 @@ const TaskContent = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
   padding: 10px 20px;
   background-color: #f5f5f5;
   border-radius: 50px;

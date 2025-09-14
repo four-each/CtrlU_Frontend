@@ -5,6 +5,7 @@ export interface FriendTodo {
   todoName: string;
   userName: string;
   durationTime: number; // milliseconds
+  profileImage?: string;
 }
 
 export interface GetFriendTodosResult {
