@@ -265,7 +265,12 @@ const MyPage = () => {
   };
 
   const handleEdit = () => {
-    navigate('/mypage/edit');
+    navigate('/mypage/edit', {
+      state: {
+        currentNickname: profileData?.result?.nickname || '',
+        currentProfileImage: profileData?.result?.profileImage || ''
+      }
+    });
   };
 
   const handleFriendList = () => {

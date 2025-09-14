@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
 import { BackLightIcon, ImageUploadIcon, ProfileIcon } from '@assets/icons';
@@ -149,9 +149,12 @@ const EditButton = styled.button`
 
 const MyPageEdit = () => {
   const navigate = useNavigate();
-  const [nickname, setNickname] = useState('');
-  const [isValid, setIsValid] = useState(true);
-  const [profileImagePreview, setProfileImagePreview] = useState<string>('');
+  const location = useLocation();
+  const { currentNickname, currentProfileImage } = location.state || { currentNickname: '', currentProfileImage: '' };
+  
+  const [nickname, setNickname] = useState(currentNickname || '');
+  const [isValid, setIsValid] = useState(currentNickname ? true : false);
+  const [profileImagePreview, setProfileImagePreview] = useState<string>(currentProfileImage || '');
   const [profileFile, setProfileFile] = useState<File | null>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const changeProfileMutation = useChangeProfile()
@@ -170,8 +173,8 @@ const MyPageEdit = () => {
     const value = e.target.value;
     setNickname(value);
     
-    // 닉네임 유효성 검사
-    if (value.length <= 4 && value.length >= 2 && /^[가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9]+$/.test(value)) {
+    // 닉네임 유효성 검사 (공백 제외)
+    if (value.trim().length <= 4 && value.trim().length >= 2 && /^[가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9]+$/.test(value.trim())) {
       setIsValid(true);
     } else {
       setIsValid(false);
@@ -179,7 +182,7 @@ const MyPageEdit = () => {
   };
 
   const handleEdit = async () => {
-    if (isValid) {
+    if (isValid && nickname.trim()) {
       let profileImageKey: string | undefined = undefined;
 
       if (profileFile) {
@@ -196,7 +199,7 @@ const MyPageEdit = () => {
       }
 
       const result = await changeProfileMutation.mutateAsync({
-        nickname,
+        nickname: nickname.trim(),
         profileImageKey: profileImageKey || '',
       });
       if (result.status === 200) {
@@ -293,7 +296,7 @@ const MyPageEdit = () => {
             )}
           </InputGroup>
 
-          <EditButton onClick={handleEdit} disabled={!isValid}>
+          <EditButton onClick={handleEdit} disabled={!isValid || !nickname.trim()}>
             수정 완료
           </EditButton>
         </FormSection>
