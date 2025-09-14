@@ -6,7 +6,7 @@ import Timer, { FinishHandler } from "@components/timer/Timer";
 import styled from "@emotion/styled";
 import { colors } from "@styles/theme";
 import { useRef, useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import profileIcon from "../../assets/icons/home/profile.svg";
 import { useGetTodoDetail } from "../../hooks/api/todo/useGetTodoDetail";
 import { useGiveUpTodo } from "../../hooks/api/todo/useGiveUpTodo";
@@ -14,11 +14,15 @@ import { useDeleteTodo } from "../../hooks/api/todo/useDeleteTodo";
 
 const Detail = () => {
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const id = searchParams.get('id');
   const finishHandler = useRef<FinishHandler>(null);
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<'complete' | 'quit' | 'delete'>('complete');
   const navigate = useNavigate();
+  
+  // Home.tsx에서 전달받은 데이터
+  const { userName: passedUserName, profileImage: passedProfileImage } = location.state || {};
 
   // API 데이터 조회
   const { data: todoDetail, isLoading, isError, error } = useGetTodoDetail(id || '');
@@ -114,6 +118,9 @@ const Detail = () => {
 
   const actualIsMe = (todoDetail as any).result.isMine;
   const { result } = todoDetail as any;
+  
+  // userName은 Home.tsx에서 전달받은 값 사용
+  const displayUserName = passedUserName || (actualIsMe ? "나" : "친구");
 
   return (
     <Container>
@@ -122,12 +129,12 @@ const Detail = () => {
         <Header
           isBack={true}
           isRight={true}
-          rightIcon={actualIsMe ? <TrashIcon onClick={() => {
+          rightIcon={actualIsMe ? <DeleteButton onClick={() => {
             setModalType('delete');
             setShowModal(true);
-          }} /> : null}
-          title={actualIsMe ? "" : "친구이름"}
-          userName={actualIsMe ? "나" : "친구이름"}
+          }}>지우기</DeleteButton> : null}
+          title=""
+          userName=""
         />
       </FixedHeaderContainer>
 
@@ -142,7 +149,7 @@ const Detail = () => {
         gap={15}
       >
         <SmallImage 
-          src={result.profileImage || profileIcon} 
+          src={result?.profileImage || profileIcon} 
           alt="프로필 이미지"
           onError={(e) => {
             e.currentTarget.src = profileIcon;
@@ -337,4 +344,14 @@ const ModalButton = styled.button<{ buttonType: "cancel" | "confirm" }>`
   background-color: ${({ buttonType }) =>
     buttonType === "cancel" ? "#bababa" : "#ad8aca"};
   cursor: pointer;
+`;
+
+const DeleteButton = styled.button`
+  background: none;
+  border: none;
+  color: #AD8ACA;
+  font-size: 16px;
+  font-weight: 400;
+  cursor: pointer;
+  padding: 0;
 `;

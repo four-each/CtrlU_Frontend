@@ -4,7 +4,7 @@ import Txt from '@components/common/Txt';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
 import { useNavigate, useLocation } from 'react-router-dom';
-import backArrow from '../../assets/icons/detail/backArrow.svg';
+import cancelIcon from '../../assets/icons/detail/cancel.svg';
 import profileIcon from '../../assets/icons/home/profile.svg';
 import ganadiIcon from '../../assets/icons/detail/ganadi.svg';
 import ringIcon from '../../assets/icons/detail/ring.svg';
@@ -79,7 +79,7 @@ const Success: React.FC = () => {
     <SuccessContainer>
       <Header>
         <BackButton onClick={handleBack}>
-          <img src={backArrow} alt="뒤로가기" />
+          <img src={cancelIcon} alt="취소" />
         </BackButton>
       </Header>
 
@@ -137,7 +137,7 @@ const Success: React.FC = () => {
 
         <CelebrationSection>
           <CelebrationText>
-            우와, 목표를 이루셨군요\n
+            우와, 목표를 이루셨군요 
             정말 대단해요!☺️
           </CelebrationText>
         </CelebrationSection>

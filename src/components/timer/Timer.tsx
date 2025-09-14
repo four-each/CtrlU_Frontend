@@ -17,9 +17,10 @@ type TimerProps = {
   challengeTime: string; // 목표 시간 (HH:MM:SS 형식)
   timerRef?: ForwardedRef<FinishHandler>;
   centerImageSrc?: string; // 중앙에 표시될 이미지 URL
+  textColor?: string; // 시간 텍스트 색상
 };
 
-export default function Timer({ durationTime, challengeTime, timerRef, centerImageSrc }: TimerProps) {
+export default function Timer({ durationTime, challengeTime, timerRef, centerImageSrc, textColor }: TimerProps) {
   const { displayTime, percentage, isFinished, setIsFinished, isOver, reset } =
     useTimer({
       durationTime: durationTime,
@@ -38,7 +39,8 @@ export default function Timer({ durationTime, challengeTime, timerRef, centerIma
     <Col gap={40} justify="center" align="center">
       <Col
         css={css`
-          max-width: 300px;
+          width: 272px;
+          height: 272px;
         `}
       >
         <CircularProgressbarWithChildren
@@ -59,17 +61,27 @@ export default function Timer({ durationTime, challengeTime, timerRef, centerIma
             border-radius: 50%;
           `}
         >
-          <img
+          <div
             css={css`
-              width: 84%;
-              height: 84%; /* Add height to maintain aspect ratio for object-fit */
+              width: 87%;
+              height: 87%;
               margin-top: -9px;
-              border-radius: 50%; /* Make it circular */
-              object-fit: cover; /* Ensure image covers the area */
+              border-radius: 50%;
+              overflow: hidden;
+              border: 2px solid #ffffff;
+              background-color: #ffffff;
             `}
-            src={centerImageSrc || ganadiIcon}
-            alt="mainImage"
-          />
+          >
+            <img
+              css={css`
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+              `}
+              src={centerImageSrc || ganadiIcon}
+              alt="mainImage"
+            />
+          </div>
           <Percent 
             isOver={isOver} 
             percentage={percentage}
@@ -105,7 +117,7 @@ export default function Timer({ durationTime, challengeTime, timerRef, centerIma
           fontSize="6rem"
           fontWeight={500}
           color={
-            isFinished ? colors.purple3 : isOver ? colors.red : colors.textBlack
+            isFinished ? colors.purple3 : isOver ? colors.red : (textColor || colors.textBlack)
           }
           letterSpacing="0.06rem"
           textAlign="center"
@@ -135,19 +147,19 @@ const Percent = styled.div<{ isOver: boolean; percentage: number }>`
     if (isOver) {
       return `
         left: 50%;
-        top: calc(50% - 136px - 4px);
+        top: calc(50% - 132px);
         transform: translate(-50%, -50%);
       `;
     }
     
     const angle = (percentage / 100) * 360 - 90;
-    const radius = 136;
+    const radius = 130;
     const x = Math.cos((angle * Math.PI) / 180) * radius;
     const y = Math.sin((angle * Math.PI) / 180) * radius;
     
     return `
       left: calc(50% + ${x}px);
-      top: calc(50% + ${y - 4}px);
+      top: calc(50% + ${y}px);
       transform: translate(-50%, -50%);
     `;
   }}

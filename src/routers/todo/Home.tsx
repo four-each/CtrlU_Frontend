@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { colors } from '@styles/theme';
-import { Task, TaskWithUser, UserWithStories, Story } from '../../types';
 import type { GetMyTodosResponse } from './api/GetMyTodosApi';
 import settingsIcon from '../../assets/icons/home/setting.svg';
 import cameraIcon from '../../assets/icons/home/shoot.svg';
 import profileIcon from '../../assets/icons/home/profile.svg';
-import StoryViewer from './StoryViewer';
 import { useGetMyTodos } from '../../hooks/api/todo/useGetMyTodos';
 import { useGetFriendTodos } from '../../hooks/api/todo/useGetFriendTodos';
 import type { FriendTodo, GetFriendTodosResponse } from './api/GetFriendTodosApi';
+import { useGetStories } from '../../hooks/api/story/useGetStories';
+import { StoryUser, StoryStatusType } from './api/GetStoriesApi';
+import StoryViewer from './StoryViewer';
 
 // Helper to format duration from seconds to + HH:MM:SS
 const formatDuration = (totalSeconds: number) => {
@@ -23,147 +24,42 @@ const formatDuration = (totalSeconds: number) => {
   return `+ ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 };
 
-
-// 임시 데이터 for friends
-const mockFriendTasks: TaskWithUser[] = [
-  {
-    id: '2',
-    userId: 'user2',
-    title: '요리하기',
-    description: '저녁 준비',
-    targetTime: 60,
-    startTime: new Date(Date.now() - 45 * 60 * 1000), // 45분 전 시작
-    startImage: profileIcon,
-    isCompleted: false,
-    isAbandoned: false,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    user: {
-      id: 'user2',
-      username: 'friend1',
-      nickname: '친구1',
-      profileImage: profileIcon,
-    },
-    isViewed: false,
-  },
-  {
-    id: '3',
-    userId: 'user2',
-    title: '청소하기',
-    description: '방 정리',
-    targetTime: 45,
-    startTime: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2시간 전 시작
-    endTime: new Date(Date.now() - 1 * 60 * 60 * 1000), // 1시간 전 완료
-    startImage: profileIcon,
-    endImage: profileIcon,
-    isCompleted: true,
-    isAbandoned: false,
-    createdAt: new Date(),
-    updatedAt: new Date(Date.now() - 1 * 60 * 60 * 1000),
-    user: {
-      id: 'user2',
-      username: 'friend1',
-      nickname: '친구1',
-      profileImage: profileIcon,
-    },
-    isViewed: true,
-  },
-  {
-    id: '4',
-    userId: 'user3',
-    title: '운동하기',
-    description: '헬스장 가기',
-    targetTime: 90,
-    startTime: new Date(Date.now() - 30 * 60 * 1000), // 30분 전 시작
-    startImage: profileIcon,
-    isCompleted: false,
-    isAbandoned: false,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    user: {
-      id: 'user3',
-      username: 'friend2',
-      nickname: '친구2',
-      profileImage: profileIcon,
-    },
-    isViewed: false,
-  },
-];
-
 const Home = () => {
   const navigate = useNavigate();
-  const [usersWithStories, setUsersWithStories] = useState<UserWithStories[]>([]);
+  const [showInProgressModal, setShowInProgressModal] = useState(false);
   const [showStoryViewer, setShowStoryViewer] = useState(false);
   const [selectedUserIndex, setSelectedUserIndex] = useState(0);
-  const [showInProgressModal, setShowInProgressModal] = useState(false);
 
-  const { data: myTodosResponse, isLoading: myTodosLoading, isError: myTodosError, error: myTodosErrorObj } = useGetMyTodos('IN_PROGRESS', 'me');
+  const { data: myTodosResponse, isLoading: myTodosLoading, isError: myTodosError } = useGetMyTodos('IN_PROGRESS', 'me');
 
   useEffect(() => {
     if (myTodosError) {
-      console.error('[Home] 내 할일 조회 에러', myTodosErrorObj);
+      console.error('[Home] 내 할일 조회 에러', myTodosError);
     }
-  }, [myTodosError, myTodosErrorObj]);
+  }, [myTodosError]);
 
   const TickingTaskTimer = ({ initialSeconds }: { initialSeconds: number }) => {
     const [seconds, setSeconds] = useState<number>(initialSeconds);
-
     useEffect(() => {
       const intervalId = setInterval(() => {
         setSeconds(prev => prev + 1);
       }, 1000);
       return () => clearInterval(intervalId);
     }, []);
-
     return <TaskTime>{formatDuration(seconds)}</TaskTime>;
   };
 
-  const renderMyTodoItem = (todo: { id: number; todoName: string; userName: string; durationTime: number; }) => {
-    return (
-      <TaskItem key={todo.id} onClick={() => navigate(`/detail?isMe=true&id=${todo.id}`)}>
-        <TaskUserName>{todo.userName}</TaskUserName>
-        <TaskContent>
-          <TaskTitle>{todo.todoName}</TaskTitle>
-          <TickingTaskTimer initialSeconds={Math.floor(todo.durationTime / 1000)} />
-        </TaskContent>
-      </TaskItem>
-    );
-  };
-
-  const TaskTimer = ({ task }: { task: Task | TaskWithUser }) => {
-    const [currentTime, setCurrentTime] = useState(new Date());
-
-    useEffect(() => {
-      const timer = setInterval(() => {
-        setCurrentTime(new Date());
-      }, 1000);
-      return () => clearInterval(timer);
-    }, []);
-
-    const elapsedMs = currentTime.getTime() - task.startTime.getTime();
-    const elapsedMinutes = Math.floor(elapsedMs / (1000 * 60));
-    
-    const formatTime = (minutes: number) => {
-      const hours = Math.floor(minutes / 60);
-      const mins = minutes % 60;
-      const seconds = Math.floor((elapsedMs % (1000 * 60)) / 1000);
-      return `+ ${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    };
-
-    return <TaskTime>{formatTime(elapsedMinutes)}</TaskTime>;
-  };
-
-  const renderFriendTaskItem = (task: TaskWithUser) => {
-    return (
-      <TaskItem key={task.id} onClick={() => navigate(`/detail?isMe=false&id=${task.id}`)}>
-        <TaskUserName>{task.user.nickname}</TaskUserName>
-        <TaskContent>
-          <TaskTitle>{task.title}</TaskTitle>
-          <TaskTimer task={task} />
-        </TaskContent>
-      </TaskItem>
-    );
-  };
+  const renderMyTodoItem = (todo: { id: number; todoName: string; userName: string; durationTime: number; }) => (
+    <TaskItem key={todo.id} onClick={() => navigate(`/detail?isMe=true&id=${todo.id}`, { 
+      state: { userName: todo.userName, profileImage: null } 
+    })}>
+      <TaskUserName>{todo.userName}</TaskUserName>
+      <TaskContent>
+        <TaskTitle>{todo.todoName}</TaskTitle>
+        <TickingTaskTimer initialSeconds={Math.floor(todo.durationTime / 1000)} />
+      </TaskContent>
+    </TaskItem>
+  );
 
   // 친구 진행 목록 무한 스크롤
   const {
@@ -173,20 +69,14 @@ const Home = () => {
     isFetchingNextPage: friendFetchingNext,
     isLoading: friendLoading,
     isError: friendError,
-    error: friendErrorObj,
   } = useGetFriendTodos({ pageSize: 10 });
 
-  useEffect(() => {
-    if (friendError) {
-      console.error('[Home] 친구 할일 조회 에러', friendErrorObj);
-    }
-  }, [friendError, friendErrorObj]);
-
-  const flatFriendTodos: FriendTodo[] = (friendPages?.pages || [])
-    .flatMap((p: GetFriendTodosResponse) => p.result.todos);
+  const flatFriendTodos: FriendTodo[] = friendPages?.pages.flatMap(p => p.result.todos) || [];
 
   const renderFriendTodoItem = (todo: FriendTodo) => (
-    <TaskItem key={todo.id} onClick={() => navigate(`/detail?isMe=false&id=${todo.id}`)}>
+    <TaskItem key={todo.id} onClick={() => navigate(`/detail?isMe=false&id=${todo.id}`, { 
+      state: { userName: todo.userName, profileImage: todo.profileImage } 
+    })}>
       <TaskUserName>{todo.userName}</TaskUserName>
       <TaskContent>
         <TaskTitle>{todo.todoName}</TaskTitle>
@@ -195,70 +85,51 @@ const Home = () => {
     </TaskItem>
   );
 
+  // New Story API Integration
+  const {
+    data: storyData,
+    fetchNextPage: fetchNextStoryPage,
+    hasNextPage: hasNextStoryPage,
+    isFetchingNextPage: isFetchingNextStoryPage,
+    isLoading: isStoryLoading,
+    isError: isStoryError,
+  } = useGetStories();
 
-  useEffect(() => {
-    const myUser = {
-      id: 'user1',
-      username: 'me',
-      nickname: '나',
-      profileImage: profileIcon,
-    };
+  const myStoryInfo: StoryUser | undefined = storyData?.pages[0]?.result.me;
+  const friendStoryInfos: StoryUser[] = storyData?.pages.flatMap(page => page.result.friends) || [];
+  const allStoryUsers = myStoryInfo ? [myStoryInfo, ...friendStoryInfos] : [];
 
-    const myMockTasksForStories: Task[] = (myTodosResponse as GetMyTodosResponse | undefined)?.result.todos.map((todo) => {
-        const now = Date.now();
-        const startTime = new Date(now - todo.durationTime);
-        return {
-            id: todo.id.toString(),
-            userId: 'user1',
-            title: todo.todoName, // Use todoName for the title
-            description: '',
-            targetTime: 0,
-            startTime: startTime,
-            startImage: profileIcon,
-            isCompleted: false,
-            isAbandoned: false,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        }
-    }) || [];
+  const getStatusBorderColor = (status: StoryStatusType): string => {
+    switch (status) {
+      case "NONE": return colors.gray;
+      case "GREEN": return colors.purple3;
+      case "GRAY":
+        return colors.gray;
+      case "RED": return colors.red;
+      default: return colors.gray;
+    }
+  };
 
-    const myStories: Story[] = myMockTasksForStories.map((task, index) => ({
-      id: `story-my-${index}`,
-      task: task,
-      timestamp: task.startTime,
-    }));
-
-    const myStoriesWithUser: UserWithStories = {
-      user: myUser,
-      stories: myStories,
-      isMyStories: true,
-    };
-
-    const friendStoriesGrouped = mockFriendTasks.reduce((acc, taskWithUser) => {
-      const { user, isViewed, ...task } = taskWithUser;
-      if (!acc[user.id]) {
-        acc[user.id] = {
-          user: user,
-          stories: [],
-          isMyStories: false,
-        };
+  const observer = useRef<IntersectionObserver | null>(null);
+  const lastStoryElementRef = useCallback((node: HTMLDivElement) => {
+    if (isFetchingNextStoryPage) return;
+    if (observer.current) observer.current.disconnect();
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasNextStoryPage) {
+        fetchNextStoryPage();
       }
-      acc[user.id].stories.push({
-        id: `story-friend-${task.id}`,
-        task: task,
-        timestamp: task.startTime,
-        isViewed: isViewed,
-      });
-      return acc;
-    }, {} as { [key: string]: UserWithStories });
+    });
+    if (node) observer.current.observe(node);
+  }, [isFetchingNextStoryPage, hasNextStoryPage, fetchNextStoryPage]);
 
-    const friendUsersWithStories = Object.values(friendStoriesGrouped);
-
-    setUsersWithStories([myStoriesWithUser, ...friendUsersWithStories]);
-  }, [myTodosResponse]);
-
-  const handleStoryItemClick = (userIndex: number) => {
-    setSelectedUserIndex(userIndex);
+  const handleStoryItemClick = (index: number) => {
+    // 내 스토리(index 0)를 클릭했을 때 스토리가 비어있으면 카메라로 이동
+    if (index === 0 && myStoryInfo && myStoryInfo.status === "NONE") {
+      navigate('/camera/start');
+      return;
+    }
+    
+    setSelectedUserIndex(index);
     setShowStoryViewer(true);
   };
 
@@ -267,40 +138,20 @@ const Home = () => {
   };
 
   const handleCameraClick = () => {
-    const myInProgressTodosCount = (myTodosResponse as GetMyTodosResponse | undefined)?.result.totalElementCount || 0;
-
+    const myInProgressTodosCount = myTodosResponse?.result.totalElementCount || 0;
     if (myInProgressTodosCount > 0) {
       setShowInProgressModal(true);
     } else {
       navigate('/camera/start');
     }
+
+
+    
   };
 
   const handleSettingsClick = () => {
     navigate('/mypage');
   };
-
-  const renderStoryItem = (userWithStories: UserWithStories, index: number) => {
-    const { user, stories, isMyStories } = userWithStories;
-    const hasUnviewedStory = !isMyStories && stories.some(story => !story.isViewed);
-
-    const getStatusColor = (): string => {
-      if (isMyStories) return '#71d596';
-      if (hasUnviewedStory) return '#71d596';
-      return '#bababa';
-    };
-
-    return (
-        <StoryItemContainer key={user.id} onClick={() => handleStoryItemClick(index)}>
-        <StoryImage 
-            src={user.profileImage} 
-            alt="story"
-            statusColor={getStatusColor()}
-        />
-        <StoryName>{user.nickname}</StoryName>
-        </StoryItemContainer>
-    );
-  }
 
   return (
     <Container>
@@ -311,7 +162,52 @@ const Home = () => {
             <SettingsIcon src={settingsIcon} alt="설정" onClick={handleSettingsClick} />
           </ProfileHeader>
           <StoryContainer>
-            {usersWithStories.map((item, index) => renderStoryItem(item, index))}
+            {isStoryLoading && <p>스토리를 불러오는 중...</p>}
+            {isStoryError && <p>스토리 로드 중 오류가 발생했습니다.</p>}
+            {myStoryInfo && (
+              <StoryItemContainer key={`me-${myStoryInfo.id}`} onClick={() => handleStoryItemClick(0)}>
+                <StoryImageContainer>
+                  <StoryImage
+                      src={myStoryInfo.profileImage || profileIcon}
+                      alt="내 스토리"
+                      statusColor={colors.gray}
+                  />
+                  {myStoryInfo.status === "NONE" && (
+                    <PlusButton>
+                      <PlusIcon>+</PlusIcon>
+                    </PlusButton>
+                  )}
+                </StoryImageContainer>
+                <StoryName>{'내 스토리'}</StoryName>
+              </StoryItemContainer>
+            )}
+            {friendStoryInfos.map((friend, index) => {
+              const userIndex = myStoryInfo ? index + 1 : index;
+              if (friendStoryInfos.length === index + 1) {
+                return (
+                  <StoryItemContainer ref={lastStoryElementRef} key={friend.id} onClick={() => handleStoryItemClick(userIndex)}>
+                    <StoryImage
+                        src={friend.profileImage || profileIcon}
+                        alt={friend.id.toString()}
+                        statusColor={getStatusBorderColor(friend.status)}
+                    />
+                    <StoryName>{friend.userName || `친구${friend.id}`}</StoryName>
+                  </StoryItemContainer>
+                );
+              } else {
+                return (
+                  <StoryItemContainer key={friend.id} onClick={() => handleStoryItemClick(userIndex)}>
+                    <StoryImage
+                        src={friend.profileImage || profileIcon}
+                        alt={friend.id.toString()}
+                        statusColor={getStatusBorderColor(friend.status)}
+                    />
+                    <StoryName>{friend.userName || `친구${friend.id}`}</StoryName>
+                  </StoryItemContainer>
+                );
+              }
+            })}
+            {isFetchingNextStoryPage && <p>친구 스토리를 더 불러오는 중...</p>}
           </StoryContainer>
         </Section>
 
@@ -325,17 +221,11 @@ const Home = () => {
           </ProgressHeader>
           <TaskList>
             {myTodosLoading && <p>내 할 일 목록을 불러오는 중...</p>}
-            {myTodosError && (
-              <>
-                <p>오류가 발생했습니다.</p>
-              </>
-            )}
-            {myTodosLoading && <p>내 할 일 목록을 불러오는 중...</p>}
             {myTodosError && <p>오류가 발생했습니다.</p>}
-            {(myTodosResponse as GetMyTodosResponse | undefined) && (myTodosResponse as GetMyTodosResponse).result.totalElementCount === 0 && (
+            {myTodosResponse?.result.totalElementCount === 0 && (
               <EmptyMessage>진행중인 할 일이 없습니다.</EmptyMessage>
             )}
-            {(myTodosResponse as GetMyTodosResponse | undefined) && (myTodosResponse as GetMyTodosResponse).result.todos.map(renderMyTodoItem)}
+            {myTodosResponse?.result.todos.map(renderMyTodoItem)}
           </TaskList>
         </Section>
 
@@ -350,7 +240,7 @@ const Home = () => {
           }}>
             {friendLoading && <p>친구 목록을 불러오는 중...</p>}
             {friendError && <p>오류가 발생했습니다.</p>}
-            {!friendLoading && !friendError && flatFriendTodos.length === 0 && (
+            {flatFriendTodos.length === 0 && !friendLoading &&(
               <EmptyMessage>진행중인 할 일이 없습니다.</EmptyMessage>
             )}
             {flatFriendTodos.map(renderFriendTodoItem)}
@@ -364,11 +254,11 @@ const Home = () => {
         <CameraIcon src={cameraIcon} alt="카메라" />
       </CameraButton>
 
-      {/* 스토리 뷰어 */}
+      {/* 스토리 뷰어 컴포넌트 */}
       {showStoryViewer && (
         <StoryViewerOverlay>
           <StoryViewer
-            usersWithStories={usersWithStories}
+            users={allStoryUsers}
             initialUserIndex={selectedUserIndex}
             onClose={handleCloseStoryViewer}
           />
@@ -494,12 +384,42 @@ const StoryItemContainer = styled.div`
   }
 `;
 
+const StoryImageContainer = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
 const StoryImage = styled.img<{ statusColor: string }>`
   width: 50px;
   height: 50px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid ${({ statusColor }) => statusColor};
+  border: 2px solid ${({ statusColor }) => statusColor};
+`;
+
+const PlusButton = styled.div`
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 18px;
+  height: 18px;
+  background-color: #7c3aed;
+  border: 2px solid white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+`;
+
+const PlusIcon = styled.span`
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 1;
 `;
 
 const StoryName = styled.span`
@@ -560,7 +480,6 @@ const TaskContent = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
   padding: 10px 20px;
   background-color: #f5f5f5;
   border-radius: 50px;
@@ -628,7 +547,6 @@ const StoryViewerOverlay = styled.div`
   align-items: center;
   justify-content: center;
 `;
-
 
 const ModalOverlay = styled.div`
   position: fixed;

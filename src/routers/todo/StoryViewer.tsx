@@ -1,246 +1,347 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import styled from '@emotion/styled';
-import { keyframes } from '@emotion/react';
+import { keyframes, css } from '@emotion/react';
 import { useSwipeable } from 'react-swipeable';
 import { colors } from '@styles/theme';
-import { UserWithStories, Story } from '../../types';
-import { Col, Row } from '@components/common/flex/Flex';
-import { formatTime } from '../../utils/helpers';
-import Header from '@components/common/header/Header';
 import Txt from '@components/common/Txt';
-import Timer, { FinishHandler } from '@components/timer/Timer';
-import backArrowIcon from '../../assets/icons/detail/backArrow.svg';
-import leftArrowIcon from '../../assets/icons/detail/arrow_left.svg';
-import rightArrowIcon from '../../assets/icons/detail/arrow_right.svg';
+import { StoryUser } from '../todo/api/GetStoriesApi';
+import { useGetStoryDetail } from '../../hooks/api/story/useGetStoryDetail';
+import { getUserId } from '../../utils/auth';
+import Timer from '../../components/timer/Timer';
+import backArrow from '../../assets/icons/detail/backArrow.svg';
+import ringIcon from '../../assets/icons/detail/ring.svg';
+import whiteCircleIcon from '../../assets/icons/detail/whiteCircle.svg';
+import arrowIcon from '../../assets/icons/detail/arrow.svg';
+import ganadiIcon from '../../assets/icons/detail/ganadi.svg';
+import profileIcon from '../../assets/icons/home/profile.svg';
+import nextIcon from '../../assets/icons/detail/next.svg';
+import prevIcon from '../../assets/icons/detail/prev.svg';
 
 interface StoryViewerProps {
-  usersWithStories: UserWithStories[];
+  users: StoryUser[];
   initialUserIndex?: number;
   onClose: () => void;
 }
 
-const slideInRight = keyframes`
-  from { transform: translateX(100%); }
-  to { transform: translateX(0); }
+const fadeIn = keyframes`
+  from { opacity: 0; }
+  to { opacity: 1; }
 `;
 
-const slideInLeft = keyframes`
-  from { transform: translateX(-100%); }
-  to { transform: translateX(0); }
+const progressBarAnimation = keyframes`
+  from { width: 0%; }
+  to { width: 100%; }
 `;
 
-const StoryViewer: React.FC<StoryViewerProps> = ({ 
-  usersWithStories, 
-  initialUserIndex = 0, 
-  onClose 
+const StoryViewer: React.FC<StoryViewerProps> = ({
+  users,
+  initialUserIndex = 0,
+  onClose,
 }) => {
   const [currentUserIndex, setCurrentUserIndex] = useState(initialUserIndex);
-  const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
-  const [progress, setProgress] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const [animation, setAnimation] = useState<'left' | 'right' | 'none'>('none');
-  const navigate = useNavigate();
-  const progressInterval = useRef<number | null>(null);
-  const finishHandler = useRef<FinishHandler>(null);
-  const STORY_DURATION = 3000; // 3초
+  const [nowId, setNowId] = useState(0);
+  const [storyIndex, setStoryIndex] = useState(0); // 0-based index for stories of the current user
 
-  const currentUser = usersWithStories[currentUserIndex];
-  const currentStory = currentUser.stories[currentStoryIndex];
+  const [isStartImageVisible, setIsStartImageVisible] = useState(true);
+  const [isRotating, setIsRotating] = useState(false);
+  const [showPurpleOverlay, setShowPurpleOverlay] = useState(false);
+  const overlayTimerRef = useRef<number | null>(null);
+
+  const currentUser = users[currentUserIndex];
+  const myUserId = getUserId();
+
+  const { data: storyDetailData, isLoading, isError } = useGetStoryDetail(
+    currentUser?.id || 0,
+    nowId,
+    !!currentUser && !!myUserId
+  );
+
+  const storyDetail = storyDetailData?.result;
 
   useEffect(() => {
-    if (isPaused) return;
+    const currentUser = users[currentUserIndex];
+    if (currentUser && currentUser.id === myUserId && currentUser.status === 'NONE') {
+      onClose();
+    }
+  }, [currentUserIndex, users, onClose, myUserId]);
 
-    const startTime = Date.now();
+  // When the user changes, reset the story progress
+  useEffect(() => {
+    setNowId(0);
+    setStoryIndex(0);
+  }, [currentUserIndex]);
 
-    progressInterval.current = setInterval(() => {
-      const now = Date.now();
-      const newProgress = Math.min(((now - startTime) / STORY_DURATION) * 100, 100);
-      setProgress(newProgress);
-
-      if (newProgress >= 100) {
-        if (currentStoryIndex < currentUser.stories.length - 1) {
-          setCurrentStoryIndex(currentStoryIndex + 1);
-        } else {
-          onClose();
-        }
-      }
-    }, 16);
-
+  // Image transition effect
+  useEffect(() => {
+    if (storyDetail?.startImage && storyDetail?.endImage) {
+      overlayTimerRef.current = setTimeout(() => {
+        setShowPurpleOverlay(true);
+      }, 1000);
+    }
     return () => {
-      if (progressInterval.current) {
-        clearInterval(progressInterval.current);
+      if (overlayTimerRef.current) {
+        clearTimeout(overlayTimerRef.current);
       }
     };
-  }, [currentUserIndex, currentStoryIndex, isPaused, usersWithStories, onClose]);
+  }, [storyDetail?.startImage, storyDetail?.endImage]);
 
-  useEffect(() => {
-    setProgress(0);
-    if (animation !== 'none') {
-      const timer = setTimeout(() => setAnimation('none'), 500);
-      return () => clearTimeout(timer);
+  const handleNext = useCallback(() => {
+    if (storyDetail?.nextId) {
+      setNowId(storyDetail.nextId);
+      setStoryIndex(prev => prev + 1);
+    } else {
+      if (currentUserIndex < users.length - 1) {
+        setCurrentUserIndex(prev => prev + 1);
+      } else {
+        onClose();
+      }
+    }
+  }, [storyDetail, currentUserIndex, users, onClose]);
+
+  const handlePrevious = () => {
+    if (storyDetail?.prevId) {
+      setNowId(storyDetail.prevId);
+      setStoryIndex(prev => prev - 1);
+    } else {
+      if (currentUserIndex > 0) {
+        setCurrentUserIndex(prev => prev - 1);
+      }
+    }
+  };
+
+  const handleNextUser = useCallback(() => {
+    if (currentUserIndex < users.length - 1) {
+      setCurrentUserIndex(prev => prev + 1);
+    } else {
+      onClose();
+    }
+  }, [currentUserIndex, users.length, onClose]);
+
+  const handlePreviousUser = useCallback(() => {
+    if (currentUserIndex > 0) {
+      setCurrentUserIndex(prev => prev - 1);
     }
   }, [currentUserIndex]);
 
-  useEffect(() => {
-    setProgress(0);
-  }, [currentStoryIndex]);
+  const handleImageClick = () => {
+    if (!storyDetail?.startImage || !storyDetail?.endImage) return;
 
-  const handlePrevious = () => {
-    if (currentStoryIndex > 0) {
-      setCurrentStoryIndex(currentStoryIndex - 1);
+    if (overlayTimerRef.current) {
+      clearTimeout(overlayTimerRef.current);
     }
-  };
 
-  const handleNext = () => {
-    if (currentStoryIndex < currentUser.stories.length - 1) {
-      setCurrentStoryIndex(currentStoryIndex + 1);
-    }
-  };
+    setShowPurpleOverlay(false);
+    setIsRotating(true);
 
-  const handlePreviousUser = () => {
-    if (currentUserIndex > 0) {
-      setAnimation('left');
-      setCurrentUserIndex(currentUserIndex - 1);
-      setCurrentStoryIndex(0);
-    }
-  };
-
-  const handleNextUser = () => {
-    if (currentUserIndex < usersWithStories.length - 1) {
-      setAnimation('right');
-      setCurrentUserIndex(currentUserIndex + 1);
-      setCurrentStoryIndex(0);
-    }
+    setTimeout(() => {
+      setIsStartImageVisible(prevState => !prevState);
+      setIsRotating(false);
+      
+      overlayTimerRef.current = setTimeout(() => {
+        setShowPurpleOverlay(true);
+      }, 1000);
+    }, 300);
   };
 
   const swipeHandlers = useSwipeable({
-    onSwipedLeft: () => handleNextUser(),
-    onSwipedRight: () => handlePreviousUser(),
-    preventScrollOnSwipe: false,
-    trackMouse: true
+    onSwipedLeft: handleNextUser,
+    onSwipedRight: handlePreviousUser,
+    preventScrollOnSwipe: true,
+    trackMouse: true,
   });
 
-  const handleProgressBarClick = (index: number) => {
-    setCurrentStoryIndex(index);
-  };
+  if (!currentUser) {
+    onClose();
+    return null;
+  }
 
-  const showLeftArrow = currentStoryIndex > 0;
-  const showRightArrow = currentStoryIndex < currentUser.stories.length - 1;
+  if (isLoading) {
+    return (
+      <Container>
+        <LoadingContainer>
+          <Txt fontSize="18px" color={colors.white}>로딩 중...</Txt>
+        </LoadingContainer>
+      </Container>
+    );
+  }
+
+  if (isError || !storyDetail) {
+    return (
+      <Container>
+        <LoadingContainer>
+          <Txt fontSize="18px" color={colors.white}>스토리를 불러올 수 없습니다.</Txt>
+        </LoadingContainer>
+      </Container>
+    );
+  }
+
+  const imageToShow = isStartImageVisible ? storyDetail.startImage : storyDetail.endImage;
+  const hasBothImages = storyDetail.startImage && storyDetail.endImage;
 
   return (
     <Container {...swipeHandlers}>
-      {/* 헤더와 진행바를 고정된 상단 영역으로 분리 */}
-      <FixedHeaderContainer>
-        <Header
-          isBack={true}
-          isRight={false}
-          title=""
-          userName={currentUser.user.nickname}
-          onBack={onClose}
-        />
+      <AnimatedContent key={currentUserIndex}>
+        <Header>
+          <BackButton onClick={onClose}>
+            <img src={backArrow} alt="뒤로가기" />
+          </BackButton>
+          <UserName>{currentUser.id === myUserId ? '나' : storyDetail.userName || `친구 ${currentUser.id}`}</UserName>
+          <div style={{ width: '24px' }} />
+        </Header>
+
         <ProgressBarContainer>
-          {currentUser.stories.map((_, index) => (
-            <ProgressBarItem key={index} onClick={() => handleProgressBarClick(index)}>
+          {Array.from({ length: storyDetail.totalCount }).map((_, index) => (
+            <ProgressBarItem key={index}>
               <ProgressBar
-                isActive={index === currentStoryIndex}
-                progress={index === currentStoryIndex ? progress : (index < currentStoryIndex ? 100 : 0)}
+                key={`${currentUserIndex}-${nowId}`}
+                isViewed={index < storyIndex}
+                isActive={index === storyIndex}
+                onAnimationEnd={index === storyIndex ? handleNext : undefined}
               />
             </ProgressBarItem>
           ))}
         </ProgressBarContainer>
-      </FixedHeaderContainer>
 
-      {/* 애니메이션이 적용될 콘텐츠 영역 */}
-      <AnimatedCol 
-        align="center" 
-        animation={animation}
-        style={{ paddingTop: '90px', paddingBottom: '80px' }}
-      >
-        <Col
-          justify="flex-start"
-          align="center"
-          width="100%"
-          height="auto"
-          padding={"50px 0 40px"}
-          gap={15}
-        >
-          <SmallImage src={currentStory.task.startImage} alt="smallImage" />
-          <Txt
-            fontSize="24px"
-            fontWeight={500}
-            color={colors.textBlack}
-            letterSpacing="0.0024rem"
-          >
-            {currentStory.task.title}
-          </Txt>
-        </Col>
-        
-        <TimerContainer>
-          <Timer
-            durationTime={currentStory.task.targetTime * 60 * 1000}
-            challengeTime={formatTime(currentStory.task.targetTime)}
-            timerRef={finishHandler}
-          />
+        <MainContent>
+          <ProfileSection>
+            <ProfileImage>
+              <img src={storyDetail.profileImage || profileIcon} alt="프로필" />
+            </ProfileImage>
+            <Txt fontSize="22px" fontWeight={500} color="#1d1d1d">
+              {storyDetail.title}
+            </Txt>
+          </ProfileSection>
 
-          {showLeftArrow && (
-            <NavigationButton position="left" onClick={handlePrevious}>
-              <ArrowIcon src={leftArrowIcon} alt="이전" />
-            </NavigationButton>
+          {storyDetail.status !== 'IN_PROGRESS' && (
+            <ProgressSection>
+              <ProgressCircle>
+                <RingImage src={ringIcon} alt="프로그레스 링" />
+                <WhiteCircleImage src={whiteCircleIcon} alt="흰색 원 배경" />
+                <ProgressImage 
+                  onClick={hasBothImages ? handleImageClick : undefined}
+                  style={{ cursor: hasBothImages ? 'pointer' : 'default' }}
+                  isRotating={isRotating}
+                >
+                  <img 
+                    src={imageToShow || ganadiIcon} 
+                    alt={imageToShow ? "미션 사진" : "기본 이미지"} 
+                  />
+                  {showPurpleOverlay && hasBothImages && (
+                    <PurpleOverlay />
+                  )}
+                </ProgressImage>
+                {showPurpleOverlay && hasBothImages && (
+                  <ArrowIcon 
+                    src={arrowIcon} 
+                    alt="화살표" 
+                    onClick={handleImageClick}
+                    style={{ cursor: 'pointer' }}
+                  />
+                )}
+              </ProgressCircle>
+            </ProgressSection>
           )}
-          
-          {showRightArrow && (
-            <NavigationButton position="right" onClick={handleNext}>
-              <ArrowIcon src={rightArrowIcon} alt="다음" />
-            </NavigationButton>
+
+          {storyDetail.status === 'IN_PROGRESS' ? (
+            <TimerSection>
+              <Timer 
+                durationTime={storyDetail.durationTime}
+                challengeTime={storyDetail.challengeTime}
+                centerImageSrc={storyDetail.startImage}
+                textColor="#832CC5"
+              />
+            </TimerSection>
+          ) : (
+            <>
+              <TargetTimeSection>
+                <TargetTimeBox>
+                  <Txt fontSize="14px" fontWeight={400} color="#1d1d1d">
+                    목표 시간: {storyDetail.challengeTime}
+                  </Txt>
+                </TargetTimeBox>
+              </TargetTimeSection>
+
+              <ActualTimeSection>
+                <ActualTimeText>
+                  {new Date(storyDetail.durationTime).toISOString().substr(11, 8)}
+                </ActualTimeText>
+              </ActualTimeSection>
+            </>
           )}
-        </TimerContainer>
-      </AnimatedCol>
+
+        </MainContent>
+      </AnimatedContent>
+
+      {storyDetail.prevId !== null && (
+        <NavButton position="left" onClick={handlePrevious}>
+          <img src={prevIcon} alt="이전" />
+        </NavButton>
+      )}
+      {storyDetail.nextId !== null && (
+        <NavButton position="right" onClick={handleNext}>
+          <img src={nextIcon} alt="다음" />
+        </NavButton>
+      )}
     </Container>
   );
 };
 
 export default StoryViewer;
 
+// Styled Components
+
+const AnimatedContent = styled.div`
+  animation: ${fadeIn} 0.4s ease-in-out;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+`;
+
 const Container = styled.div`
   width: 100%;
   max-width: 480px;
   height: 100vh;
-  background-color: ${colors.purple1};
+  background-color: #C8B0DB;
   margin: 0 auto;
   overflow-y: scroll;
   position: relative;
 `;
 
-const AnimatedCol = styled(Col)<{ animation: 'left' | 'right' | 'none' }>`
-  min-height: 100%;
-  animation: ${({ animation }) => animation === 'left' ? slideInLeft : animation === 'right' ? slideInRight : 'none'} 0.5s forwards;
+const Header = styled.div`
+  padding: 44px 20px 0;
+  height: 65px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  background-color: #C8B0DB;
 `;
 
-const FixedHeaderContainer = styled(Col)`
-  position: fixed;
-  top: 0;
+const BackButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 8px;
+  
+  img {
+    width: 24px;
+    height: 21px;
+  }
+`;
+
+const UserName = styled.h1`
+  color: #1d1d1d;
+  font-size: 18px;
+  font-weight: 500;
+  font-family: 'Noto Sans KR', sans-serif;
+  margin: 0;
+  position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  width: 100%;
-  max-width: 480px;
-  background-color: ${colors.purple1};
-  z-index: 100;
-`;
-
-const HeaderContainer = styled.div`
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-const TimerContainer = styled.div`
-  position: relative;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 `;
 
 const ProgressBarContainer = styled.div`
@@ -248,6 +349,8 @@ const ProgressBarContainer = styled.div`
   gap: 4px;
   padding: 8px 16px 12px 16px;
   width: 100%;
+  margin-top: 20px;
+  background-color: #C8B0DB;
 `;
 
 const ProgressBarItem = styled.div`
@@ -256,50 +359,211 @@ const ProgressBarItem = styled.div`
   background-color: rgba(255, 255, 255, 0.3);
   border-radius: 2px;
   overflow: hidden;
-  cursor: pointer;
 `;
 
-const ProgressBar = styled.div<{ isActive: boolean; progress: number }>`
+const ProgressBar = styled.div<{ isActive: boolean; isViewed: boolean; }>`
   height: 100%;
-  width: ${({ progress }) => progress}%;
-  background-color: ${({ isActive }) => isActive ? colors.purple3 : colors.purple3};
-  transition: width 0.1s ease;
+  background-color: #832cc5;
+  width: ${({ isViewed }) => (isViewed ? '100%' : '0%')};
+  ${({ isActive }) =>
+    isActive &&
+    css`
+      animation: ${progressBarAnimation} 5s linear forwards;
+    `}
 `;
 
-const SmallImage = styled.img`
-  width: 35px;
-  height: 35px;
-  object-fit: cover;
-  object-position: center;
-  border-radius: 50%;
-  background-color: ${colors.purple1};
-  border: 2px solid ${colors.purple1};
-`;
-
-const NavigationButton = styled.button<{ position: 'left' | 'right' }>`
-  position: absolute;
-  top: 30%;
-  ${({ position }) => position}: 20px;
-  transform: translateY(-50%);
-  background: rgba(170, 32, 240, 0.3);
-  border: none;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
+const LoadingContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  z-index: 10;
+  height: 100vh;
+`;
+
+const MainContent = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 20px;
+  padding-bottom: 50px;
+  position: relative;
+  background-color: #C8B0DB;
+`;
+
+const ProfileSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  margin-top: 40px;
+  margin-bottom: 25px;
+`;
+
+const ProfileImage = styled.div`
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  border: 2px solid #c8b0db;
+  overflow: hidden;
+  background-color: white;
   
-  &:hover {
-    background-color: rgba(170, 32, 240, 0.5);
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+`;
+
+const ProgressSection = styled.div`
+  margin-top: 15px;
+  position: relative;
+`;
+
+const TimerSection = styled.div`
+  margin-top: 15px;
+`;
+
+const ProgressCircle = styled.div`
+  width: 272px;
+  height: 272px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const RingImage = styled.img`
+  width: 272px;
+  height: 272px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+`;
+
+const WhiteCircleImage = styled.img`
+  width: 235px;
+  height: 235px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+`;
+
+const PurpleOverlay = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #832cc5;
+  opacity: 0.6;
+  z-index: 3;
+  border-radius: 50%;
+  animation: fadeIn 0.5s ease-in-out;
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 0.6; }
   }
 `;
 
 const ArrowIcon = styled.img`
-  width: 20px;
-  height: 20px;
-  filter: brightness(0) invert(1);
+  width: 30px;
+  height: 35px;
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: bounce 1s ease-in-out infinite;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  z-index: 4;
+  
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+    40% { transform: translateX(-50%) translateY(-10px); }
+    60% { transform: translateX(-50%) translateY(-5px); }
+  }
+`;
+
+const ProgressImage = styled.div<{ isRotating: boolean }>`
+  width: 235px;
+  height: 235px;
+  border-radius: 50%;
+  overflow: hidden;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  border: 2px solid #ffffff;
+  transition: transform 0.6s ease-in-out;
+  
+  ${(props) => props.isRotating && `animation: rotate 0.6s ease-in-out;`}
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: relative;
+    z-index: 2;
+    transition: opacity 0.3s ease-in-out;
+  }
+  
+  @keyframes rotate {
+    0% { transform: translate(-50%, -50%) rotateY(0deg); }
+    50% { transform: translate(-50%, -50%) rotateY(90deg); }
+    100% { transform: translate(-50%, -50%) rotateY(180deg); }
+  }
+`;
+
+const TargetTimeSection = styled.div`
+  margin-top: 4vh;
+`;
+
+const TargetTimeBox = styled.div`
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 50px;
+  padding: 8px 20px;
+  min-width: 201px;
+  text-align: center;
+`;
+
+const ActualTimeSection = styled.div`
+  margin-top: 2vh;
+  text-align: center;
+`;
+
+const ActualTimeText = styled.div`
+  font-size: 60px;
+  font-weight: 500;
+  color: #832CC5;
+  letter-spacing: 0.06rem;
+  text-align: center;
+`;
+
+const NavButton = styled.button<{ position: 'left' | 'right' }>`
+  position: absolute;
+  top: 50%;
+  ${({ position }) => position}: 20px;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  background: none;
+  padding: 0;
+  
+  img {
+    width: 32px;
+    height: 32px;
+    display: block;
+    filter: brightness(1.5) contrast(1.2);
+  }
 `;
