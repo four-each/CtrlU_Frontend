@@ -405,7 +405,7 @@ const PlusButton = styled.div`
   right: -2px;
   width: 18px;
   height: 18px;
-  background-color: #7c3aed;
+  background-color: #832CC5;
   border: 2px solid white;
   border-radius: 50%;
   display: flex;
@@ -497,7 +497,7 @@ const TaskTitle = styled.h3`
 const TaskTime = styled.span`
   font-size: 14px;
   font-weight: 400;
-  color: #7c3aed;
+  color: #832CC5;
   font-family: 'Noto Sans KR', sans-serif;
   min-width: 90px;
   width: 90px;
@@ -582,7 +582,7 @@ const ModalMessage = styled.p`
 `;
 
 const ModalCloseButton = styled.button`
-  background-color: #7c3aed;
+  background-color: #832CC5;
   color: white;
   border: none;
   border-radius: 50px;

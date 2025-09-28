@@ -354,4 +354,9 @@ const DeleteButton = styled.button`
   font-weight: 400;
   cursor: pointer;
   padding: 0;
+  margin-right: 30px;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  writing-mode: horizontal-tb;
 `;

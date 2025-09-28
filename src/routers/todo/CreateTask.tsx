@@ -162,7 +162,7 @@ const CreateTaskScreen: React.FC<CreateTaskScreenProps> = ({
             <defs>
               <linearGradient id="gradient" x1="0%" y1="0%" x2="10%" y2="100%">
                 <stop offset="0%" stopColor="white" />
-                <stop offset="100%" stopColor="#7c3aed" />
+                <stop offset="100%" stopColor="#832CC5" />
               </linearGradient>
             </defs>
           </svg>
@@ -295,11 +295,11 @@ const Percent = styled.div`
   font-size: 0.9rem;
   font-weight: 700;
   color: white;
-  background-color: #7c3aed;
+  background-color: #832CC5;
   border-radius: 50%;
   z-index: 1;
   
-  top: 0;
+  top: 3%;
   left: 50%;
   transform: translate(-50%, -50%);
 `;
@@ -316,85 +316,6 @@ const GoalTimeLabel = styled.p`
   font-weight: 500;
   color: #AD8ACA;
   margin: 0;
-`;
-
-const TimePickerContainer = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 20px 0;
-  padding: 16px 24px;
-  background-color: #f8f9fa;
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 400px;
-`;
-
-const TimePickerColumn = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
-
-const TimePickerLabel = styled.div`
-  font-size: 14px;
-  font-weight: 600;
-  color: #6b7280;
-  margin-left: 8px;
-`;
-
-const TimePickerScroll = styled.div`
-  display: flex;
-  flex-direction: column;
-  height: 60px;
-  overflow-y: auto;
-  border-radius: 8px;
-  background-color: white;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-  
-  &::-webkit-scrollbar {
-    width: 4px;
-  }
-  
-  &::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 2px;
-  }
-  
-  &::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 2px;
-  }
-`;
-
-const TimePickerOption = styled.div<{ isSelected: boolean }>`
-  padding: 8px 12px;
-  font-size: 18px;
-  font-weight: ${props => props.isSelected ? '700' : '400'};
-  color: ${props => props.isSelected ? '#ffffff' : '#374151'};
-  background-color: ${props => props.isSelected ? '#7c3aed' : 'transparent'};
-  cursor: pointer;
-  text-align: center;
-  transition: all 0.2s ease;
-  min-height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  z-index: ${props => props.isSelected ? '2' : '1'};
-  
-  &:hover {
-    background-color: ${props => props.isSelected ? '#7c3aed' : '#f9fafb'};
-  }
-  
-  &:first-child {
-    border-radius: 8px 8px 0 0;
-  }
-  
-  &:last-child {
-    border-radius: 0 0 8px 8px;
-  }
 `;
 
 const GoalTime = styled.time`
@@ -421,7 +342,7 @@ const StartButton = styled.button`
   padding: 16px 64px;
   width: 100%;
   max-width: 335px;
-  background-color: #7c3aed;
+  background-color: #832CC5;
   color: white;
   border: none;
   border-radius: 50px;
